@@ -4,12 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pt.upskill.groceryroutepro.entities.Store;
 
-import java.util.List;
-import java.util.Set;
-
 @Repository
 public interface StoreRepository extends JpaRepository<Store,Long> {
     Store findByName(String storeName);
-    Set<Store> findAllStores();
 
 }

@@ -16,16 +16,17 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
+        //TODO alterar antMatchers
         httpSecurity.
             formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/perform_login")
+                .loginPage("/users/login")
+                .loginProcessingUrl("users/login")
             .and()
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/tarefas").hasAnyRole("USER", "ADMIN")
+                    .antMatchers("/tarefas").hasAnyRole("USER_FREE", "ADMIN")
                     .antMatchers("/countries", "/admin").hasRole("ADMIN")
-                    .antMatchers("/login", "/signup", "/assets/**", "/styles/**").permitAll()
+                    .antMatchers("/login", "/users/signup", "/assets/**", "/styles/**").permitAll()
                     .antMatchers("/").authenticated()
                     .antMatchers("**").denyAll();
     }

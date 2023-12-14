@@ -17,7 +17,7 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    @PostMapping("/signup")
+    @PostMapping("/users/signup")
     public ResponseEntity<String> signUp(@RequestBody SignUp signUp){
         try {
             authService.createAccount(signUp);
@@ -27,6 +27,11 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao registar conta: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/users/login")
+    public ResponseEntity<String> login(){
+        return ResponseEntity.ok("fixe");
     }
 
 

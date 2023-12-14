@@ -53,8 +53,9 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(signup.getPassword()));
         Role role = roleRepository.findByName("USER_FREE");
         user.setRole(role);
-        Set<Store> stores = storeRepository.findAllStores();
-        user.setStores(stores);
+        List<Store> storesList = storeRepository.findAll();
+        Set<Store> storeSet = new HashSet<>(storesList);
+        user.setStores(storeSet);
         return userRepository.save(user);
     }
 }
