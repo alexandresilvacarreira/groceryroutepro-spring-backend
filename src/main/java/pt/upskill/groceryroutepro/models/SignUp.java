@@ -4,7 +4,6 @@ public class SignUp {
     private String name;
     private String email;
     private String password;
-    private String matchingPassword;
 
     public String getName() {
         return name;
@@ -30,11 +29,4 @@ public class SignUp {
         this.password = password;
     }
 
-    public String getMatchingPassword() {
-        return matchingPassword;
-    }
-
-    public void setMatchingPassword(String matchingPassword) {
-        this.matchingPassword = matchingPassword;
-    }
 }

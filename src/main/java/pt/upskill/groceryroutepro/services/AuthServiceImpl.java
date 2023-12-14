@@ -4,11 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import pt.upskill.groceryroutepro.entities.Role;
+import pt.upskill.groceryroutepro.entities.Store;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.Login;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.repositories.RoleRepository;
+import pt.upskill.groceryroutepro.repositories.StoreRepository;
 import pt.upskill.groceryroutepro.repositories.UserRepository;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -18,6 +27,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    StoreRepository storeRepository;
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -39,7 +51,10 @@ public class AuthServiceImpl implements AuthService {
         user.setName(signup.getName());
         user.setEmail(signup.getEmail());
         user.setPassword(passwordEncoder.encode(signup.getPassword()));
-        user.setRole(roleRepository.findById(1L).get());
+        Role role = roleRepository.findByName("USER_FREE");
+        user.setRole(role);
+        Set<Store> stores = storeRepository.findAllStores();
+        user.setStores(stores);
         return userRepository.save(user);
     }
 }

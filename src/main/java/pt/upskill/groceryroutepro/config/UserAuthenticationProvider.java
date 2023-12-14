@@ -8,6 +8,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.models.Login;
+import pt.upskill.groceryroutepro.services.AuthService;
 
 
 import java.util.ArrayList;
@@ -17,20 +20,20 @@ import java.util.List;
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
 
-//    @Autowired
-//    AuthService authService;
+    @Autowired
+    AuthService authService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-//        String username = authentication.getName();
-//        String password = authentication.getCredentials().toString();
-//        Login login = new Login(username, password);
-//        User user = authService.validateLogin(login);
-//        if(user != null) {
-//            List<GrantedAuthority> roleList = new ArrayList<>();
-//            roleList.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
-//            return new UsernamePasswordAuthenticationToken(username, password, roleList);
-//        }
+        String email = authentication.getName();
+        String password = authentication.getCredentials().toString();
+        Login login = new Login(email, password);
+        User user = authService.validateLogin(login);
+        if(user != null) {
+            List<GrantedAuthority> roleList = new ArrayList<>();
+            roleList.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
+            return new UsernamePasswordAuthenticationToken(email, password, roleList);
+        }
         return null;
     }
 
