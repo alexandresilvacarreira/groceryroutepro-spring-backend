@@ -20,8 +20,11 @@ public class AuthController {
     @PostMapping("/users/signup")
     public ResponseEntity<String> signUp(@RequestBody SignUp signUp){
         try {
-            authService.createAccount(signUp);
-            return ResponseEntity.ok("Conta registada com sucesso");
+            if(authService.createAccount(signUp) !=null){
+                return ResponseEntity.ok("Conta registada com sucesso");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao registar conta, email já existente");
+            }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -29,10 +32,11 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/users/login")
-    public ResponseEntity<String> login(){
-        return ResponseEntity.ok("fixe");
-    }
+//    @GetMapping("/users/login")
+//    public ResponseEntity<String> login(){
+//        //TODO corrigir isto
+//        return ResponseEntity.ok("fixe");
+//    }
 
 
 }

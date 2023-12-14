@@ -16,11 +16,11 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        //TODO alterar antMatchers
+        //TODO confirmar email, alterar antMatchers,
         httpSecurity.
             formLogin()
-                .loginPage("/users/login")
-                .loginProcessingUrl("users/login")
+//                .loginPage("/users/login")
+//                .loginProcessingUrl("users/login")
             .and()
                 .csrf().disable()
                 .authorizeRequests()
