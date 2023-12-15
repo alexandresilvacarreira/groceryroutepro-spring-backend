@@ -31,7 +31,7 @@ public class AuthController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/users/signup")
+    @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
         Map<String, Object> serverMessage = new HashMap<>();
         try {
