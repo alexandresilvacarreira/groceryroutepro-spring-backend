@@ -19,7 +19,6 @@ import java.util.List;
 @Component
 public class UserAuthenticationProvider implements AuthenticationProvider {
 
-
     @Autowired
     AuthService authService;
 

@@ -20,14 +20,16 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.
             formLogin()
 //                .loginPage("/users/login")
-//                .loginProcessingUrl("users/login")
+//                .loginProcessingUrl("/users/login")
             .and()
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/tarefas").hasAnyRole("USER_FREE", "ADMIN")
-                    .antMatchers("/countries", "/admin").hasRole("ADMIN")
-                    .antMatchers("/login", "/users/signup", "/assets/**", "/styles/**").permitAll()
+                    // TODO proteger endpoints shopping-lists, routes
+                    .antMatchers("/users/login", "/users/signup").anonymous()
                     .antMatchers("/").authenticated()
+                    .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
+                    .antMatchers("/user-management/**").hasRole("ADMIN")
+//                    .antMatchers("/login", "/users/signup").permitAll()
                     .antMatchers("**").denyAll();
     }
 

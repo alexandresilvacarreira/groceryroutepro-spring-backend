@@ -1,5 +1,6 @@
 package pt.upskill.groceryroutepro.controllers;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,9 @@ import org.springframework.web.servlet.ModelAndView;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.services.AuthService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @Component
 public class AuthController {
@@ -18,18 +22,26 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/users/signup")
-    public ResponseEntity<String> signUp(@RequestBody SignUp signUp){
+    public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp){
+        Map<String,Object> serverMessage = new HashMap<>();
         try {
             if(authService.createAccount(signUp) !=null){
-                return ResponseEntity.ok("Conta registada com sucesso");
+                serverMessage.put("success",true);
+                serverMessage.put("message","Conta registada com sucesso");
+                return ResponseEntity.ok(serverMessage);
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao registar conta, email já existente");
+                serverMessage.put("success",false);
+                serverMessage.put("message","Erro ao registar conta");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);
             }
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            serverMessage.put("success",false);
+            serverMessage.put("message","Erro ao registar conta");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao registar conta: " + e.getMessage());
-        }
+            serverMessage.put("success",false);
+            serverMessage.put("message","Erro ao registar conta");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);        }
     }
 
 //    @GetMapping("/users/login")
