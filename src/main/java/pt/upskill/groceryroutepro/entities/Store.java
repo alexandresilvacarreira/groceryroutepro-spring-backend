@@ -1,6 +1,7 @@
 package pt.upskill.groceryroutepro.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,10 +13,11 @@ import java.util.Set;
 public class Store {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     @ManyToMany(mappedBy = "stores")
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 
     public Store() {
@@ -44,4 +46,16 @@ public class Store {
     public void setUsers(Set<User> users) {
         this.users = users;
     }
+
+
+    @Override
+    public String toString() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            return super.toString();
+        }
+    }
+
 }

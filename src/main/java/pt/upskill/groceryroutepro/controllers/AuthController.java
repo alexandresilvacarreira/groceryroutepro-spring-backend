@@ -18,6 +18,7 @@ import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.services.AuthService;
 import pt.upskill.groceryroutepro.services.UserService;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,41 +29,36 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    @Autowired
-    UserService userService;
-
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
-        Map<String, Object> serverMessage = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         try {
             if (authService.createAccount(signUp) != null) {
-                serverMessage.put("success", true);
-                serverMessage.put("message", "Conta registada com sucesso");
-                return ResponseEntity.ok(serverMessage);
+                response.put("success", true);
+                response.put("message", "Conta registada com sucesso");
+                return ResponseEntity.ok(response);
             } else {
-                serverMessage.put("success", false);
-                serverMessage.put("message", "Erro ao registar conta");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);
+                response.put("success", false);
+                response.put("message", "Erro ao registar conta");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         } catch (IllegalArgumentException e) {
-            serverMessage.put("success", false);
-            serverMessage.put("message", "Erro ao registar conta");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);
+            response.put("success", false);
+            response.put("message", "Erro ao registar conta");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         } catch (Exception e) {
-            serverMessage.put("success", false);
-            serverMessage.put("message", "Erro ao registar conta");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(serverMessage);
+            response.put("success", false);
+            response.put("message", "Erro ao registar conta");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
-    @GetMapping("/users/authenticated-user")
-    public ResponseEntity<User> getAuthenticatedUser() {
-        try {
-            User authenticatedUser = this.userService.getAuthenticatedUser();
-            return ResponseEntity.ok(authenticatedUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    // O loginForm requer este endpoint para redireccionar o utilizador no caso de pedidos efetuados sem autenticação.
+    // Deverá redireccionar para a página de login do frontend
+    @GetMapping("/login")
+    public void login() {
+
     }
+
 
 }

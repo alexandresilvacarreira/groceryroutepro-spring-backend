@@ -40,7 +40,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .logout().permitAll()
                 .and()
                 .formLogin()
-//                .loginPage("/login") // Por defeito, se um utilizador pedir um recurso ao qual nao tem acesso, o Spring Security manda para uma página de login deles.
+                .loginPage("/login") // Se um utilizador pedir um recurso ao qual nao tem acesso, o Spring redirecciona para uma página de login.
                 .loginProcessingUrl("/process-login")
                 .usernameParameter("email")
                 .passwordParameter("password")
@@ -53,8 +53,8 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/signup","/login").permitAll()
-                .antMatchers("/").authenticated()
+                .antMatchers("/signup", "/login").permitAll()
+                .antMatchers("/", "/users/get-authenticated-user").authenticated()
                 .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
                 .antMatchers("**").denyAll();
@@ -76,7 +76,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         Map<String, Object> serverMessage = new HashMap<>();
         serverMessage.put("success",true);
         serverMessage.put("message","Autenticado com sucesso");
-        serverMessage.put("userRole",user.getRole().getName());
+        serverMessage.put("user",user);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(serverMessage);

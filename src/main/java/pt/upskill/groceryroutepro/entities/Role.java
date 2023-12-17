@@ -1,6 +1,7 @@
 package pt.upskill.groceryroutepro.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -45,4 +46,15 @@ public class Role {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            return super.toString();
+        }
+    }
+
 }

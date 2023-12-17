@@ -1,5 +1,8 @@
 package pt.upskill.groceryroutepro.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +21,7 @@ public class User {
     private String vehicleFuelType;
     private double vehicleConsumption;
 
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "user_stores",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -110,5 +113,15 @@ public class User {
 
     public void setStores(Set<Store> stores) {
         this.stores = stores;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            return super.toString();
+        }
     }
 }
