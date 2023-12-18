@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.server.authentication.logout.DelegatingServerLogoutHandler;
+import org.springframework.security.web.server.authentication.logout.SecurityContextServerLogoutHandler;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.repositories.UserRepository;
 
@@ -37,7 +39,14 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .cors()
                 .and()
-                .logout().permitAll()
+                .logout()
+                .logoutUrl("/logout")
+                .invalidateHttpSession(true) // Invalidar a sessão HTTP
+                .clearAuthentication(true) // Limpar detalhes de autenticação
+                .deleteCookies("JSESSIONID") // Limpar cookies de sessão
+                .logoutSuccessHandler(((request, response, authentication) -> {
+                    handleLogoutSuccess(request, response, authentication);
+                }))
                 .and()
                 .formLogin()
                 .loginPage("/login") // Se um utilizador pedir um recurso ao qual nao tem acesso, o Spring redirecciona para uma página de login.
@@ -53,7 +62,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/signup", "/login").permitAll()
+                .antMatchers("/signup", "/login", "/logout").permitAll()
                 .antMatchers("/", "/users/get-authenticated-user").authenticated()
                 .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
@@ -74,9 +83,9 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         User user = userRepository.getByEmail(authentication.getName());
 
         Map<String, Object> serverMessage = new HashMap<>();
-        serverMessage.put("success",true);
-        serverMessage.put("message","Autenticado com sucesso");
-        serverMessage.put("user",user);
+        serverMessage.put("success", true);
+        serverMessage.put("message", "Autenticado com sucesso");
+        serverMessage.put("user", user);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(serverMessage);
@@ -89,9 +98,22 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         response.setContentType("application/json");
 
         Map<String, Object> serverMessage = new HashMap<>();
-        serverMessage.put("success",false);
-        serverMessage.put("message","Erro ao autenticar");
+        serverMessage.put("success", false);
+        serverMessage.put("message", "Erro ao autenticar");
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(serverMessage);
+        response.getWriter().write(json);
+    }
+
+    private void handleLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        // Podemos personalizar esta lógica
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+
+        Map<String, Object> serverMessage = new HashMap<>();
+        serverMessage.put("success", true);
+        serverMessage.put("message", "Logout bem sucedido");
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(serverMessage);
         response.getWriter().write(json);

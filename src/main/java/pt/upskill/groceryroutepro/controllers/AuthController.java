@@ -57,6 +57,11 @@ public class AuthController {
     // Deverá redireccionar para a página de login do frontend
     @GetMapping("/login")
     public void login() {
+        // TODO redirect para localhost:4200/login
+    }
+
+    @PostMapping("/logout")
+    public void logout() {
 
     }
 
