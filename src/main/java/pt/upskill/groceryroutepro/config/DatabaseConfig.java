@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pt.upskill.groceryroutepro.entities.Category;
 import pt.upskill.groceryroutepro.entities.Role;
 import pt.upskill.groceryroutepro.entities.Store;
+import pt.upskill.groceryroutepro.repositories.CategoryRepository;
 import pt.upskill.groceryroutepro.repositories.RoleRepository;
 import pt.upskill.groceryroutepro.repositories.StoreRepository;
 
@@ -18,14 +20,18 @@ public class DatabaseConfig {
     @Autowired
     private StoreRepository storeRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public DatabaseConfig() {
     }
 
     @Bean
-    public CommandLineRunner initRoles() {
+    public CommandLineRunner initializeTables() {
         return args -> {
             initializeRoles();
             initializeStores();
+            initializeCategories();
         };
     }
 
@@ -58,6 +64,28 @@ public class DatabaseConfig {
             Store store = new Store();
             store.setName(storeName);
             storeRepository.save(store);
+        }
+    }
+
+    private void initializeCategories() {
+        createCategoryIfNotExists("mercearia");
+        createCategoryIfNotExists("frutas e legumes");
+        createCategoryIfNotExists("congelados");
+        createCategoryIfNotExists("mercearia");
+        createCategoryIfNotExists("laticínios e ovos");
+        createCategoryIfNotExists("peixaria");
+        createCategoryIfNotExists("talho");
+        createCategoryIfNotExists("charcutaria");
+        createCategoryIfNotExists("alternativas alimentares, bio, saudável");
+        createCategoryIfNotExists("bebidas");
+        createCategoryIfNotExists("padaria e pastelaria");
+    }
+
+    private void createCategoryIfNotExists(String categoryName) {
+        if (categoryRepository.findByName(categoryName) == null) {
+            Category category = new Category();
+            category.setName(categoryName);
+            categoryRepository.save(category);
         }
     }
 

@@ -1,0 +1,96 @@
+package pt.upskill.groceryroutepro.entities;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class Price {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
+
+    private double primaryValue;
+    private String primaryUnit;
+    private double secondaryValue;
+    private String secondaryUnit;
+    @Column(columnDefinition = "DATE")
+    private LocalDate collectionDate;
+    @ManyToOne
+    private Product product;
+
+    public Price() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public double getPrimaryValue() {
+        return primaryValue;
+    }
+
+    public void setPrimaryValue(double primaryValue) {
+        this.primaryValue = primaryValue;
+    }
+
+    public String getPrimaryUnit() {
+        return primaryUnit;
+    }
+
+    public void setPrimaryUnit(String primaryUnit) {
+        this.primaryUnit = primaryUnit;
+    }
+
+    public double getSecondaryValue() {
+        return secondaryValue;
+    }
+
+    public void setSecondaryValue(double secondaryValue) {
+        this.secondaryValue = secondaryValue;
+    }
+
+    public String getSecondaryUnit() {
+        return secondaryUnit;
+    }
+
+    public void setSecondaryUnit(String secondaryUnit) {
+        this.secondaryUnit = secondaryUnit;
+    }
+
+    public LocalDate getCollectionDate() {
+        return collectionDate;
+    }
+
+    public void setCollectionDate(LocalDate collectionDate) {
+        this.collectionDate = collectionDate;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            return super.toString();
+        }
+    }
+
+}

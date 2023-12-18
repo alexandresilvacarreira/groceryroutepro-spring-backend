@@ -5,32 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-public class Store {
+public class Chain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @ManyToMany(mappedBy = "stores")
+    @OneToMany(mappedBy = "chain")
     @JsonIgnore
-    private Set<User> users = new HashSet<>();
-    @ManyToOne
-    private Chain chain;
+    private List<Product> products = new ArrayList<>();
+    @OneToMany(mappedBy = "chain")
+    @JsonIgnore
+    private List<Store> stores = new ArrayList<>();
 
-    public Store() {
-    }
-
-    public Chain getChain() {
-        return chain;
-    }
-
-    public void setChain(Chain chain) {
-        this.chain = chain;
+    public Chain() {
     }
 
     public Long getId() {
@@ -49,14 +40,21 @@ public class Store {
         this.name = name;
     }
 
-    public Set<User> getUsers() {
-        return users;
+    public List<Product> getProducts() {
+        return products;
     }
 
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
+    public List<Store> getStores() {
+        return stores;
+    }
+
+    public void setStores(List<Store> stores) {
+        this.stores = stores;
+    }
 
     @Override
     public String toString() {
