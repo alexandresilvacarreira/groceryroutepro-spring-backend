@@ -5,9 +5,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pt.upskill.groceryroutepro.entities.Category;
+import pt.upskill.groceryroutepro.entities.Chain;
 import pt.upskill.groceryroutepro.entities.Role;
 import pt.upskill.groceryroutepro.entities.Store;
 import pt.upskill.groceryroutepro.repositories.CategoryRepository;
+import pt.upskill.groceryroutepro.repositories.ChainRepository;
 import pt.upskill.groceryroutepro.repositories.RoleRepository;
 import pt.upskill.groceryroutepro.repositories.StoreRepository;
 
@@ -23,6 +25,9 @@ public class DatabaseConfig {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private ChainRepository chainRepository;
+
     public DatabaseConfig() {
     }
 
@@ -32,6 +37,7 @@ public class DatabaseConfig {
             initializeRoles();
             initializeStores();
             initializeCategories();
+            initializeChains();
         };
     }
 
@@ -50,6 +56,23 @@ public class DatabaseConfig {
         }
     }
 
+    private void initializeChains() {
+        createChainIfNotExists("aldi");
+        createChainIfNotExists("continente");
+        createChainIfNotExists("lidl");
+        createChainIfNotExists("minipreço");
+        createChainIfNotExists("intermarché");
+        createChainIfNotExists("pingo doce");
+    }
+
+    private void createChainIfNotExists(String chainName) {
+        if (chainRepository.findByName(chainName) == null) {
+            Chain chain = new Chain();
+            chain.setName(chainName);
+            chainRepository.save(chain);
+        }
+    }
+
     private void initializeStores() {
         createStoreIfNotExists("aldi");
         createStoreIfNotExists("continente");
@@ -63,6 +86,7 @@ public class DatabaseConfig {
         if (storeRepository.findByName(storeName) == null) {
             Store store = new Store();
             store.setName(storeName);
+            store.setChain(chainRepository.findByName(storeName));
             storeRepository.save(store);
         }
     }
