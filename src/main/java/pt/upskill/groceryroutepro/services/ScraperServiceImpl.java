@@ -36,53 +36,76 @@ public class ScraperServiceImpl implements ScraperService {
     public void scrapeContinente(String url, String category) {
 
         try {
-            // Connect to the website and get the HTML document
+            // Pedido à API da loja
             Document document = Jsoup.connect(url).get();
 
-            // Select all product elements in the HTML
+            // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
 
-            // Iterate through each product element
+            // Iterar produtos
             for (Element productElement : productElements) {
-                // Extract product details
+                // Obter informação dos produtos
                 String name = productElement.select(".ct-tile--description").text();
                 String brand = productElement.select(".col-tile--brand").text();
                 String quantity = productElement.select(".pwc-tile--quantity").text();
-                String discountPercentage = productElement.select(".pwc-discount-amount").text();
-                String imageUrl = productElement.select(".ct-tile-image").attr("src");
+                String imageUrl = productElement.select(".ct-tile-image").attr("data-src");
 
-                // Create a new Product instance
+                // Info relativa ao desconto
+                Element discountPercentageElement = productElement.select(".pwc-discount-amount").first();
+                String discountPercentage = "";
+                if (discountPercentageElement != null) {
+                    discountPercentage = discountPercentageElement.text().replaceAll("[^0-9%]", "");
+                }
+                Element priceWithoutDiscountElement = productElement.select(".pwc-tile--price-dashed").first();
+                String priceWithoutDiscount = "";
+                if (priceWithoutDiscountElement != null) {
+                    priceWithoutDiscount = priceWithoutDiscountElement.select(".pwc-tile--price-value").text() +
+                            priceWithoutDiscountElement.select(".pwc-m-unit").text();
+                }
+
+                // Instanciar produto
                 Product product = new Product();
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
                 product.setDiscountPercentage(discountPercentage);
+                product.setPriceWoDiscount(priceWithoutDiscount);
                 product.setImageUrl(imageUrl);
 
-                // Set the chain and category separately (assuming you have methods for this)
-                 product.setChain(chainRepository.findByName("continente"));
-                 product.setCategory(categoryRepository.findByName(category));
+                // Cadeia e categoria inseridas manualmente
+                product.setChain(chainRepository.findByName("continente"));
+                product.setCategory(categoryRepository.findByName(category));
 
-                // Extract price details
+                // Obter preços
                 String primaryValueStr = productElement.select(".ct-price-formatted").text().replaceAll("[^0-9.]", "");
                 double primaryValue = Double.parseDouble(primaryValueStr);
                 String primaryUnit = productElement.select(".pwc-m-unit").text();
+                String secondaryValueString = productElement.select(".ct-price-value").text().replaceAll("[^0-9.]", "");
+                double secondaryValue = Double.parseDouble(secondaryValueString);
+                String secondaryUnit = productElement.select(".pwc-m-unit").text();
 
-                // Create a new Price instance
+                Element secondaryPriceElement = productElement.select(".pwc-tile--price-secondary").first();
+                if (secondaryPriceElement != null) {
+                    secondaryValue = Double.parseDouble(secondaryPriceElement.select(".ct-price-value").text()
+                            .replaceAll("[^0-9.]", ""));
+                    secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text();
+                }
+
+                // Instanciar preço
                 Price price = new Price();
                 price.setPrimaryValue(primaryValue);
                 price.setPrimaryUnit(primaryUnit);
-                price.setSecondaryValue(0.0);  // Set secondary value as needed
-                price.setSecondaryUnit("");    // Set secondary unit as needed
+                price.setSecondaryValue(secondaryValue);  // Set secondary value as needed
+                price.setSecondaryUnit(secondaryUnit);    // Set secondary unit as needed
                 price.setCollectionDate(LocalDate.now());  // Set the current date
 
-                // Associate the Price with the Product
+                // Associar preço ao produto
                 price.setProduct(product);
 
-                // Add the Price to the Product's prices list
+                // Adicionar o preço à lista do produto
                 product.getPrices().add(price);
 
-                // Save the Product to the database (assuming you have a service or repository)
+                // Guardar produto
                 productRepository.save(product);
             }
         } catch (IOException e) {

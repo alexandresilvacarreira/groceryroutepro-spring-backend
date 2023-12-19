@@ -17,9 +17,9 @@ public class Product {
     private String brand;
     private String quantity;
     private String discountPercentage;
-    private String discountPrice;
+    private String priceWoDiscount;
     private String imageUrl;
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Price> prices = new ArrayList<>();
     @ManyToOne
@@ -70,12 +70,12 @@ public class Product {
         this.discountPercentage = discountPercentage;
     }
 
-    public String getDiscountPrice() {
-        return discountPrice;
+    public String getPriceWoDiscount() {
+        return priceWoDiscount;
     }
 
-    public void setDiscountPrice(String discountPrice) {
-        this.discountPrice = discountPrice;
+    public void setPriceWoDiscount(String priceWoDiscount) {
+        this.priceWoDiscount = priceWoDiscount;
     }
 
     public String getImageUrl() {

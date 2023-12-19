@@ -22,6 +22,7 @@ public class Price {
     @Column(columnDefinition = "DATE")
     private LocalDate collectionDate;
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     public Price() {

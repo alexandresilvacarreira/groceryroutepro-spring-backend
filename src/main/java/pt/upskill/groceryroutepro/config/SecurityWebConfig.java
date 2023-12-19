@@ -66,6 +66,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/users/get-authenticated-user").authenticated()
                 .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
+                .antMatchers("/scraper/**").permitAll() //TODO proteger isto, por agora fica assim para poder fazer o scraping manualmente
                 .antMatchers("**").denyAll();
     }
 
