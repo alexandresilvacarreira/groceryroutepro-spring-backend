@@ -45,13 +45,13 @@ public class ScraperServiceImpl implements ScraperService {
             // Iterar produtos
             for (Element productElement : productElements) {
                 // Obter informação dos produtos
-                String name = productElement.select(".ct-tile--description").text();
+                String name = productElement.select(".pwc-tile--description").text();
                 String brand = productElement.select(".col-tile--brand").text();
                 String quantity = productElement.select(".pwc-tile--quantity").text();
                 String imageUrl = productElement.select(".ct-tile-image").attr("data-src");
 
                 // Info relativa ao desconto
-                Element discountPercentageElement = productElement.select(".pwc-discount-amount").first();
+                Element discountPercentageElement = productElement.select("p.pwc-discount-amount.col-discount-amount:not(.pwc-info-amount-iva-zero)").first();
                 String discountPercentage = "";
                 if (discountPercentageElement != null) {
                     discountPercentage = discountPercentageElement.text().replaceAll("[^0-9%]", "");
@@ -59,8 +59,8 @@ public class ScraperServiceImpl implements ScraperService {
                 Element priceWithoutDiscountElement = productElement.select(".pwc-tile--price-dashed").first();
                 String priceWithoutDiscount = "";
                 if (priceWithoutDiscountElement != null) {
-                    priceWithoutDiscount = priceWithoutDiscountElement.select(".pwc-tile--price-value").text() +
-                            priceWithoutDiscountElement.select(".pwc-m-unit").text();
+                    priceWithoutDiscount = priceWithoutDiscountElement.select(".pwc-tile--price-value").text().replaceAll("[^0-9,]", "") +" €"+
+                            productElement.select(".pwc-m-unit").first().text();
                 }
 
                 // Instanciar produto
@@ -77,19 +77,18 @@ public class ScraperServiceImpl implements ScraperService {
                 product.setCategory(categoryRepository.findByName(category));
 
                 // Obter preços
-                String primaryValueStr = productElement.select(".ct-price-formatted").text().replaceAll("[^0-9.]", "");
-                double primaryValue = Double.parseDouble(primaryValueStr);
-                String primaryUnit = productElement.select(".pwc-m-unit").text();
-                String secondaryValueString = productElement.select(".ct-price-value").text().replaceAll("[^0-9.]", "");
-                double secondaryValue = Double.parseDouble(secondaryValueString);
-                String secondaryUnit = productElement.select(".pwc-m-unit").text();
 
+                // Primário
+                Element primaryPriceElement = productElement.select(".pwc-tile--price-primary").first();
+                String primaryValueStr = primaryPriceElement.select(".ct-price-formatted").text().replaceAll("[^0-9,]", "");
+                double primaryValue = Double.parseDouble(primaryValueStr.replace(",", "."));
+                String primaryUnit = primaryPriceElement.select(".pwc-m-unit").text().replace("/","");;
+
+                // Secundário (normalmente é o preço por kg)
                 Element secondaryPriceElement = productElement.select(".pwc-tile--price-secondary").first();
-                if (secondaryPriceElement != null) {
-                    secondaryValue = Double.parseDouble(secondaryPriceElement.select(".ct-price-value").text()
-                            .replaceAll("[^0-9.]", ""));
-                    secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text();
-                }
+                String secondaryValueStr = secondaryPriceElement.select(".ct-price-value").text().replaceAll("[^0-9,]", "");
+                double secondaryValue = Double.parseDouble(secondaryValueStr.replace(",", "."));
+                String secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text().replace("/","");
 
                 // Instanciar preço
                 Price price = new Price();
@@ -112,6 +111,12 @@ public class ScraperServiceImpl implements ScraperService {
             System.out.println(e.getMessage());
         }
 
+    }
+
+
+    @Override
+    public void scrapeAuchan(String url, String category) {
+        // TODO quantidade: ir pela quantidade mínima, se não houver, usar a última palavra do nome
     }
 
 
