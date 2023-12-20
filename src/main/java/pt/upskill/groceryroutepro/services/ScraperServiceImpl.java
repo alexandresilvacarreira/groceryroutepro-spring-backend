@@ -1,6 +1,10 @@
 package pt.upskill.groceryroutepro.services;
 
+import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParser;
+import org.springframework.boot.json.JsonParserFactory;
+import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.entities.Chain;
 import pt.upskill.groceryroutepro.entities.Price;
@@ -19,6 +23,9 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ScraperServiceImpl implements ScraperService {
@@ -76,8 +83,6 @@ public class ScraperServiceImpl implements ScraperService {
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
-                product.setDiscountPercentage(discountPercentage);
-                product.setPriceWoDiscount(priceWithoutDiscount);
                 product.setImageUrl(imageUrl);
 
                 // Obter preços
@@ -100,6 +105,8 @@ public class ScraperServiceImpl implements ScraperService {
                 price.setPrimaryUnit(primaryUnit);
                 price.setSecondaryValue(secondaryValue);
                 price.setSecondaryUnit(secondaryUnit);
+                price.setDiscountPercentage(discountPercentage);
+                price.setPriceWoDiscount(priceWithoutDiscount);
                 price.setCollectionDate(LocalDateTime.now());
 
                 // Associar preço ao produto
@@ -138,11 +145,11 @@ public class ScraperServiceImpl implements ScraperService {
                 // Quantidade - não disponível em todos, quando não existe usamos a última palavra do nome
                 Element quantityElement = productElement.select(".auc-measures--avg-weight").first();
                 String quantity = "";
-                if (quantityElement != null){
+                if (quantityElement != null) {
                     quantity = quantityElement.text();
                 } else {
                     String[] nameWords = name.split(" ");
-                    quantity = nameWords[nameWords.length-1];
+                    quantity = nameWords[nameWords.length - 1];
                 }
                 String imageUrl = productElement.select(".tile-image").attr("data-src");
 
@@ -155,10 +162,10 @@ public class ScraperServiceImpl implements ScraperService {
                 Element priceWithoutDiscountElement = productElement.select(".auc-price__stricked").first();
                 String priceWithoutDiscount = "";
                 if (priceWithoutDiscountElement != null) {
-                    priceWithoutDiscount = priceWithoutDiscountElement.select("span.strike-through, span.value").attr("content").replace(".",",") + " €";
+                    priceWithoutDiscount = priceWithoutDiscountElement.select("span.strike-through, span.value").attr("content").replace(".", ",") + " €";
                     // Nem todos têm unidade, adicionar só nos que têm
                     Element discountUnit = priceWithoutDiscountElement.select(".auc-avgWeight").first();
-                    if (discountUnit != null){
+                    if (discountUnit != null) {
                         priceWithoutDiscount += discountUnit.text();
                     }
                 }
@@ -171,8 +178,6 @@ public class ScraperServiceImpl implements ScraperService {
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
-                product.setDiscountPercentage(discountPercentage);
-                product.setPriceWoDiscount(priceWithoutDiscount);
                 product.setImageUrl(imageUrl);
 
                 // Obter preços
@@ -183,15 +188,16 @@ public class ScraperServiceImpl implements ScraperService {
                 double primaryValue = Double.parseDouble(primaryValueStr);
                 Element primaryUnitElement = primaryPriceElement.selectFirst(".auc-avgWeight");
                 String primaryUnit = "";
-                if (primaryUnitElement !=null){
-                    primaryUnit = primaryUnitElement.text().replace("/","");
+                if (primaryUnitElement != null) {
+                    primaryUnit = primaryUnitElement.text().replace("/", "");
                 }
 
                 // Secundário (normalmente é o preço por kg)
                 Element secondaryPriceElement = productElement.select(".auc-measures--price-per-unit").first();
                 String secondaryValueStr = secondaryPriceElement.text().replaceAll("[^0-9.]", "");
                 double secondaryValue = Double.parseDouble(secondaryValueStr);
-                String secondaryUnit = secondaryPriceElement.text().substring(secondaryPriceElement.text().lastIndexOf('/') + 1).trim();;
+                String secondaryUnit = secondaryPriceElement.text().substring(secondaryPriceElement.text().lastIndexOf('/') + 1).trim();
+                ;
 
                 // Instanciar preço
                 Price price = new Price();
@@ -199,6 +205,8 @@ public class ScraperServiceImpl implements ScraperService {
                 price.setPrimaryUnit(primaryUnit);
                 price.setSecondaryValue(secondaryValue);
                 price.setSecondaryUnit(secondaryUnit);
+                price.setDiscountPercentage(discountPercentage);
+                price.setPriceWoDiscount(priceWithoutDiscount);
                 price.setCollectionDate(LocalDateTime.now());
 
                 // Associar preço ao produto
@@ -215,13 +223,141 @@ public class ScraperServiceImpl implements ScraperService {
         }
     }
 
-    public Product createOrGetProduct(String productName, String productQuantity, Long chainId){
+    @Override
+    public void scrapeMinipreco(String url, String category) {
+
+        try {
+
+            // Pedido à API da loja
+            Document document = Jsoup.connect(url).get();
+
+            Elements productElements = document.select(".product-list__item");
+
+            // Iterar produtos
+            for (Element productElement : productElements) {
+
+                String name = productElement.select(".details").text();
+
+                // Minipreco normalmente inclui a marca em maiúsculas no início do nome dos produtos, por defeito usamos Minipreco
+                String brand = "Minipreço";
+                Pattern pattern = Pattern.compile("^([A-Z]+\\s?)+");
+                Matcher matcher = pattern.matcher(name);
+
+                if (matcher.find()) {
+                    brand = matcher.group().trim();
+                    // Temos de truncar a string, senão vem também a primeira letra do resto do nome
+                    if (!brand.isEmpty()) {
+                        brand = brand.substring(0, brand.length() - 1);
+                    }
+                }
+
+                // Quantidade - ora são as duas últimas palavras, ora o que está em parênteses no fim do nome
+                String quantity = "";
+                if (name.lastIndexOf(")") == name.length() - 1) {
+                    quantity = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
+                } else {
+                    String[] nameWords = name.split(" ");
+                    quantity = nameWords[nameWords.length - 2] + nameWords[nameWords.length - 1];
+                }
+
+                String imageUrl = productElement.select(".thumb img").first().attr("data-original");
+
+                // Info relativa ao desconto
+                Element discountPercentageElement = productElement.select(".promotion_text").first();
+                int discountPercentage = 0;
+                if (discountPercentageElement != null) {
+                    discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                }
+
+                Element priceWithoutDiscountElement = productElement.select("p.price s").first();
+                String priceWithoutDiscount = "";
+                if (priceWithoutDiscountElement != null) {
+                    priceWithoutDiscount = priceWithoutDiscountElement.text();
+                }
+
+                // Atualizar produto
+                Chain chain = chainRepository.findByName("minipreço");
+                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                product.setChain(chain);
+                product.setCategory(categoryRepository.findByName(category));
+                product.setName(name);
+                product.setBrand(brand);
+                product.setQuantity(quantity);
+                product.setImageUrl(imageUrl);
+
+                // Obter preços
+
+                // Primário
+                Element primaryPriceElement = productElement.select("p.price").first();
+                String primaryValueStr = primaryPriceElement.ownText().replaceAll("[^0-9,]", "").replace(",", ".");
+                double primaryValue = Double.parseDouble(primaryValueStr);
+
+                String primaryUnit = "";
+
+                // Secundário (normalmente é o preço por kg)
+                String secondaryPriceString = productElement.select(".pricePerKilogram").first().ownText();
+                String secondaryValueStr = secondaryPriceString.replaceAll("[^0-9,]", "").replace(",", ".");
+                double secondaryValue = Double.parseDouble(secondaryValueStr);
+                String secondaryUnit = secondaryPriceString.substring(secondaryPriceString.lastIndexOf("/") + 1, secondaryPriceString.length() - 2);
+
+                // Instanciar preço
+                Price price = new Price();
+                price.setPrimaryValue(primaryValue);
+                price.setPrimaryUnit(primaryUnit);
+                price.setSecondaryValue(secondaryValue);
+                price.setSecondaryUnit(secondaryUnit);
+                price.setDiscountPercentage(discountPercentage);
+                price.setPriceWoDiscount(priceWithoutDiscount);
+                price.setCollectionDate(LocalDateTime.now());
+
+                // Associar preço ao produto
+                price.setProduct(product);
+
+                // Adicionar o preço à lista do produto
+                product.getPrices().add(price);
+
+                // Guardar produto
+                productRepository.save(product);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Override
+    public Response scrapePingoDoce(String url, String category) {
+
+        Response response = null;
+
+        try {
+
+            // Gerado pelo Postman
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, "");
+            Request request = new Request.Builder()
+                    .url(url)
+                    .method("GET", null)
+                    .build();
+            response = client.newCall(request).execute();
+            return response;
+//            ResponseBody responseBody = response.body();
+//            JsonParser jsonParser = JsonParserFactory.getJsonParser();
+//            Map<String, Object> responseMap = jsonParser.parseMap(responseBody.string());
+//            System.out.println(responseMap);
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        return response;
+    }
+
+    public Product createOrGetProduct(String productName, String productQuantity, Long chainId) {
         Product product = productRepository.findByNameQuantityAndChain(productName, productQuantity, chainId);
         if (product == null) {
             product = new Product();
         }
         return product;
     }
-
 
 }

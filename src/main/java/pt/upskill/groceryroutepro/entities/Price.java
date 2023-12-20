@@ -20,6 +20,8 @@ public class Price {
     private String primaryUnit;
     private double secondaryValue;
     private String secondaryUnit;
+    private int discountPercentage;
+    private String priceWoDiscount;
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime collectionDate;
     @ManyToOne
@@ -67,6 +69,22 @@ public class Price {
 
     public void setSecondaryUnit(String secondaryUnit) {
         this.secondaryUnit = secondaryUnit;
+    }
+
+    public int getDiscountPercentage() {
+        return discountPercentage;
+    }
+
+    public void setDiscountPercentage(int discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
+    public String getPriceWoDiscount() {
+        return priceWoDiscount;
+    }
+
+    public void setPriceWoDiscount(String priceWoDiscount) {
+        this.priceWoDiscount = priceWoDiscount;
     }
 
     public LocalDateTime getCollectionDate() {

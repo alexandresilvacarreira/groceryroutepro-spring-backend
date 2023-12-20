@@ -1,5 +1,6 @@
 package pt.upskill.groceryroutepro.controllers;
 
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,29 @@ public class ScraperController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/scraper/minipreco")
+    public ResponseEntity<String> scrapeMinipreco(@RequestBody ScraperParams scraperParams) {
+        try {
+            this.scraperService.scrapeMinipreco(scraperParams.getUrl(), scraperParams.getCategory());
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/scraper/pingo-doce")
+    public Response scrapePingoDoce(@RequestBody ScraperParams scraperParams) {
+
+        return this.scraperService.scrapePingoDoce(scraperParams.getUrl(), scraperParams.getCategory());
+
+        //        try {
+//            this.scraperService.scrapePingoDoce(scraperParams.getUrl(), scraperParams.getCategory());
+//            return ResponseEntity.ok("Produtos guardados com sucesso");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+//        }
     }
 
 }
