@@ -16,7 +16,7 @@ public class Product {
     private String name;
     private String brand;
     private String quantity;
-    private String discountPercentage;
+    private int discountPercentage;
     private String priceWoDiscount;
     private String imageUrl;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
@@ -62,11 +62,11 @@ public class Product {
         this.quantity = quantity;
     }
 
-    public String getDiscountPercentage() {
+    public int getDiscountPercentage() {
         return discountPercentage;
     }
 
-    public void setDiscountPercentage(String discountPercentage) {
+    public void setDiscountPercentage(int discountPercentage) {
         this.discountPercentage = discountPercentage;
     }
 

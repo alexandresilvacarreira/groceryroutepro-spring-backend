@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class Price {
     private String primaryUnit;
     private double secondaryValue;
     private String secondaryUnit;
-    @Column(columnDefinition = "DATE")
-    private LocalDate collectionDate;
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime collectionDate;
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
@@ -68,11 +69,11 @@ public class Price {
         this.secondaryUnit = secondaryUnit;
     }
 
-    public LocalDate getCollectionDate() {
+    public LocalDateTime getCollectionDate() {
         return collectionDate;
     }
 
-    public void setCollectionDate(LocalDate collectionDate) {
+    public void setCollectionDate(LocalDateTime collectionDate) {
         this.collectionDate = collectionDate;
     }
 
