@@ -58,11 +58,12 @@ public class DatabaseConfig {
 
     private void initializeChains() {
         createChainIfNotExists("aldi");
+        createChainIfNotExists("auchan");
         createChainIfNotExists("continente");
+        createChainIfNotExists("pingo doce");
+        createChainIfNotExists("intermarché");
         createChainIfNotExists("lidl");
         createChainIfNotExists("minipreço");
-        createChainIfNotExists("intermarché");
-        createChainIfNotExists("pingo doce");
     }
 
     private void createChainIfNotExists(String chainName) {
@@ -75,11 +76,12 @@ public class DatabaseConfig {
 
     private void initializeStores() {
         createStoreIfNotExists("aldi");
+        createStoreIfNotExists("auchan");
         createStoreIfNotExists("continente");
+        createStoreIfNotExists("pingo doce");
+        createStoreIfNotExists("intermarché");
         createStoreIfNotExists("lidl");
         createStoreIfNotExists("minipreço");
-        createStoreIfNotExists("intermarché");
-        createStoreIfNotExists("pingo doce");
     }
 
     private void createStoreIfNotExists(String storeName) {

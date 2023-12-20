@@ -30,4 +30,14 @@ public class ScraperController {
         }
     }
 
+    @PostMapping("/scraper/auchan")
+    public ResponseEntity<String> scrapeAuchan(@RequestBody ScraperParams scraperParams) {
+        try {
+            this.scraperService.scrapeAuchan(scraperParams.getUrl(), scraperParams.getCategory());
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
 }
