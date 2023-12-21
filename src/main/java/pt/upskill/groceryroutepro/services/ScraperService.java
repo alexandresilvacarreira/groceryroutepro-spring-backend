@@ -1,6 +1,9 @@
 package pt.upskill.groceryroutepro.services;
 
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+
+import java.util.Map;
 
 public interface ScraperService {
     void scrapeContinente(String url, String category);
@@ -9,6 +12,6 @@ public interface ScraperService {
 
     void scrapeMinipreco(String url, String category);
 
-    Response scrapePingoDoce(String url, String category);
+    void scrapePingoDoce(String url, String category);
 
 }

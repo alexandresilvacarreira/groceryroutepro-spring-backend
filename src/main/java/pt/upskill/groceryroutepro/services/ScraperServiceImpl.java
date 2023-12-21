@@ -23,6 +23,8 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -325,31 +327,113 @@ public class ScraperServiceImpl implements ScraperService {
     }
 
     @Override
-    public Response scrapePingoDoce(String url, String category) {
-
-        Response response = null;
+    public void scrapePingoDoce(String url, String category) {
 
         try {
 
             // Gerado pelo Postman
-            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
             MediaType mediaType = MediaType.parse("text/plain");
             RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
                     .url(url)
-                    .method("GET", null)
+                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0")
+                    .addHeader("Accept", "application/json, text/plain, */*")
+                    .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
+//                    .addHeader("Accept-Encoding", "gzip, deflate, br")
+                    .addHeader("Referer", "https://mercadao.pt/store/pingo-doce/category/frutas-e-legumes-12")
+                    .addHeader("X-Version", "3.16.0")
+                    .addHeader("X-Name", "webapp")
+                    .addHeader("ngsw-bypass", "true")
+                    .addHeader("Connection", "keep-alive")
+                    .addHeader("Cookie", "OptanonConsent=isGpcEnabled=0&datestamp=Wed+Dec+20+2023+20%3A57%3A22+GMT%2B0000+(Hora+padr%C3%A3o+da+Europa+Ocidental)&version=202301.2.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0002%3A1%2CC0001%3A1%2CC0005%3A1%2CC0004%3A1&geolocation=PT%3B11&AwaitingReconsent=false; OptanonAlertBoxClosed=2023-12-05T18:33:49.947Z")
+                    .addHeader("Sec-Fetch-Dest", "empty")
+                    .addHeader("Sec-Fetch-Mode", "cors")
+                    .addHeader("Sec-Fetch-Site", "same-origin")
+                    .addHeader("TE", "trailers")
                     .build();
-            response = client.newCall(request).execute();
-            return response;
-//            ResponseBody responseBody = response.body();
-//            JsonParser jsonParser = JsonParserFactory.getJsonParser();
-//            Map<String, Object> responseMap = jsonParser.parseMap(responseBody.string());
-//            System.out.println(responseMap);
+
+            Response response = client.newCall(request).execute();
+            String responseString = response.body().string();
+            JsonParser jsonParser = JsonParserFactory.getJsonParser();
+            Map<String, Object> responseMap =  jsonParser.parseMap(responseString);
+            List<Map<String, Object>> products = (List<Map<String, Object>>) ((Map<String, Object>) ((Map<String, Object>) responseMap.get("sections")).get("null")).get("products");
+
+            // Iterar produtos
+            for (Map<String, Object> productMap : products) {
+
+                // Info do produto vem no _source
+                Map<String, Object> productData = (Map<String, Object>) productMap.get("_source");
+
+                String imageUrl = "https://res.cloudinary.com/fonte-online/image/upload/c_fill,h_300,q_auto,w_300/v1/PDO_PROD/" + productData.get("sku") + "_1";
+                String name = (String) productData.get("firstName");
+                System.out.println(name);
+                String brand = (String) ((Map<String, Object>) productData.get("brand")).get("name");
+                String quantity = "";
+                double primaryValue = (double) Math.round( (double) productData.get("buyingPrice")  * 100) / 100;
+                System.out.println("primaryValue: " + primaryValue);
+                String primaryUnit = "";
+                double secondaryValue;
+                String secondaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
+                if ((productData.get("capacity")).equals("0")){
+                    System.out.println("capacity 0");
+                    quantity = (productData.get("averageWeight") + " " + productData.get("netContentUnit")).toLowerCase();
+                    primaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
+                    secondaryValue = primaryValue;
+                    System.out.println("secondaryValue:" + secondaryValue);
+                } else {
+                    System.out.println("capacity with stuff");
+                    quantity = ((String) productData.get("capacity")).toLowerCase();
+                    secondaryValue = (double) Math.round( (primaryValue / ((Number) productData.get("netContent")).doubleValue()) * 100) /100;
+                    System.out.println("secondaryValue: " + secondaryValue);
+                }
+
+
+                int discountPercentage = 0;
+                String priceWithoutDiscount = "";
+                Map<String, Object> promotion = (Map<String, Object>) productData.get("promotion");
+                if (promotion.get("amount") != null && promotion.get("type").equals("PERCENTAGE")){
+                    discountPercentage = (int) Math.round((double) promotion.get("amount"));
+                    priceWithoutDiscount = ((double) Math.round( (Double) productData.get("regularPrice")  * 100) / 100) + " €";
+                }
+
+                // Atualizar produto
+                Chain chain = chainRepository.findByName("pingo doce");
+                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                product.setChain(chain);
+                product.setCategory(categoryRepository.findByName(category));
+                product.setName(name);
+                product.setBrand(brand);
+                product.setQuantity(quantity);
+                product.setImageUrl(imageUrl);
+
+                // Instanciar preço
+                Price price = new Price();
+                price.setPrimaryValue(primaryValue);
+                price.setPrimaryUnit(primaryUnit);
+                price.setSecondaryValue(secondaryValue);
+                price.setSecondaryUnit(secondaryUnit);
+                price.setDiscountPercentage(discountPercentage);
+                price.setPriceWoDiscount(priceWithoutDiscount);
+                price.setCollectionDate(LocalDateTime.now());
+
+                // Associar preço ao produto
+                price.setProduct(product);
+
+                // Adicionar o preço à lista do produto
+                product.getPrices().add(price);
+
+                // Guardar produto
+                productRepository.save(product);
+
+            }
+
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        return response;
+
     }
 
     public Product createOrGetProduct(String productName, String productQuantity, Long chainId) {
