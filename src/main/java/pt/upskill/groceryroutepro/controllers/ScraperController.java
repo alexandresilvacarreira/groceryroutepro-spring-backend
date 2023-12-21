@@ -62,4 +62,14 @@ public class ScraperController {
         }
     }
 
+    @PostMapping("/scraper/intermarche")
+    public ResponseEntity<String> scrapeIntermarche(@RequestBody ScraperParams scraperParams) {
+        try {
+            this.scraperService.scrapeIntermarche(scraperParams.getUrl(), scraperParams.getCategory(), scraperParams.getRequestBody());
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
 }

@@ -14,4 +14,6 @@ public interface ScraperService {
 
     void scrapePingoDoce(String url, String category);
 
+    void scrapeIntermarche(String url, String category, String requestBody);
+
 }

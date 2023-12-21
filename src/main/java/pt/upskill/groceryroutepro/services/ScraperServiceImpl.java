@@ -342,7 +342,7 @@ public class ScraperServiceImpl implements ScraperService {
                     .addHeader("Accept", "application/json, text/plain, */*")
                     .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
 //                    .addHeader("Accept-Encoding", "gzip, deflate, br")
-                    .addHeader("Referer", "https://mercadao.pt/store/pingo-doce/category/frutas-e-legumes-12")
+//                    .addHeader("Referer", "https://mercadao.pt/store/pingo-doce/category/frutas-e-legumes-12")
                     .addHeader("X-Version", "3.16.0")
                     .addHeader("X-Name", "webapp")
                     .addHeader("ngsw-bypass", "true")
@@ -357,7 +357,7 @@ public class ScraperServiceImpl implements ScraperService {
             Response response = client.newCall(request).execute();
             String responseString = response.body().string();
             JsonParser jsonParser = JsonParserFactory.getJsonParser();
-            Map<String, Object> responseMap =  jsonParser.parseMap(responseString);
+            Map<String, Object> responseMap = jsonParser.parseMap(responseString);
             List<Map<String, Object>> products = (List<Map<String, Object>>) ((Map<String, Object>) ((Map<String, Object>) responseMap.get("sections")).get("null")).get("products");
 
             // Iterar produtos
@@ -371,12 +371,12 @@ public class ScraperServiceImpl implements ScraperService {
                 System.out.println(name);
                 String brand = (String) ((Map<String, Object>) productData.get("brand")).get("name");
                 String quantity = "";
-                double primaryValue = (double) Math.round( (double) productData.get("buyingPrice")  * 100) / 100;
+                double primaryValue = (double) Math.round((double) productData.get("buyingPrice") * 100) / 100;
                 System.out.println("primaryValue: " + primaryValue);
                 String primaryUnit = "";
                 double secondaryValue;
                 String secondaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
-                if ((productData.get("capacity")).equals("0")){
+                if ((productData.get("capacity")).equals("0")) {
                     System.out.println("capacity 0");
                     quantity = (productData.get("averageWeight") + " " + productData.get("netContentUnit")).toLowerCase();
                     primaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
@@ -385,7 +385,7 @@ public class ScraperServiceImpl implements ScraperService {
                 } else {
                     System.out.println("capacity with stuff");
                     quantity = ((String) productData.get("capacity")).toLowerCase();
-                    secondaryValue = (double) Math.round( (primaryValue / ((Number) productData.get("netContent")).doubleValue()) * 100) /100;
+                    secondaryValue = (double) Math.round((primaryValue / ((Number) productData.get("netContent")).doubleValue()) * 100) / 100;
                     System.out.println("secondaryValue: " + secondaryValue);
                 }
 
@@ -393,9 +393,9 @@ public class ScraperServiceImpl implements ScraperService {
                 int discountPercentage = 0;
                 String priceWithoutDiscount = "";
                 Map<String, Object> promotion = (Map<String, Object>) productData.get("promotion");
-                if (promotion.get("amount") != null && promotion.get("type").equals("PERCENTAGE")){
+                if (promotion.get("amount") != null && promotion.get("type").equals("PERCENTAGE")) {
                     discountPercentage = (int) Math.round((double) promotion.get("amount"));
-                    priceWithoutDiscount = ((double) Math.round( (Double) productData.get("regularPrice")  * 100) / 100) + " €";
+                    priceWithoutDiscount = ((double) Math.round((Double) productData.get("regularPrice") * 100) / 100) + " €";
                 }
 
                 // Atualizar produto
@@ -435,6 +435,107 @@ public class ScraperServiceImpl implements ScraperService {
         }
 
     }
+
+    @Override
+    public void scrapeIntermarche(String url, String category, String requestBody) {
+
+        try {
+
+            // Gerado pelo Postman
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("application/json;charset=utf-8");
+            // Alterar o body para mudar as categorias, páginas, etc.
+            RequestBody body = RequestBody.create(mediaType, requestBody);
+            Request request = new Request.Builder()
+                    .url(url)
+                    .method("POST", body)
+                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0")
+                    .addHeader("Accept", "application/json, text/plain, */*")
+                    .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
+                    .addHeader("Content-Type", "application/json;charset=utf-8")
+                    .addHeader("x-red-device", "red_fo_desktop")
+                    .addHeader("x-red-version", "3")
+                    .addHeader("x-optional-oauth", "true")
+                    .addHeader("x-service-name", "produits")
+                    .addHeader("x-itm-device-fp", "ead3ce12-5cec-43d6-abf0-62d10b4e0bcd")
+                    .addHeader("x-itm-session-id", "7ea3cd74-a97c-4ca5-87ca-d634800964fa")
+                    .addHeader("x-pdv", "{\"ref\":\"03622\",\"isEcommerce\":true}")
+                    .addHeader("Origin", "https://www.loja-online.intermarche.pt")
+                    .addHeader("Alt-Used", "www.loja-online.intermarche.pt")
+                    .addHeader("Connection", "keep-alive")
+//                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/frescos/padaria-e-pastelaria/pao-e-broa/10036?ordre=decroissant&page=1&trier=prix")
+                    .addHeader("Sec-Fetch-Dest", "empty")
+                    .addHeader("Sec-Fetch-Mode", "cors")
+                    .addHeader("Sec-Fetch-Site", "same-origin")
+                    .addHeader("TE", "trailers")
+                    .addHeader("Cookie", "datadome=YVhULd5eY1eUn9FiSaVAJpKd9fkv610A~4lh9nESWCXhI_WFFrpvSru6uOLDc4SFBP8wFuhWPr~sXKH7pGFjJluaufUz7f8t42x4xD_41ik~pauVS6fM1MJDOak7XAT2; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
+                    .build();
+
+
+            Response response = client.newCall(request).execute();
+            String responseString = response.body().string();
+            JsonParser jsonParser = JsonParserFactory.getJsonParser();
+            Map<String, Object> responseMap = jsonParser.parseMap(responseString);
+            List<Map<String, Object>> products = (List<Map<String, Object>>) responseMap.get("produits");
+
+
+            // Iterar produtos
+            for (Map<String, Object> productData : products) {
+
+                String imageUrl = ((List<String>) productData.get("images")).get(0);
+                String name = (String) productData.get("libelle");
+                String brand = (String) productData.get("marque");
+                String quantity = (String) productData.get("conditionnement");
+
+                double primaryValue = (double) Math.round((double) productData.get("prix") * 100) / 100;
+                String primaryUnit = "";
+                double secondaryValue = (double) Math.round((double) productData.get("prixKg") * 100) / 100;
+                String secondaryUnit = (String) ((Map<String, Object>) productData.get("typeProduit")).get("uniteByCode");
+
+
+                // No intermarché apenas indicam que está com desconto, mas não a percentagem nem o preço original (a não ser pelos folhetos)
+                int discountPercentage = 0;
+                String priceWithoutDiscount = "";
+
+                // Atualizar produto
+                Chain chain = chainRepository.findByName("pingo doce");
+                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                product.setChain(chain);
+                product.setCategory(categoryRepository.findByName(category));
+                product.setName(name);
+                product.setBrand(brand);
+                product.setQuantity(quantity);
+                product.setImageUrl(imageUrl);
+
+                // Instanciar preço
+                Price price = new Price();
+                price.setPrimaryValue(primaryValue);
+                price.setPrimaryUnit(primaryUnit);
+                price.setSecondaryValue(secondaryValue);
+                price.setSecondaryUnit(secondaryUnit);
+                price.setDiscountPercentage(discountPercentage);
+                price.setPriceWoDiscount(priceWithoutDiscount);
+                price.setCollectionDate(LocalDateTime.now());
+
+                // Associar preço ao produto
+                price.setProduct(product);
+
+                // Adicionar o preço à lista do produto
+                product.getPrices().add(price);
+
+                // Guardar produto
+                productRepository.save(product);
+
+            }
+
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 
     public Product createOrGetProduct(String productName, String productQuantity, Long chainId) {
         Product product = productRepository.findByNameQuantityAndChain(productName, productQuantity, chainId);
