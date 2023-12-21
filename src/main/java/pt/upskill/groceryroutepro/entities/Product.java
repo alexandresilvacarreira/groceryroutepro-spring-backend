@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Product {
@@ -22,8 +24,13 @@ public class Product {
     private List<Price> prices = new ArrayList<>();
     @ManyToOne
     private Chain chain;
-    @ManyToOne
-    private Category category;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "product_categories",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
 
     public Product() {
     }
@@ -84,12 +91,12 @@ public class Product {
         this.chain = chain;
     }
 
-    public Category getCategory() {
-        return category;
+    public Set<Category> getCategories() {
+        return categories;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 
     @Override

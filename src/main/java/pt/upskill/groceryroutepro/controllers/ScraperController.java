@@ -32,6 +32,16 @@ public class ScraperController {
         }
     }
 
+    @PostMapping("/scraper/continente/all")
+    public ResponseEntity<String> scrapeContinenteAll() {
+        try {
+            this.scraperService.scrapeContinenteAll();
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/scraper/auchan")
     public ResponseEntity<String> scrapeAuchan(@RequestBody ScraperParams scraperParams) {
         try {

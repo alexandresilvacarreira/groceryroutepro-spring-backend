@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Category {
@@ -14,9 +16,9 @@ public class Category {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToMany(mappedBy = "category")
+    @ManyToMany(mappedBy = "categories")
     @JsonIgnore
-    private List<Product> products = new ArrayList<>();
+    private Set<Product> products = new HashSet<>();
 
     public Category() {
     }
@@ -37,11 +39,11 @@ public class Category {
         this.name = name;
     }
 
-    public List<Product> getProducts() {
+    public Set<Product> getProducts() {
         return products;
     }
 
-    public void setProducts(List<Product> products) {
+    public void setProducts(Set<Product> products) {
         this.products = products;
     }
 

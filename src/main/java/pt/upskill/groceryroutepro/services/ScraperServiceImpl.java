@@ -1,6 +1,7 @@
 package pt.upskill.groceryroutepro.services;
 
 import okhttp3.*;
+import org.jsoup.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
@@ -10,6 +11,7 @@ import pt.upskill.groceryroutepro.entities.Chain;
 import pt.upskill.groceryroutepro.entities.Price;
 import pt.upskill.groceryroutepro.entities.Product;
 import pt.upskill.groceryroutepro.entities.Store;
+import pt.upskill.groceryroutepro.models.ScraperParams;
 import pt.upskill.groceryroutepro.repositories.CategoryRepository;
 import pt.upskill.groceryroutepro.repositories.ChainRepository;
 import pt.upskill.groceryroutepro.repositories.PriceRepository;
@@ -23,9 +25,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,11 +44,98 @@ public class ScraperServiceImpl implements ScraperService {
     @Autowired
     ChainRepository chainRepository;
 
+    private List<String> userAgentList = Arrays.asList(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    );
+
+    @Override
+    public void scrapeContinenteAll() {
+
+        int start = 0;
+        int size = 100;
+
+        List<ScraperParams> scraperParamsList = new ArrayList<>();
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=mercearias&pmin=0%2e01", "mercearia"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=frutas-legumes&pmin=0%2e01", "frutas e legumes"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=congelados&pmin=0%2e01", "congelados"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=laticinios&pmin=0%2e01", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=peixaria-e-talho-peixaria&pmin=0%2e01", "peixaria"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=peixaria-e-talho-talho&pmin=0%2e01", "talho"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=charcutaria-queijo&pmin=0%2e01", "charcutaria"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=biologicos&pmin=0%2e01", "alternativas alimentares, bio, saudável"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=bebidas&pmin=0%2e01", "bebidas"));
+        scraperParamsList.add(new ScraperParams("https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=padaria-e-pastelaria&pmin=0%2e01", "padaria e pastelaria"));
+
+        for (ScraperParams scraperParams :
+                scraperParamsList) {
+
+            int maxSize = 1000;
+
+            switch (scraperParams.getCategory()) {
+                case "mercearia":
+                    maxSize = 5394;
+                    break;
+                case "frutas e legumes":
+                    maxSize = 713;
+                    break;
+                case "congelados":
+                    maxSize = 936;
+                    break;
+                case "laticínios e ovos":
+                    maxSize = 1025;
+                    break;
+                case "peixaria":
+                    maxSize = 453;
+                    break;
+                case "talho":
+                    maxSize = 284;
+                    break;
+                case "charcutaria":
+                    maxSize = 859;
+                    break;
+                case "alternativas alimentares, bio, saudável":
+                    maxSize = 2295;
+                    break;
+                case "bebidas":
+                    maxSize = 5062;
+                    break;
+                case "padaria e pastelaria":
+                    maxSize = 602;
+                    break;
+            }
+
+            while (start <= maxSize) {
+
+                // Sleeps aleatórios entre pedidos para evitar bloqueios
+                Random random = new Random();
+                int randomTimeout = random.nextInt(4000) + 1000;
+                try {
+                    Thread.sleep(randomTimeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                String url = scraperParams.getUrl() + "&start=" + start + "&sz=" + size;
+                scrapeContinente(url, scraperParams.getCategory());
+                start += size;
+            }
+
+        }
+    }
+
     @Override
     public void scrapeContinente(String url, String category) {
 
         try {
+
             // Pedido à API da loja
+            Random random = new Random();
+            int randomIndex = random.nextInt(this.userAgentList.size());
+            Connection connection = Jsoup.connect(url);
+            connection.userAgent(this.userAgentList.get(randomIndex));
+            connection.header("Connection", "keep-alive");
             Document document = Jsoup.connect(url).get();
 
             // Produtos desta loja estão na classe .product
@@ -58,21 +145,29 @@ public class ScraperServiceImpl implements ScraperService {
             for (Element productElement : productElements) {
 
                 // Inicializar produto
-                String name = productElement.select(".pwc-tile--description").text();
+                Element nameElement = productElement.select(".pwc-tile--description").first();
+                if (nameElement == null) {
+                    continue;
+                }
+                String name = nameElement.text();
                 String quantity = productElement.select(".pwc-tile--quantity").text();
                 Chain chain = chainRepository.findByName("continente");
                 Product product = this.createOrGetProduct(name, quantity, chain.getId());
                 product.setChain(chain);
-                product.setCategory(categoryRepository.findByName(category));
+                product.getCategories().add(categoryRepository.findByName(category));
+                ;
 
                 String brand = productElement.select(".col-tile--brand").text();
                 String imageUrl = productElement.select(".ct-tile-image").attr("data-src");
 
                 // Info relativa ao desconto
-                Element discountPercentageElement = productElement.select("p.pwc-discount-amount.col-discount-amount:not(.pwc-info-amount-iva-zero)").first();
+                Element discountPercentageElement = productElement.select("p.pwc-discount-amount.col-discount-amount:not(.pwc-info-amount-iva-zero .pwc-discount-amount-pvpr)").first();
                 int discountPercentage = 0;
                 if (discountPercentageElement != null) {
-                    discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    String discountPercentageStr = discountPercentageElement.text();
+                    if (discountPercentageStr.contains("Desconto Imediato: ")) {
+                        discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    }
                 }
                 Element priceWithoutDiscountElement = productElement.select(".pwc-tile--price-dashed").first();
                 String priceWithoutDiscount = "";
@@ -131,7 +226,13 @@ public class ScraperServiceImpl implements ScraperService {
     public void scrapeAuchan(String url, String category) {
 
         try {
+
             // Pedido à API da loja
+            Random random = new Random();
+            int randomIndex = random.nextInt(this.userAgentList.size());
+            Connection connection = Jsoup.connect(url);
+            connection.userAgent(this.userAgentList.get(randomIndex));
+            connection.header("Connection", "keep-alive");
             Document document = Jsoup.connect(url).get();
 
             // Produtos desta loja estão na classe .product
@@ -176,7 +277,7 @@ public class ScraperServiceImpl implements ScraperService {
                 Chain chain = chainRepository.findByName("auchan");
                 Product product = this.createOrGetProduct(name, quantity, chain.getId());
                 product.setChain(chain);
-                product.setCategory(categoryRepository.findByName(category));
+                product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
@@ -281,7 +382,7 @@ public class ScraperServiceImpl implements ScraperService {
                 Chain chain = chainRepository.findByName("minipreço");
                 Product product = this.createOrGetProduct(name, quantity, chain.getId());
                 product.setChain(chain);
-                product.setCategory(categoryRepository.findByName(category));
+                product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
@@ -402,7 +503,7 @@ public class ScraperServiceImpl implements ScraperService {
                 Chain chain = chainRepository.findByName("pingo doce");
                 Product product = this.createOrGetProduct(name, quantity, chain.getId());
                 product.setChain(chain);
-                product.setCategory(categoryRepository.findByName(category));
+                product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);
@@ -502,7 +603,7 @@ public class ScraperServiceImpl implements ScraperService {
                 Chain chain = chainRepository.findByName("pingo doce");
                 Product product = this.createOrGetProduct(name, quantity, chain.getId());
                 product.setChain(chain);
-                product.setCategory(categoryRepository.findByName(category));
+                product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
                 product.setBrand(brand);
                 product.setQuantity(quantity);

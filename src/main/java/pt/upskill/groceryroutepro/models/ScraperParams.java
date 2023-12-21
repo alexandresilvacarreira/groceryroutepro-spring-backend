@@ -3,11 +3,11 @@ package pt.upskill.groceryroutepro.models;
 public class ScraperParams {
     private String url;
     private String category;
-
     private String requestBody;
 
-    public ScraperParams() {
-
+    public ScraperParams(String url, String category) {
+        this.url = url;
+        this.category = category;
     }
 
     public String getUrl() {
