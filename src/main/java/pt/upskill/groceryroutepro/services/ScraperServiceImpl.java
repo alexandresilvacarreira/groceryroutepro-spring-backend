@@ -72,44 +72,11 @@ public class ScraperServiceImpl implements ScraperService {
         for (ScraperParams scraperParams :
                 scraperParamsList) {
 
-            int maxSize = 1000;
-
-            switch (scraperParams.getCategory()) {
-                case "mercearia":
-                    maxSize = 5394;
-                    break;
-                case "frutas e legumes":
-                    maxSize = 713;
-                    break;
-                case "congelados":
-                    maxSize = 936;
-                    break;
-                case "laticínios e ovos":
-                    maxSize = 1025;
-                    break;
-                case "peixaria":
-                    maxSize = 453;
-                    break;
-                case "talho":
-                    maxSize = 284;
-                    break;
-                case "charcutaria":
-                    maxSize = 859;
-                    break;
-                case "alternativas alimentares, bio, saudável":
-                    maxSize = 2295;
-                    break;
-                case "bebidas":
-                    maxSize = 5062;
-                    break;
-                case "padaria e pastelaria":
-                    maxSize = 602;
-                    break;
-            }
-
             int start = 0;
 
-            while (start <= maxSize) {
+            this.endOfCategory = false;
+
+            while (!this.endOfCategory) {
 
                 // Sleeps aleatórios entre pedidos para evitar bloqueios
                 Random random = new Random();
@@ -141,8 +108,13 @@ public class ScraperServiceImpl implements ScraperService {
             connection.header("Connection", "keep-alive");
             Document document = Jsoup.connect(url).get();
 
+
             // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
+            if (productElements == null || productElements.isEmpty()) {
+                this.endOfCategory = true;
+                return;
+            }
 
             // Iterar produtos
             for (Element productElement : productElements) {
@@ -294,7 +266,7 @@ public class ScraperServiceImpl implements ScraperService {
 
             int start = 0;
 
-            while (this.endOfCategory == false) {
+            while (!this.endOfCategory) {
 
                 // Sleeps aleatórios entre pedidos para evitar bloqueios
                 Random random = new Random();
@@ -328,7 +300,7 @@ public class ScraperServiceImpl implements ScraperService {
 
             // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
-            if (productElements == null || productElements.isEmpty()){
+            if (productElements == null || productElements.isEmpty()) {
                 this.endOfCategory = true;
                 return;
             }
@@ -415,7 +387,7 @@ public class ScraperServiceImpl implements ScraperService {
                 Element secondaryPriceElement = productElement.select(".auc-measures--price-per-unit").first();
                 double secondaryValue = 0.0;
                 String secondaryUnit = "";
-                if (secondaryPriceElement != null){
+                if (secondaryPriceElement != null) {
                     String secondaryValueStr = secondaryPriceElement.text().replaceAll("[^0-9.]", "");
                     secondaryUnit = secondaryPriceElement.text().substring(secondaryPriceElement.text().lastIndexOf('/') + 1).trim();
                     try {
@@ -452,19 +424,91 @@ public class ScraperServiceImpl implements ScraperService {
     }
 
     @Override
+    public void scrapeMiniprecoAll() {
+
+        List<ScraperParams> scraperParamsList = new ArrayList<>();
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/mercearia/c/WEB.003.000.00000?q=%3Arelevance", "mercearia"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/frutas-e-vegetais/c/WEB.001.000.00000?q=%3Arelevance", "frutas e legumes"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/gelados-e-congelados/c/WEB.006.000.00000?q=%3Arelevance", "congelados"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/laticinios-e-ovos/c/WEB.005.000.00000?q=%3Arelevance", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/talho-e-peixaria/peixaria/c/WEB.022.001.00000", "peixaria"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/talho-e-peixaria/talho/c/WEB.022.002.00000?q=%3Arelevance", "talho"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/charcutaria-e-queijos/c/WEB.021.000.00000?q=%3Arelevance", "charcutaria"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/equilibrio-e-bio/c/WEB.019.000.00000?q=%3Arelevance", "alternativas alimentares, bio, saudável"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/bebidas-e-garrafeira/c/WEB.007.000.00000?q=%3Arelevance", "bebidas"));
+        scraperParamsList.add(new ScraperParams("https://www.minipreco.pt/produtos/padaria-e-pastelaria/c/WEB.002.000.00000?q=%3Arelevance", "padaria e pastelaria"));
+
+
+        for (ScraperParams scraperParams :
+                scraperParamsList) {
+
+            this.endOfCategory = false;
+
+            int page = 0;
+
+            while (!this.endOfCategory) {
+
+                // Sleeps aleatórios entre pedidos para evitar bloqueios
+                Random random = new Random();
+                int randomTimeout = random.nextInt(4000) + 1000;
+                try {
+                    Thread.sleep(randomTimeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (scraperParams.getCategory().equals("peixaria")) {
+                    scrapeMinipreco(scraperParams.getUrl(), scraperParams.getCategory());
+                    this.endOfCategory = true;
+                } else {
+                    String url = scraperParams.getUrl() + "&page=" + page + "&disp=";
+                    scrapeMinipreco(url, scraperParams.getCategory());
+                    page += 1;
+                }
+            }
+
+        }
+    }
+
+    @Override
     public void scrapeMinipreco(String url, String category) {
 
         try {
 
             // Pedido à API da loja
+            Random random = new Random();
+            int randomIndex = random.nextInt(this.userAgentList.size());
+            Connection connection = Jsoup.connect(url);
+            connection.userAgent(this.userAgentList.get(randomIndex));
+            connection.header("Connection", "keep-alive");
             Document document = Jsoup.connect(url).get();
 
+            // Produtos desta loja estão na classe .product-list__item
             Elements productElements = document.select(".product-list__item");
+            if (productElements == null || productElements.isEmpty()) {
+                this.endOfCategory = true;
+                return;
+            } else {
+                // Fim da categoria é indicado por um redirect para a página com a listagem de todos os produtos
+                Element pageTitleElement = document.select(".category-page-title").first();
+                if (pageTitleElement != null) {
+                    String pageTitle = pageTitleElement.text().toLowerCase();
+                    if (pageTitle.equals("produtos")) {
+                        this.endOfCategory = true;
+                        return;
+                    }
+                }
+            }
 
             // Iterar produtos
             for (Element productElement : productElements) {
 
-                String name = productElement.select(".details").text();
+                Element nameElement = productElement.select(".details").first();
+                if (nameElement == null) {
+                    continue;
+                }
+
+                String name = nameElement.text();
 
                 // Minipreco normalmente inclui a marca em maiúsculas no início do nome dos produtos, por defeito usamos Minipreco
                 String brand = "Minipreço";
@@ -475,17 +519,35 @@ public class ScraperServiceImpl implements ScraperService {
                     brand = matcher.group().trim();
                     // Temos de truncar a string, senão vem também a primeira letra do resto do nome
                     if (!brand.isEmpty()) {
-                        brand = brand.substring(0, brand.length() - 1);
+                        try {
+                            brand = brand.substring(0, brand.length() - 1);
+                        } catch (IndexOutOfBoundsException e) {
+                            brand = "";
+                            System.out.println(name);
+                            System.out.println(e.getMessage());
+                        }
                     }
                 }
 
                 // Quantidade - ora são as duas últimas palavras, ora o que está em parênteses no fim do nome
                 String quantity = "";
                 if (name.lastIndexOf(")") == name.length() - 1) {
-                    quantity = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
+                    try {
+                        quantity = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Could not get quantity for: " + url);
+                        System.out.println("Product name: " + name);
+                        System.out.println(e.getMessage());
+                    }
                 } else {
                     String[] nameWords = name.split(" ");
-                    quantity = nameWords[nameWords.length - 2] + nameWords[nameWords.length - 1];
+                    try {
+                        quantity = nameWords[nameWords.length - 2] + nameWords[nameWords.length - 1];
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Could not get quantity for: " + url);
+                        System.out.println("Product name: " + name);
+                        System.out.println(e.getMessage());
+                    }
                 }
 
                 String imageUrl = productElement.select(".thumb img").first().attr("data-original");
@@ -494,7 +556,14 @@ public class ScraperServiceImpl implements ScraperService {
                 Element discountPercentageElement = productElement.select(".promotion_text").first();
                 int discountPercentage = 0;
                 if (discountPercentageElement != null) {
-                    discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    try {
+                        discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    } catch (NumberFormatException e) {
+                        System.out.println("Product name: " + name);
+                        System.out.println("Product brand: " + brand);
+                        System.out.println("url: " + url);
+                        System.out.println(e.getMessage());
+                    }
                 }
 
                 Element priceWithoutDiscountElement = productElement.select("p.price s").first();
@@ -517,16 +586,46 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Primário
                 Element primaryPriceElement = productElement.select("p.price").first();
+                if (primaryPriceElement == null) {
+                    System.out.println("primaryPriceElement is null for: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println("url: " + url);
+                    continue;
+                }
+
                 String primaryValueStr = primaryPriceElement.ownText().replaceAll("[^0-9,]", "").replace(",", ".");
-                double primaryValue = Double.parseDouble(primaryValueStr);
+                double primaryValue = 0.0;
+                try {
+                    primaryValue = Double.parseDouble(primaryValueStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Product name: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println("url: " + url);
+                    System.out.println(e.getMessage());
+                }
 
                 String primaryUnit = "";
 
                 // Secundário (normalmente é o preço por kg)
-                String secondaryPriceString = productElement.select(".pricePerKilogram").first().ownText();
-                String secondaryValueStr = secondaryPriceString.replaceAll("[^0-9,]", "").replace(",", ".");
-                double secondaryValue = Double.parseDouble(secondaryValueStr);
-                String secondaryUnit = secondaryPriceString.substring(secondaryPriceString.lastIndexOf("/") + 1, secondaryPriceString.length() - 2);
+                Element secondaryPriceElement = productElement.select(".pricePerKilogram").first();
+                double secondaryValue = 0.0;
+                String secondaryUnit = "";
+                if (secondaryPriceElement != null) {
+                    String secondaryPriceString = secondaryPriceElement.ownText();
+                    String secondaryValueStr = secondaryPriceString.replaceAll("[^0-9,]", "").replace(",", ".");
+                    try {
+                        secondaryValue = Double.parseDouble(secondaryValueStr);
+                        secondaryUnit = secondaryPriceString.substring(secondaryPriceString.lastIndexOf("/") + 1, secondaryPriceString.length() - 2);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Product name: " + name);
+                        System.out.println("url: " + url);
+                        System.out.println(e.getMessage());
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Product name: " + name);
+                        System.out.println("url: " + url);
+                        System.out.println(e.getMessage());
+                    }
+                }
 
                 // Instanciar preço
                 Price price = new Price();

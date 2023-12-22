@@ -15,6 +15,8 @@ public interface ScraperService {
 
     void scrapeAuchan(String url, String category);
 
+    void scrapeMiniprecoAll();
+
     void scrapeMinipreco(String url, String category);
 
     void scrapePingoDoce(String url, String category);
