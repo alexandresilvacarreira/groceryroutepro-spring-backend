@@ -6,4 +6,5 @@ public interface UserService {
 
     User getAuthenticatedUser();
 
+
 }
