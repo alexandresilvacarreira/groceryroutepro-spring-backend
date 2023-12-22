@@ -52,6 +52,16 @@ public class ScraperController {
         }
     }
 
+    @PostMapping("/scraper/auchan/all")
+    public ResponseEntity<String> scrapeAuchanAll() {
+        try {
+            this.scraperService.scrapeAuchanAll();
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/scraper/minipreco")
     public ResponseEntity<String> scrapeMinipreco(@RequestBody ScraperParams scraperParams) {
         try {

@@ -50,10 +50,11 @@ public class ScraperServiceImpl implements ScraperService {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     );
 
+    private boolean endOfCategory;
+
     @Override
     public void scrapeContinenteAll() {
 
-        int start = 0;
         int size = 100;
 
         List<ScraperParams> scraperParamsList = new ArrayList<>();
@@ -106,6 +107,8 @@ public class ScraperServiceImpl implements ScraperService {
                     break;
             }
 
+            int start = 0;
+
             while (start <= maxSize) {
 
                 // Sleeps aleatórios entre pedidos para evitar bloqueios
@@ -151,14 +154,13 @@ public class ScraperServiceImpl implements ScraperService {
                 }
                 String name = nameElement.text();
                 String quantity = productElement.select(".pwc-tile--quantity").text();
-                Chain chain = chainRepository.findByName("continente");
-                Product product = this.createOrGetProduct(name, quantity, chain.getId());
-                product.setChain(chain);
-                product.getCategories().add(categoryRepository.findByName(category));
-                ;
-
                 String brand = productElement.select(".col-tile--brand").text();
                 String imageUrl = productElement.select(".ct-tile-image").attr("data-src");
+                Chain chain = chainRepository.findByName("continente");
+                Product product = this.createOrGetProduct(name, quantity, brand, imageUrl, chain.getId());
+                product.setChain(chain);
+                product.getCategories().add(categoryRepository.findByName(category));
+
 
                 // Info relativa ao desconto
                 Element discountPercentageElement = productElement.select("p.pwc-discount-amount.col-discount-amount:not(.pwc-info-amount-iva-zero .pwc-discount-amount-pvpr)").first();
@@ -166,7 +168,14 @@ public class ScraperServiceImpl implements ScraperService {
                 if (discountPercentageElement != null) {
                     String discountPercentageStr = discountPercentageElement.text();
                     if (discountPercentageStr.contains("Desconto Imediato: ")) {
-                        discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                        try {
+                            discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                        } catch (NumberFormatException e) {
+                            System.out.println("Product ID: " + product.getId());
+                            System.out.println("Product name: " + name);
+                            System.out.println("Product brand: " + brand);
+                            System.out.println(e.getMessage());
+                        }
                     }
                 }
                 Element priceWithoutDiscountElement = productElement.select(".pwc-tile--price-dashed").first();
@@ -186,15 +195,52 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Primário
                 Element primaryPriceElement = productElement.select(".pwc-tile--price-primary").first();
-                String primaryValueStr = primaryPriceElement.select(".ct-price-formatted").text().replaceAll("[^0-9,]", "");
-                double primaryValue = Double.parseDouble(primaryValueStr.replace(",", "."));
+                if (primaryPriceElement == null) {
+                    System.out.println("Product name: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println("primaryPriceElement null: " + url);
+                    continue;
+                }
+
+                String primaryValueStr = primaryPriceElement.select(".ct-price-formatted").text();
+                int lastCommaIndex = primaryValueStr.lastIndexOf(",");
+                String commaPrimaryValueStr = primaryValueStr.substring(0, lastCommaIndex) + "." + primaryValueStr.substring(lastCommaIndex + 1);
+                String modifiedPrimaryValueStr = commaPrimaryValueStr.replaceAll("[^0-9.]", "");
+                double primaryValue = 0.0;
+                try {
+                    primaryValue = Double.parseDouble(modifiedPrimaryValueStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Product ID: " + product.getId());
+                    System.out.println("Product name: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println(e.getMessage());
+                }
+
                 String primaryUnit = primaryPriceElement.select(".pwc-m-unit").text().replace("/", "");
 
                 // Secundário (normalmente é o preço por kg)
                 Element secondaryPriceElement = productElement.select(".pwc-tile--price-secondary").first();
-                String secondaryValueStr = secondaryPriceElement.select(".ct-price-value").text().replaceAll("[^0-9,]", "");
-                double secondaryValue = Double.parseDouble(secondaryValueStr.replace(",", "."));
-                String secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text().replace("/", "");
+                double secondaryValue = 0.0;
+                String secondaryUnit = "";
+                if (secondaryPriceElement == null) {
+                    System.out.println("Product name: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println("secondaryPriceElement null: " + url);
+                } else {
+                    String secondaryValueStr = secondaryPriceElement.select(".ct-price-value").text();
+                    int lastCommaIndexSecondary = secondaryValueStr.lastIndexOf(",");
+                    String commaSecondaryValueStr = secondaryValueStr.substring(0, lastCommaIndexSecondary) + "." + secondaryValueStr.substring(lastCommaIndexSecondary + 1);
+                    String modifiedSecondaryValueStr = commaSecondaryValueStr.replaceAll("[^0-9.]", "");
+                    try {
+                        secondaryValue = Double.parseDouble(modifiedSecondaryValueStr);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Product ID: " + product.getId());
+                        System.out.println("Product name: " + name);
+                        System.out.println("Product brand: " + brand);
+                        System.out.println(e.getMessage());
+                    }
+                    secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text().replace("/", "");
+                }
 
                 // Instanciar preço
                 Price price = new Price();
@@ -214,6 +260,7 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Guardar produto
                 productRepository.save(product);
+
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -221,6 +268,50 @@ public class ScraperServiceImpl implements ScraperService {
 
     }
 
+    @Override
+    public void scrapeAuchanAll() {
+
+        int size = 100;
+
+        List<ScraperParams> scraperParamsList = new ArrayList<>();
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=mercearia&prefn1=soldInStores&prefv1=000", "mercearia"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=fruta&prefn1=soldInStores&prefv1=000", "frutas e legumes"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=legumes&prefn1=soldInStores&prefv1=000", "frutas e legumes"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=congelados&prefn1=soldInStores&prefv1=000", "congelados"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=produtos-lacteos&prefn1=soldInStores&prefv1=000", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=peixaria&prefn1=soldInStores&prefv1=000", "peixaria"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=talho&prefn1=soldInStores&prefv1=000", "talho"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=charcutaria&prefn1=soldInStores&prefv1=000", "charcutaria"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=biologico-e-escolhas-alimentares&prefn1=soldInStores&prefv1=000", "alternativas alimentares, bio, saudável"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=bebidas-e-garrafeira&prefn1=soldInStores&prefv1=000", "bebidas"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=padaria&prefn1=soldInStores&prefv1=000", "padaria e pastelaria"));
+        scraperParamsList.add(new ScraperParams("https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=pastelaria&prefn1=soldInStores&prefv1=000", "padaria e pastelaria"));
+
+        for (ScraperParams scraperParams :
+                scraperParamsList) {
+
+            this.endOfCategory = false;
+
+            int start = 0;
+
+            while (this.endOfCategory == false) {
+
+                // Sleeps aleatórios entre pedidos para evitar bloqueios
+                Random random = new Random();
+                int randomTimeout = random.nextInt(4000) + 1000;
+                try {
+                    Thread.sleep(randomTimeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                String url = scraperParams.getUrl() + "&start=" + start + "&sz=" + size;
+                scrapeAuchan(url, scraperParams.getCategory());
+                start += size;
+            }
+
+        }
+    }
 
     @Override
     public void scrapeAuchan(String url, String category) {
@@ -237,12 +328,19 @@ public class ScraperServiceImpl implements ScraperService {
 
             // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
+            if (productElements == null || productElements.isEmpty()){
+                this.endOfCategory = true;
+                return;
+            }
 
             // Iterar produtos
             for (Element productElement : productElements) {
 
-
-                String name = productElement.select(".auc-product-tile__name a").text();
+                Element productNameElement = productElement.select(".auc-product-tile__name a").first();
+                if (productNameElement == null) {
+                    continue;
+                }
+                String name = productNameElement.text();
                 String brand = ""; // Auchan inclui a marca no nome dos produtos, não temos uma classe à parte para obter esta informação
 
                 // Quantidade - não disponível em todos, quando não existe usamos a última palavra do nome
@@ -260,7 +358,13 @@ public class ScraperServiceImpl implements ScraperService {
                 Element discountPercentageElement = productElement.select(".auc-promo--discount--red").first();
                 int discountPercentage = 0;
                 if (discountPercentageElement != null) {
-                    discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    try {
+                        discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
+                    } catch (NumberFormatException e) {
+                        System.out.println("Product name: " + name);
+                        System.out.println("Product brand: " + brand);
+                        System.out.println(e.getMessage());
+                    }
                 }
                 Element priceWithoutDiscountElement = productElement.select(".auc-price__stricked").first();
                 String priceWithoutDiscount = "";
@@ -275,7 +379,7 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Atualizar produto
                 Chain chain = chainRepository.findByName("auchan");
-                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                Product product = this.createOrGetProduct(name, quantity, brand, imageUrl, chain.getId());
                 product.setChain(chain);
                 product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
@@ -287,8 +391,20 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Primário
                 Element primaryPriceElement = productElement.select(".auc-product-tile__prices .sales").first();
+                if (primaryPriceElement == null) {
+                    System.out.println("primaryPriceElement null for name: " + name + " url: " + url);
+                    continue;
+                }
                 String primaryValueStr = primaryPriceElement.select(".value").attr("content");
-                double primaryValue = Double.parseDouble(primaryValueStr);
+                double primaryValue = 0.0;
+                try {
+                    primaryValue = Double.parseDouble(primaryValueStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Product name: " + name);
+                    System.out.println("Product brand: " + brand);
+                    System.out.println(e.getMessage());
+                }
+
                 Element primaryUnitElement = primaryPriceElement.selectFirst(".auc-avgWeight");
                 String primaryUnit = "";
                 if (primaryUnitElement != null) {
@@ -297,10 +413,19 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Secundário (normalmente é o preço por kg)
                 Element secondaryPriceElement = productElement.select(".auc-measures--price-per-unit").first();
-                String secondaryValueStr = secondaryPriceElement.text().replaceAll("[^0-9.]", "");
-                double secondaryValue = Double.parseDouble(secondaryValueStr);
-                String secondaryUnit = secondaryPriceElement.text().substring(secondaryPriceElement.text().lastIndexOf('/') + 1).trim();
-                ;
+                double secondaryValue = 0.0;
+                String secondaryUnit = "";
+                if (secondaryPriceElement != null){
+                    String secondaryValueStr = secondaryPriceElement.text().replaceAll("[^0-9.]", "");
+                    secondaryUnit = secondaryPriceElement.text().substring(secondaryPriceElement.text().lastIndexOf('/') + 1).trim();
+                    try {
+                        secondaryValue = Double.parseDouble(secondaryValueStr);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Product name: " + name);
+                        System.out.println("Product brand: " + brand);
+                        System.out.println(e.getMessage());
+                    }
+                }
 
                 // Instanciar preço
                 Price price = new Price();
@@ -380,7 +505,7 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Atualizar produto
                 Chain chain = chainRepository.findByName("minipreço");
-                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                Product product = this.createOrGetProduct(name, quantity, brand, imageUrl, chain.getId());
                 product.setChain(chain);
                 product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
@@ -501,7 +626,7 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Atualizar produto
                 Chain chain = chainRepository.findByName("pingo doce");
-                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                Product product = this.createOrGetProduct(name, quantity, brand, imageUrl, chain.getId());
                 product.setChain(chain);
                 product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
@@ -600,8 +725,8 @@ public class ScraperServiceImpl implements ScraperService {
                 String priceWithoutDiscount = "";
 
                 // Atualizar produto
-                Chain chain = chainRepository.findByName("pingo doce");
-                Product product = this.createOrGetProduct(name, quantity, chain.getId());
+                Chain chain = chainRepository.findByName("intermarché");
+                Product product = this.createOrGetProduct(name, quantity, brand, imageUrl, chain.getId());
                 product.setChain(chain);
                 product.getCategories().add(categoryRepository.findByName(category));
                 product.setName(name);
@@ -638,8 +763,8 @@ public class ScraperServiceImpl implements ScraperService {
     }
 
 
-    public Product createOrGetProduct(String productName, String productQuantity, Long chainId) {
-        Product product = productRepository.findByNameQuantityAndChain(productName, productQuantity, chainId);
+    public Product createOrGetProduct(String productName, String productQuantity, String productBrand, String imageUrl, Long chainId) {
+        Product product = productRepository.findByAttributes(productName, productQuantity, productBrand, imageUrl, chainId);
         if (product == null) {
             product = new Product();
         }

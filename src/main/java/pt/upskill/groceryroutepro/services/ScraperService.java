@@ -11,6 +11,8 @@ public interface ScraperService {
 
     void scrapeContinente(String url, String category);
 
+    void scrapeAuchanAll();
+
     void scrapeAuchan(String url, String category);
 
     void scrapeMinipreco(String url, String category);
