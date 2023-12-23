@@ -92,6 +92,16 @@ public class ScraperController {
         }
     }
 
+    @PostMapping("/scraper/pingo-doce/all")
+    public ResponseEntity<String> scrapePingoDoceAll() {
+        try {
+            this.scraperService.scrapePingoDoceAll();
+            return ResponseEntity.ok("Produtos guardados com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/scraper/intermarche")
     public ResponseEntity<String> scrapeIntermarche(@RequestBody ScraperParams scraperParams) {
         try {

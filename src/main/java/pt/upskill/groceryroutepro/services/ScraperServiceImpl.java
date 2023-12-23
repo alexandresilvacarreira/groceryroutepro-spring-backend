@@ -52,6 +52,8 @@ public class ScraperServiceImpl implements ScraperService {
 
     private boolean endOfCategory;
 
+    private int productsInCategory;
+
     @Override
     public void scrapeContinenteAll() {
 
@@ -652,9 +654,62 @@ public class ScraperServiceImpl implements ScraperService {
     }
 
     @Override
+    public void scrapePingoDoceAll() {
+
+        int size = 100;
+
+        List<ScraperParams> scraperParamsList = new ArrayList<>();
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde7fd2bff003f50812d%22%5D&esPreference=0.20779248609075285", "mercearia"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde8fd2bff003f508138%22%5D&esPreference=0.20779248609075285", "frutas e legumes"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f50815a%22%5D&esPreference=0.20779248609075285", "congelados"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f508168%22%5D&esPreference=0.20779248609075285", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eeddedfd2bff003f5081f4%22%5D&esPreference=0.9580062688292429", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eede01fd2bff003f508304%22%5D&esPreference=0.9580062688292429", "laticínios e ovos"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde8fd2bff003f508144%22%5D&esPreference=0.20779248609075285", "peixaria"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde8fd2bff003f50813d%22%5D&esPreference=0.20779248609075285", "talho"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde8fd2bff003f50814a%22%5D&esPreference=0.20779248609075285", "charcutaria"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eeddedfd2bff003f5081f6%22%5D&esPreference=0.9580062688292429", "charcutaria"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f508174%22%5D&esPreference=0.20779248609075285", "alternativas alimentares, bio, saudável"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eeddeafd2bff003f508185%22%5D&esPreference=0.9580062688292429", "bebidas"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f508173%22%5D&esPreference=0.9580062688292429", "bebidas"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde8fd2bff003f508155%22%5D&esPreference=0.9580062688292429", "padaria e pastelaria"));
+        scraperParamsList.add(new ScraperParams("https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eeddedfd2bff003f5081fe%22%5D&esPreference=0.9580062688292429", "padaria e pastelaria"));
+
+
+        for (ScraperParams scraperParams :
+                scraperParamsList) {
+
+            this.productsInCategory = 100;
+
+            int from = 0;
+
+            while (from <= this.productsInCategory) {
+
+                // Sleeps aleatórios entre pedidos para evitar bloqueios
+                Random random = new Random();
+                int randomTimeout = random.nextInt(4000) + 1000;
+                try {
+                    Thread.sleep(randomTimeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                String url = scraperParams.getUrl() + "&from=" + from + "&size=" + size;
+                scrapePingoDoce(url, scraperParams.getCategory());
+                from += size;
+
+            }
+
+        }
+    }
+
+    @Override
     public void scrapePingoDoce(String url, String category) {
 
         try {
+
+            Random random = new Random();
+            int randomIndex = random.nextInt(this.userAgentList.size());
 
             // Gerado pelo Postman
             OkHttpClient client = new OkHttpClient().newBuilder()
@@ -663,7 +718,7 @@ public class ScraperServiceImpl implements ScraperService {
             RequestBody body = RequestBody.create(mediaType, "");
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0")
+                    .addHeader("User-Agent", this.userAgentList.get(randomIndex))
                     .addHeader("Accept", "application/json, text/plain, */*")
                     .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
 //                    .addHeader("Accept-Encoding", "gzip, deflate, br")
@@ -672,7 +727,7 @@ public class ScraperServiceImpl implements ScraperService {
                     .addHeader("X-Name", "webapp")
                     .addHeader("ngsw-bypass", "true")
                     .addHeader("Connection", "keep-alive")
-                    .addHeader("Cookie", "OptanonConsent=isGpcEnabled=0&datestamp=Wed+Dec+20+2023+20%3A57%3A22+GMT%2B0000+(Hora+padr%C3%A3o+da+Europa+Ocidental)&version=202301.2.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0002%3A1%2CC0001%3A1%2CC0005%3A1%2CC0004%3A1&geolocation=PT%3B11&AwaitingReconsent=false; OptanonAlertBoxClosed=2023-12-05T18:33:49.947Z")
+//                    .addHeader("Cookie", "OptanonConsent=isGpcEnabled=0&datestamp=Wed+Dec+20+2023+20%3A57%3A22+GMT%2B0000+(Hora+padr%C3%A3o+da+Europa+Ocidental)&version=202301.2.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0002%3A1%2CC0001%3A1%2CC0005%3A1%2CC0004%3A1&geolocation=PT%3B11&AwaitingReconsent=false; OptanonAlertBoxClosed=2023-12-05T18:33:49.947Z")
                     .addHeader("Sec-Fetch-Dest", "empty")
                     .addHeader("Sec-Fetch-Mode", "cors")
                     .addHeader("Sec-Fetch-Site", "same-origin")
@@ -684,8 +739,13 @@ public class ScraperServiceImpl implements ScraperService {
             JsonParser jsonParser = JsonParserFactory.getJsonParser();
             Map<String, Object> responseMap = jsonParser.parseMap(responseString);
             List<Map<String, Object>> products = (List<Map<String, Object>>) ((Map<String, Object>) ((Map<String, Object>) responseMap.get("sections")).get("null")).get("products");
+            this.productsInCategory = ((int) ((Map<String, Object>) ((Map<String, Object>) responseMap.get("sections")).get("null")).get("total"));
 
-            // Iterar produtos
+            if (products == null || products.isEmpty()) {
+                return;
+            }
+
+            //Iterar produtos
             for (Map<String, Object> productMap : products) {
 
                 // Info do produto vem no _source
@@ -693,34 +753,73 @@ public class ScraperServiceImpl implements ScraperService {
 
                 String imageUrl = "https://res.cloudinary.com/fonte-online/image/upload/c_fill,h_300,q_auto,w_300/v1/PDO_PROD/" + productData.get("sku") + "_1";
                 String name = (String) productData.get("firstName");
-                System.out.println(name);
                 String brand = (String) ((Map<String, Object>) productData.get("brand")).get("name");
                 String quantity = "";
-                double primaryValue = (double) Math.round((double) productData.get("buyingPrice") * 100) / 100;
-                System.out.println("primaryValue: " + primaryValue);
+                double primaryValue = 0.0;
+                try {
+                    Object primaryValueElement = productData.get("buyingPrice");
+                    if (primaryValueElement instanceof Integer) {
+                        primaryValue = (int) primaryValueElement;
+                    } else {
+                        primaryValue = (double) Math.round((double) productData.get("buyingPrice") * 100) / 100;
+                    }
+                } catch (ClassCastException e) {
+                    System.out.println("primaryValue failed for: \n" + name + "\n url: " + url);
+                    continue;
+                }
+
                 String primaryUnit = "";
-                double secondaryValue;
+                double secondaryValue = 0.0;
                 String secondaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
                 if ((productData.get("capacity")).equals("0")) {
-                    System.out.println("capacity 0");
                     quantity = (productData.get("averageWeight") + " " + productData.get("netContentUnit")).toLowerCase();
                     primaryUnit = ((String) productData.get("netContentUnit")).toLowerCase();
                     secondaryValue = primaryValue;
-                    System.out.println("secondaryValue:" + secondaryValue);
                 } else {
-                    System.out.println("capacity with stuff");
                     quantity = ((String) productData.get("capacity")).toLowerCase();
-                    secondaryValue = (double) Math.round((primaryValue / ((Number) productData.get("netContent")).doubleValue()) * 100) / 100;
-                    System.out.println("secondaryValue: " + secondaryValue);
-                }
+                    try {
+                        Object netContentObject = productData.get("netContent");
+                        double netContent;
+                        if (netContentObject instanceof Integer) {
+                            netContent = (int) netContentObject;
+                        } else {
+                            netContent = (double) netContentObject;
+                        }
+                        secondaryValue = (double) Math.round((primaryValue / netContent) * 100) / 100;
+                    } catch (ClassCastException e) {
+                        System.out.println("secondaryValue failed for: \n" + name + "\n url: " + url);
+                    }
 
+                }
 
                 int discountPercentage = 0;
                 String priceWithoutDiscount = "";
                 Map<String, Object> promotion = (Map<String, Object>) productData.get("promotion");
-                if (promotion.get("amount") != null && promotion.get("type").equals("PERCENTAGE")) {
-                    discountPercentage = (int) Math.round((double) promotion.get("amount"));
-                    priceWithoutDiscount = ((double) Math.round((Double) productData.get("regularPrice") * 100) / 100) + " €";
+                if (promotion != null && promotion.get("amount") != null && promotion.get("type").equals("PERCENTAGE")) {
+                    try {
+                        Object promotionObject = promotion.get("amount");
+                        double promotionAmount;
+                        if (promotionObject instanceof Integer) {
+                            promotionAmount = (int) promotionObject;
+                        } else {
+                            promotionAmount = (double) promotionObject;
+                        }
+                        discountPercentage = (int) Math.round(promotionAmount);
+                    } catch (ClassCastException e) {
+                        System.out.println("discountPercentage failed for: \n" + name + "\n url: " + url);
+                    }
+                    try {
+                        Object priceWoDiscountObject = productData.get("regularPrice");
+                        double priceWoDiscount;
+                        if (priceWoDiscountObject instanceof Integer){
+                            priceWoDiscount = (int) priceWoDiscountObject;
+                        } else {
+                            priceWoDiscount = (double) priceWoDiscountObject;
+                        }
+                        priceWithoutDiscount = ((double) Math.round(priceWoDiscount * 100) / 100) + " €";
+                    } catch (ClassCastException e) {
+                        System.out.println("priceWithoutDiscount failed for: \n" + name + "\n url: " + url);
+                    }
                 }
 
                 // Atualizar produto
