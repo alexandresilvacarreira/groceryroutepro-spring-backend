@@ -3,6 +3,7 @@ package pt.upskill.groceryroutepro.services;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ScraperService {
@@ -24,5 +25,9 @@ public interface ScraperService {
     void scrapePingoDoceAll();
 
     void scrapeIntermarche(String url, String category, String requestBody);
+
+    void scrapeIntermarcheAll();
+
+//    Map<String, List<Integer>> getSubcategoriesIntermarche(String storeUrl);
 
 }

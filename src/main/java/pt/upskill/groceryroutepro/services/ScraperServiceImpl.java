@@ -54,6 +54,12 @@ public class ScraperServiceImpl implements ScraperService {
 
     private int productsInCategory;
 
+    private int pagesInCategory;
+
+    private List<String> categories = Arrays.asList("mercearia", "frutas e legumes", "congelados", "laticínios e ovos", "peixaria", "talho", "charcutaria", "alternativas alimentares, bio, saudável", "bebidas", "padaria e pastelaria");
+
+    /************************** CONTINENTE **************************/
+
     @Override
     public void scrapeContinenteAll() {
 
@@ -105,11 +111,11 @@ public class ScraperServiceImpl implements ScraperService {
             // Pedido à API da loja
             Random random = new Random();
             int randomIndex = random.nextInt(this.userAgentList.size());
-            Connection connection = Jsoup.connect(url);
-            connection.userAgent(this.userAgentList.get(randomIndex));
-            connection.header("Connection", "keep-alive");
-            Document document = Jsoup.connect(url).get();
+            Connection connection = Jsoup.connect(url)
+                    .userAgent(this.userAgentList.get(randomIndex))
+                    .header("Connection", "keep-alive");
 
+            Document document = connection.get();
 
             // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
@@ -242,6 +248,8 @@ public class ScraperServiceImpl implements ScraperService {
 
     }
 
+    /************************** AUCHAN **************************/
+
     @Override
     public void scrapeAuchanAll() {
 
@@ -295,10 +303,10 @@ public class ScraperServiceImpl implements ScraperService {
             // Pedido à API da loja
             Random random = new Random();
             int randomIndex = random.nextInt(this.userAgentList.size());
-            Connection connection = Jsoup.connect(url);
-            connection.userAgent(this.userAgentList.get(randomIndex));
-            connection.header("Connection", "keep-alive");
-            Document document = Jsoup.connect(url).get();
+            Connection connection = Jsoup.connect(url)
+                    .userAgent(this.userAgentList.get(randomIndex))
+                    .header("Connection", "keep-alive");
+            Document document = connection.get();
 
             // Produtos desta loja estão na classe .product
             Elements productElements = document.select(".product");
@@ -425,6 +433,8 @@ public class ScraperServiceImpl implements ScraperService {
         }
     }
 
+    /************************** MINIPREÇO **************************/
+
     @Override
     public void scrapeMiniprecoAll() {
 
@@ -480,10 +490,10 @@ public class ScraperServiceImpl implements ScraperService {
             // Pedido à API da loja
             Random random = new Random();
             int randomIndex = random.nextInt(this.userAgentList.size());
-            Connection connection = Jsoup.connect(url);
-            connection.userAgent(this.userAgentList.get(randomIndex));
-            connection.header("Connection", "keep-alive");
-            Document document = Jsoup.connect(url).get();
+            Connection connection = Jsoup.connect(url)
+                    .userAgent(this.userAgentList.get(randomIndex))
+                    .header("Connection", "keep-alive");
+            Document document = connection.get();
 
             // Produtos desta loja estão na classe .product-list__item
             Elements productElements = document.select(".product-list__item");
@@ -653,6 +663,8 @@ public class ScraperServiceImpl implements ScraperService {
         }
     }
 
+    /************************** PINGO DOCE **************************/
+
     @Override
     public void scrapePingoDoceAll() {
 
@@ -811,7 +823,7 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         Object priceWoDiscountObject = productData.get("regularPrice");
                         double priceWoDiscount;
-                        if (priceWoDiscountObject instanceof Integer){
+                        if (priceWoDiscountObject instanceof Integer) {
                             priceWoDiscount = (int) priceWoDiscountObject;
                         } else {
                             priceWoDiscount = (double) priceWoDiscountObject;
@@ -860,10 +872,167 @@ public class ScraperServiceImpl implements ScraperService {
 
     }
 
+    /************************** INTERMARCHÉ **************************/
+
+    @Override
+    public void scrapeIntermarcheAll() {
+
+        // Começamos por obter os ids de todas as subcategorias do intermarché (a api não permite pedidos às categorias principais)
+
+        Map<String, List<Integer>> subcategoriesIntermarche = new HashMap<>();
+
+        for (String category :
+                this.categories) {
+            String categoryIdsName = "ids_" + category;
+            String categoryNbProductsName = "nbProducts_" + category;
+            subcategoriesIntermarche.put(categoryIdsName, new ArrayList<>());
+            subcategoriesIntermarche.put(categoryNbProductsName, new ArrayList<>());
+        }
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(this.userAgentList.size());
+
+        try {
+
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("text/plain");
+            RequestBody body = RequestBody.create(mediaType, "");
+            Request request = new Request.Builder()
+                    .url("https://www.loja-online.intermarche.pt/api/service/arborescence-produit/v1/pdvs/03622/categories")
+                    .addHeader("User-Agent", this.userAgentList.get(randomIndex))
+                    .addHeader("Accept", "application/json, text/plain, */*")
+                    .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
+//                    .addHeader("Accept-Encoding", "gzip, deflate, br")
+                    .addHeader("x-red-device", "red_fo_desktop")
+                    .addHeader("x-red-version", "3")
+                    .addHeader("x-service-name", "arborescence-produit")
+                    .addHeader("x-itm-device-fp", "ead3ce12-5cec-43d6-abf0-62d10b4e0bcd")
+                    .addHeader("x-itm-session-id", "7ea3cd74-a97c-4ca5-87ca-d634800964fa")
+                    .addHeader("x-pdv", "{\"ref\":\"03622\",\"isEcommerce\":true}")
+                    .addHeader("Alt-Used", "www.loja-online.intermarche.pt")
+                    .addHeader("Connection", "keep-alive")
+                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/mercearia/arroz-massa-e-farinha/massa/10179")
+                    .addHeader("Cookie", "datadome=iKf01CU1s5nRvY3m~fENy3jqHsqcXqwMbAP3HGXYjWZT2f~41muWa_uA4KRyVAuKUqmgV2fAMseXZAHNj93TicXl5xYhtiZKmHSbgsfquFTutzutaWMMTIx7KqbnAgSF; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
+                    .addHeader("Sec-Fetch-Dest", "empty")
+                    .addHeader("Sec-Fetch-Mode", "cors")
+                    .addHeader("Sec-Fetch-Site", "same-origin")
+                    .addHeader("Pragma", "no-cache")
+                    .addHeader("Cache-Control", "no-cache")
+                    .addHeader("TE", "trailers")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseString = response.body().string();
+            JsonParser jsonParser = JsonParserFactory.getJsonParser();
+            Map<String, Object> responseMap = jsonParser.parseMap(responseString);
+
+            // As subcategorias que precisamos estão no 3o nível do json da resposta
+            List<Map<String, Map<String, Object>>> categoriesLvl1 = (List<Map<String, Map<String, Object>>>) responseMap.get("categories");
+
+            for (Map<String, Map<String, Object>> categoryLvl1 :
+                    categoriesLvl1) {
+
+                Object categoryLvl1NameObj = categoryLvl1.get("libelle");
+                String categoryLvl1Name = (String) categoryLvl1NameObj;
+                List<Map<String, Map<String, Object>>> categoriesLvl2 = (List<Map<String, Map<String, Object>>>) categoryLvl1.get("categories");
+
+                for (Map<String, Map<String, Object>> categoryLvl2 :
+                        categoriesLvl2) {
+
+                    Object categoryLvl2NameObj = categoryLvl2.get("libelle");
+                    String categoryLvl2Name = (String) categoryLvl2NameObj;
+                    List<Map<String, Map<String, Object>>> categoriesLvl3 = (List<Map<String, Map<String, Object>>>) categoryLvl2.get("categories");
+
+
+                    for (Map<String, Map<String, Object>> categoryLvl3 :
+                            categoriesLvl3) {
+
+                        Object categoryLvl3IdObj = categoryLvl3.get("id_categorie");
+                        Integer categoryLvl3Id = (Integer) categoryLvl3IdObj;
+                        Object categoryLvl3NbProductsObj = categoryLvl3.get("nb_produits");
+                        Integer categoryLvl3NbProducts = (Integer) categoryLvl3NbProductsObj;
+
+                        if (categoryLvl2Name.equals("Padaria e Pastelaria")) {
+                            subcategoriesIntermarche.get("ids_padaria e pastelaria").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_padaria e pastelaria").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl2Name.equals("Fruta") || categoryLvl2Name.equals("Legumes")) {
+                            subcategoriesIntermarche.get("ids_frutas e legumes").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_frutas e legumes").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl2Name.equals("Peixaria")) {
+                            subcategoriesIntermarche.get("ids_peixaria").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_peixaria").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl2Name.equals("Talho")) {
+                            subcategoriesIntermarche.get("ids_talho").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_talho").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl2Name.equals("Charcutaria")) {
+                            subcategoriesIntermarche.get("ids_charcutaria").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_charcutaria").add(categoryLvl3NbProducts);
+                            // Lvl 1 aqui
+                        } else if (categoryLvl1Name.equals("Mercearia")) {
+                            subcategoriesIntermarche.get("ids_mercearia").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_mercearia").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl1Name.equals("Congelados")) {
+                            subcategoriesIntermarche.get("ids_congelados").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_congelados").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl1Name.equals("Laticínios")) {
+                            subcategoriesIntermarche.get("ids_laticínios e ovos").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_laticínios e ovos").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl1Name.equals("Bebidas e Garrafeira")) {
+                            subcategoriesIntermarche.get("ids_bebidas").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_bebidas").add(categoryLvl3NbProducts);
+                        } else if (categoryLvl1Name.equals("Alimentação Alternativa")) {
+                            subcategoriesIntermarche.get("ids_alternativas alimentares, bio, saudável").add(categoryLvl3Id);
+                            subcategoriesIntermarche.get("nbProducts_alternativas alimentares, bio, saudável").add(categoryLvl3NbProducts);
+                        }
+                    }
+
+
+                }
+            }
+
+            // Obtidas as subcategorias e o nr de produtos de cada uma, podemos passar ao scraping dos produtos
+            for (String category :
+                    this.categories) {
+
+                // Estas listas deverão ter o mesmo tamanho
+                List<Integer> subcategoryIds = subcategoriesIntermarche.get("ids_" + category);
+                List<Integer> subcategoryNbProducts = subcategoriesIntermarche.get("nbProducts_" + category);
+
+
+                for (int i = 0; i < subcategoryIds.size(); i++) {
+
+                    String requestBody = "{\"category\":\"" + subcategoryIds.get(i) + "\",\"page\":1,\"size\":" + subcategoryNbProducts.get(i) + ",\"filtres\":[],\"tri\":\"pertinence\",\"ordreTri\":null,\"catalog\":[\"PDV\"]}";
+
+                    // Sleeps aleatórios entre pedidos para evitar bloqueios
+                    Random randomNb = new Random();
+                    int randomTimeout = randomNb.nextInt(4000) + 1000;
+                    try {
+                        Thread.sleep(randomTimeout);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    scrapeIntermarche("https://www.loja-online.intermarche.pt/api/service/produits/v2/pdvs/03622/products/byKeywordAndCategory", category, requestBody);
+
+                }
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     public void scrapeIntermarche(String url, String category, String requestBody) {
 
         try {
+
+            Random random = new Random();
+            int randomIndex = random.nextInt(this.userAgentList.size());
 
             // Gerado pelo Postman
             OkHttpClient client = new OkHttpClient().newBuilder()
@@ -874,7 +1043,7 @@ public class ScraperServiceImpl implements ScraperService {
             Request request = new Request.Builder()
                     .url(url)
                     .method("POST", body)
-                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0")
+                    .addHeader("User-Agent", this.userAgentList.get(randomIndex))
                     .addHeader("Accept", "application/json, text/plain, */*")
                     .addHeader("Accept-Language", "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3")
                     .addHeader("Content-Type", "application/json;charset=utf-8")
@@ -893,7 +1062,7 @@ public class ScraperServiceImpl implements ScraperService {
                     .addHeader("Sec-Fetch-Mode", "cors")
                     .addHeader("Sec-Fetch-Site", "same-origin")
                     .addHeader("TE", "trailers")
-                    .addHeader("Cookie", "datadome=YVhULd5eY1eUn9FiSaVAJpKd9fkv610A~4lh9nESWCXhI_WFFrpvSru6uOLDc4SFBP8wFuhWPr~sXKH7pGFjJluaufUz7f8t42x4xD_41ik~pauVS6fM1MJDOak7XAT2; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
+                    .addHeader("Cookie", "datadome=ESbFuVKm4lJA7zwgBzSuk680nz62IsA8wFRgHASNDolAW9fd1Ct507uhiQLqs5JcK0tSHP2Skjr1wtcswwzQt81gSxNYAqgrV51~EZE0D2fMepCxP9mAfKi1NohKZjgU; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
                     .build();
 
 
@@ -901,8 +1070,8 @@ public class ScraperServiceImpl implements ScraperService {
             String responseString = response.body().string();
             JsonParser jsonParser = JsonParserFactory.getJsonParser();
             Map<String, Object> responseMap = jsonParser.parseMap(responseString);
-            List<Map<String, Object>> products = (List<Map<String, Object>>) responseMap.get("produits");
 
+            List<Map<String, Object>> products = (List<Map<String, Object>>) responseMap.get("produits");
 
             // Iterar produtos
             for (Map<String, Object> productData : products) {
