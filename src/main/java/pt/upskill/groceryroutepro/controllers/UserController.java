@@ -44,4 +44,27 @@ public class UserController {
         }
     }
 
+    @PostMapping("/signup")
+    public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
+        // fazer verificação dos dados de sign up
+
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (userService.createAccount(signUp) != null) {
+                response.put("success", true);
+                response.put("message", "Conta registada com sucesso");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Erro ao registar conta");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 }

@@ -1,7 +1,7 @@
 package pt.upskill.groceryroutepro.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -20,6 +20,10 @@ public class User {
     private double maxStoreRadiusKm = 5.5;
     private String vehicleFuelType;
     private double vehicleConsumption;
+
+    private boolean verifiedEmail;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Confirmation confirmation;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
@@ -113,6 +117,23 @@ public class User {
 
     public void setStores(Set<Store> stores) {
         this.stores = stores;
+    }
+
+
+    public Confirmation getConfirmation() {
+        return confirmation;
+    }
+
+    public void setConfirmation(Confirmation confirmation) {
+        this.confirmation = confirmation;
+    }
+
+    public boolean isVerifiedEmail() {
+        return verifiedEmail;
+    }
+
+    public void setVerifiedEmail(boolean verifiedEmail) {
+        this.verifiedEmail = verifiedEmail;
     }
 
     @Override

@@ -29,29 +29,7 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            if (authService.createAccount(signUp) != null) {
-                response.put("success", true);
-                response.put("message", "Conta registada com sucesso");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "Erro ao registar conta");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-        } catch (IllegalArgumentException e) {
-            response.put("success", false);
-            response.put("message", "Erro ao registar conta");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Erro ao registar conta");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
+
 
     // O loginForm requer este endpoint para redireccionar o utilizador no caso de pedidos efetuados sem autenticação.
     // Deverá redireccionar para a página de login do frontend

@@ -1,7 +1,10 @@
 package pt.upskill.groceryroutepro.services;
 
+import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.utils.Enum.EmailType;
+
 public interface EmailService {
 
-    void sendSimpleMessage(String to, String subject, String text);
+    void sendSimpleMessage(User user, String subject, String text, EmailType emailType);
 
 }
