@@ -12,4 +12,5 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT p FROM Product p WHERE p.name = :productName AND p.quantity = :productQuantity AND p.brand = :productBrand AND p.imageUrl = :productImageUrl AND p.chain.id = :chainId")
     Product findByAttributes(String productName, String productQuantity, String productBrand, String productImageUrl, Long chainId);
 
+
 }
