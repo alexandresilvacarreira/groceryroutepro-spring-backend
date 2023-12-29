@@ -95,9 +95,10 @@ public class Price {
         this.collectionDate = collectionDate;
     }
 
-    public Product getProduct() {
-        return product;
-    }
+    // TODO omitir o getter para o produto, para não devolver informação repetida nos pedidos
+//    public Product getProduct() {
+//        return product;
+//    }
 
     public void setProduct(Product product) {
         this.product = product;
