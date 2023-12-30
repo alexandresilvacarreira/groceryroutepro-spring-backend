@@ -1,24 +1,24 @@
 package pt.upskill.groceryroutepro.models;
 
-import pt.upskill.groceryroutepro.entities.Price;
-import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 
 import java.util.List;
 
-public class ListProductDetails {
+public class ListProductWPrice {
 
-    private List<ProductWPrices> products;
+    private List<ProductWPriceProjection> products;
+    private Pagination pagination;
     private String errorMessage;
     private boolean success;
 
-    public ListProductDetails() {
+    public ListProductWPrice() {
     }
 
-    public List<ProductWPrices> getProducts() {
+    public List<ProductWPriceProjection> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductWPrices> products) {
+    public void setProducts(List<ProductWPriceProjection> products) {
         this.products = products;
     }
 
@@ -36,5 +36,13 @@ public class ListProductDetails {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public Pagination getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Pagination pagination) {
+        this.pagination = pagination;
     }
 }
