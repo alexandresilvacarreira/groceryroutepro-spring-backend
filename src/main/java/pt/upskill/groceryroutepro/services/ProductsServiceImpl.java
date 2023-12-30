@@ -1,6 +1,8 @@
 package pt.upskill.groceryroutepro.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.entities.Product;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
@@ -20,7 +22,7 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public List<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, int nbResults, int page) {
-        return productRepository.findProductsByParams(search, categoryIds, chainIds, nbResults, page * nbResults);
+    public Slice<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable) {
+        return productRepository.findProductsByParams(search, categoryIds, chainIds, pageable);
     }
 }

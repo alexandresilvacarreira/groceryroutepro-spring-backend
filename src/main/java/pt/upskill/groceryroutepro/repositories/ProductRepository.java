@@ -1,5 +1,7 @@
 package pt.upskill.groceryroutepro.repositories;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,7 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "p.image_url AS imageUrl, " +
             "p.name, " +
             "p.quantity, " +
-            "p.chain_id AS chainId, " +
+            "c.name AS chain, " +
             "pr.id AS priceId, " +
             "pr.collection_date AS priceCollectionDate, " +
             "pr.discount_percentage AS priceDiscountPercentage, " +
@@ -46,16 +48,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND pc.category_id IN :categoryIds " +
             "AND c.id IN :chainIds " +
             "GROUP BY " +
-            "p.id " +
-            "ORDER BY " +
-            "pr.primary_value ASC " +
-            "LIMIT :nbResults OFFSET :offs")
-    List<ProductWPriceProjection> findProductsByParams(
+            "p.id ")
+    Slice<ProductWPriceProjection> findProductsByParams(
             @Param("search") String search,
             @Param("categoryIds") List<Long> categoryIds,
-            @Param("chainIds") List<Long> chainIds,
-            @Param("nbResults") int nbResults,
-            @Param("offs") int offs
+            @Param("chainIds") List<Long> chainIds, Pageable pageable
     );
 
 }

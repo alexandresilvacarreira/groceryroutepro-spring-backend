@@ -1,6 +1,11 @@
 package pt.upskill.groceryroutepro.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -50,21 +55,32 @@ public class ProductsController {
     @GetMapping("/list")
     public ResponseEntity<ListProductWPrice> listProducts(@RequestParam(defaultValue = "") String search,
                                                           @RequestParam(defaultValue = "0") Integer page,
-                                                          @RequestParam(defaultValue = "10") Integer nbResults,
+                                                          @RequestParam(defaultValue = "10") Integer size,
                                                           @RequestParam(defaultValue = "1,2,3,4,5,6,7") List<Long> chains,
                                                           @RequestParam(defaultValue = "1,2,3,4,5,6,7,8,9,10") List<Long> categories,
-                                                          @RequestParam(defaultValue = "primary_value-ASC") String sort) {
+                                                          @RequestParam(defaultValue = "pricePrimaryValue,asc") String sort) {
 
         ListProductWPrice results = new ListProductWPrice();
 
-        // TODO:
-        //  sort, chain e categoria com nome em vez de id, paginação
+        String[] sortParams = sort.split(",");
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortParams[1].equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortParams[0]));
+
+//
+//        Pageable pageable;
+//        if (sortParams[1].equals("desc")){
+//            pageable = PageRequest.of(page, size, Sort.by(sortParams[0]).descending());
+//        } else {
+//            pageable = PageRequest.of(page, size, Sort.by(sortParams[0]).ascending());
+//        }
 
         try {
-            List<ProductWPriceProjection> products = productsService.getProductsByParams(search, categories, chains, nbResults, page);
+            Slice<ProductWPriceProjection> products = productsService.getProductsByParams(search, categories, chains, pageable);
             results.setProducts(products);
             results.setSuccess(true);
-                return ResponseEntity.ok(results);
+            results.setHasNextPage(products.hasNext());
+            results.setHasPreviousPage(products.hasPrevious());
+            return ResponseEntity.ok(results);
         } catch (Exception e) {
             String errorMessage = "Erro ao obter produtos: " + e.getMessage();
             results.setErrorMessage(errorMessage);

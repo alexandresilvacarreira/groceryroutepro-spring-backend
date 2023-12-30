@@ -1,5 +1,7 @@
 package pt.upskill.groceryroutepro.services;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import pt.upskill.groceryroutepro.entities.Product;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 
@@ -9,6 +11,6 @@ public interface ProductsService {
 
     Product getProductById(Long productId);
 
-    List<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, int nbResults, int page);
+    Slice<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable);
 
 }

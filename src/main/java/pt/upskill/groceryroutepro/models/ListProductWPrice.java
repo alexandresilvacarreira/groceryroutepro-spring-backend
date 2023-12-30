@@ -1,24 +1,26 @@
 package pt.upskill.groceryroutepro.models;
 
+import org.springframework.data.domain.Slice;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 
 import java.util.List;
 
 public class ListProductWPrice {
 
-    private List<ProductWPriceProjection> products;
-    private Pagination pagination;
+    private Slice<ProductWPriceProjection> products;
     private String errorMessage;
     private boolean success;
+    private boolean hasNextPage;
+    private boolean hasPreviousPage;
 
     public ListProductWPrice() {
     }
 
-    public List<ProductWPriceProjection> getProducts() {
+    public Slice<ProductWPriceProjection> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductWPriceProjection> products) {
+    public void setProducts(Slice<ProductWPriceProjection> products) {
         this.products = products;
     }
 
@@ -38,11 +40,19 @@ public class ListProductWPrice {
         this.success = success;
     }
 
-    public Pagination getPagination() {
-        return pagination;
+    public boolean isHasNextPage() {
+        return hasNextPage;
     }
 
-    public void setPagination(Pagination pagination) {
-        this.pagination = pagination;
+    public void setHasNextPage(boolean hasNextPage) {
+        this.hasNextPage = hasNextPage;
+    }
+
+    public boolean isHasPreviousPage() {
+        return hasPreviousPage;
+    }
+
+    public void setHasPreviousPage(boolean hasPreviousPage) {
+        this.hasPreviousPage = hasPreviousPage;
     }
 }
