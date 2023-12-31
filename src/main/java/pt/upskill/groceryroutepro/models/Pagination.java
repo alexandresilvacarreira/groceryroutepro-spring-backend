@@ -12,16 +12,12 @@ public class Pagination {
     private int size;
     private boolean hasNextPage;
     private boolean hasPreviousPage;
-    private boolean isFirstPage;
-    private boolean isLastPage;
 
-    public Pagination(int currentPage, int size, boolean hasNextPage, boolean hasPreviousPage, boolean isFirstPage, boolean isLastPage) {
+    public Pagination(int currentPage, int size, boolean hasNextPage, boolean hasPreviousPage) {
         this.currentPage = currentPage;
         this.size = size;
         this.hasNextPage = hasNextPage;
         this.hasPreviousPage = hasPreviousPage;
-        this.isFirstPage = isFirstPage;
-        this.isLastPage = isLastPage;
     }
 
     public int getCurrentPage() {
@@ -54,23 +50,5 @@ public class Pagination {
 
     public void setHasPreviousPage(boolean hasPreviousPage) {
         this.hasPreviousPage = hasPreviousPage;
-    }
-
-    @JsonProperty("isFirstPage")
-    public boolean isFirstPage() {
-        return isFirstPage;
-    }
-
-    public void setFirstPage(boolean firstPage) {
-        isFirstPage = firstPage;
-    }
-
-    @JsonProperty("isLastPage")
-    public boolean isLastPage() {
-        return isLastPage;
-    }
-
-    public void setLastPage(boolean lastPage) {
-        isLastPage = lastPage;
     }
 }

@@ -1,18 +1,17 @@
 package pt.upskill.groceryroutepro.models;
 
-import org.springframework.data.domain.Slice;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 
 import java.util.List;
 
-public class ListProductWPrice {
+public class ProductWPriceList {
 
     private List<ProductWPriceProjection> products;
     private boolean success;
     private String errorMessage;
     private Pagination pagination;
 
-    public ListProductWPrice() {
+    public ProductWPriceList() {
     }
 
     public List<ProductWPriceProjection> getProducts() {

@@ -11,6 +11,7 @@ public interface ProductWPriceProjection {
         String getName();
         String getQuantity();
         String getChain();
+        Long getChainId();
         Long getPriceId();
         Timestamp getPriceCollectionDate();
         int getPriceDiscountPercentage();
