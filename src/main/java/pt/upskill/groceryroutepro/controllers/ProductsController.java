@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import pt.upskill.groceryroutepro.entities.Product;
 import pt.upskill.groceryroutepro.models.ListProductWPrice;
+import pt.upskill.groceryroutepro.models.Pagination;
 import pt.upskill.groceryroutepro.models.ProductDetails;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.services.ProductsService;
@@ -61,25 +62,16 @@ public class ProductsController {
                                                           @RequestParam(defaultValue = "pricePrimaryValue,asc") String sort) {
 
         ListProductWPrice results = new ListProductWPrice();
-
         String[] sortParams = sort.split(",");
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortParams[1].equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortParams[0]));
 
-//
-//        Pageable pageable;
-//        if (sortParams[1].equals("desc")){
-//            pageable = PageRequest.of(page, size, Sort.by(sortParams[0]).descending());
-//        } else {
-//            pageable = PageRequest.of(page, size, Sort.by(sortParams[0]).ascending());
-//        }
-
         try {
             Slice<ProductWPriceProjection> products = productsService.getProductsByParams(search, categories, chains, pageable);
-            results.setProducts(products);
+            results.setProducts(products.getContent());
             results.setSuccess(true);
-            results.setHasNextPage(products.hasNext());
-            results.setHasPreviousPage(products.hasPrevious());
+            Pagination pagination = new Pagination(products.getNumber(), products.getNumberOfElements(), products.hasNext(), products.hasPrevious(), products.isFirst(), products.isLast());
+            results.setPagination(pagination);
             return ResponseEntity.ok(results);
         } catch (Exception e) {
             String errorMessage = "Erro ao obter produtos: " + e.getMessage();
