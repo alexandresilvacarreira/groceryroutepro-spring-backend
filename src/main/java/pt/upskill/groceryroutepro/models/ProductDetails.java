@@ -7,19 +7,29 @@ import java.util.List;
 
 public class ProductDetails {
 
-    private ProductWPrices productDetails;
+    private Product product;
+
+    private List<Price> prices;
     private String errorMessage;
     private boolean success;
 
     public ProductDetails() {
     }
 
-    public ProductWPrices getProductDetails() {
-        return productDetails;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductDetails(ProductWPrices productDetails) {
-        this.productDetails = productDetails;
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public List<Price> getPrices() {
+        return prices;
+    }
+
+    public void setPrices(List<Price> prices) {
+        this.prices = prices;
     }
 
     public String getErrorMessage() {
