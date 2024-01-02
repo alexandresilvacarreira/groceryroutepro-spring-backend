@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.models.EmailVerificationToken;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.services.AuthService;
 import pt.upskill.groceryroutepro.services.UserService;
@@ -46,7 +47,7 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
-        // fazer verificação dos dados de sign up
+        // fazer verificação dos dados de sign up iguais ao frontend
 
 
         Map<String, Object> response = new HashMap<>();
@@ -66,5 +67,28 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PostMapping("/verify-account")
+    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken){
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            //TODO isto não está bem é suposto devolver logo erro
+            if (userService.verifyEmail(emailVerificationToken.getToken())) {
+                // devolver o user?
+                response.put("success", true);
+                response.put("message", "Conta verificada com sucesso");
+                return ResponseEntity.ok(response);
+
+            } else {
+                response.put("success", false);
+                response.put("message", "Erro ao verificar conta");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 
 }

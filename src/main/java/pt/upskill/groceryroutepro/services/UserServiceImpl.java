@@ -49,6 +49,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean verifyEmail(String verificationCode) {
+        //get the user from the verification code and set its verification to true
+        User user = userRepository.findByConfirmation_Token(verificationCode);
+
+        if (user!=null){
+            user.setVerifiedEmail(true);
+
+            //delete confimration???
+            return true;
+        }
+
         return false;
     }
 

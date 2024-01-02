@@ -8,5 +8,6 @@ import pt.upskill.groceryroutepro.entities.User;
 public interface UserRepository extends JpaRepository<User,Long> {
 
     User getByEmail(String email);
+    User findByConfirmation_Token(String token);
 
 }

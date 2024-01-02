@@ -12,6 +12,7 @@ public class Confirmation {
     private String code;
     private LocalDateTime createdDate;
     @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     public String getCode() {

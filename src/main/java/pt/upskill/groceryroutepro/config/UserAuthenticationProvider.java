@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.Login;
 import pt.upskill.groceryroutepro.services.AuthService;
+import pt.upskill.groceryroutepro.services.UserService;
 
 
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     AuthService authService;
 
+    @Autowired
+    UserService userService;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
@@ -29,9 +33,12 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         Login login = new Login(email, password);
         User user = authService.validateLogin(login);
         if(user != null) {
-            List<GrantedAuthority> roleList = new ArrayList<>();
-            roleList.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
-            return new UsernamePasswordAuthenticationToken(email, password, roleList);
+            /// logica verificar se já tem email registado???
+            if (user.isVerifiedEmail()){
+                List<GrantedAuthority> roleList = new ArrayList<>();
+                roleList.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
+                return new UsernamePasswordAuthenticationToken(email, password, roleList);
+            }
         }
         return null;
     }
