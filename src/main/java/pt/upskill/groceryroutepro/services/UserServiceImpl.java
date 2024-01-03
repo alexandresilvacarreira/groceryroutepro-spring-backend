@@ -40,9 +40,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     ConfirmationRepository confirmationRepository;
 
-
-
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
+
     @Override
     public User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

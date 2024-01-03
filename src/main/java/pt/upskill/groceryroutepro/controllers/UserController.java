@@ -26,23 +26,27 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/users/get-authenticated-user")
-    public ResponseEntity<Map<String, Object>> getAuthenticatedUser() {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            User authenticatedUser = this.userService.getAuthenticatedUser();
-            if (authenticatedUser == null) {
-                response.put("success", false);
-                response.put("message", "Nenhum utilizador encontrado");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            response.put("success", true);
-            response.put("user", authenticatedUser);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Erro ao obter utilizador");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public User getAuthenticatedUser() {
+
+        User authenticatedUser = this.userService.getAuthenticatedUser();
+        return authenticatedUser;
+//
+//        Map<String, Object> response = new HashMap<>();
+//        try {
+//            User authenticatedUser = this.userService.getAuthenticatedUser();
+//            if (authenticatedUser == null) {
+//                response.put("success", false);
+//                response.put("message", "Nenhum utilizador encontrado");
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+//            }
+//            response.put("success", true);
+//            response.put("user", authenticatedUser);
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            response.put("success", false);
+//            response.put("message", "Erro ao obter utilizador");
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
     }
 
     @PostMapping("/signup")

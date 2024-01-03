@@ -62,8 +62,8 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/signup", "/login", "/logout", "/verify-account/").permitAll()
-                .antMatchers("/", "/users/get-authenticated-user").authenticated()
+                .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user").permitAll() //TODO mudar o get-authenticated-user para o .authenticated()
+                .antMatchers("/").authenticated()
                 .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
                 .antMatchers("/scraper/**", "/products/**").permitAll() //TODO proteger isto!
@@ -88,6 +88,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         serverMessage.put("message", "Autenticado com sucesso");
         serverMessage.put("user", user);
         //TODO DTO EM VEZ DE USER
+
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(serverMessage);

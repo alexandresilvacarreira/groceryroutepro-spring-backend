@@ -31,12 +31,10 @@ public class EmailServiceImpl implements EmailService {
             message.setSubject(subject);
 
 
-
             if (emailType==EmailType.EMAILVERIFICATION){
                 text = "Olá " + user.getName() + "\n\nA tua conta foi criada. Por favor carrega no link em baixo e introduz o código" +
                         " para verificar a tua conta. \n\n" + verificationLink + "\n\nCódigo:\n\n" + user.getConfirmation().getCode();
             }
-
 
             message.setText(text);
             emailSender.send(message);
