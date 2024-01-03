@@ -36,7 +36,6 @@ public class AuthController {
     @GetMapping("/login")
     public void login() {
         // TODO redirect para localhost:4200/login
-        //todo isto serve para alguma coisa??? não estamos a fazer login com o user authenthication provider???
     }
 
     @PostMapping("/logout")

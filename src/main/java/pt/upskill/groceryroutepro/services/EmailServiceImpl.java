@@ -18,7 +18,7 @@ public class EmailServiceImpl implements EmailService {
     private String fromEmail;
 
     @Value("${spring.mail.verify.password.link}")
-    private static String verificationLink;
+    private String verificationLink;
 
 
     @Autowired

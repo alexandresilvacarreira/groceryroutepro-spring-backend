@@ -1,5 +1,7 @@
 package pt.upskill.groceryroutepro.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -9,18 +11,19 @@ public class Confirmation {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    private String code;
+    private String token;
     private LocalDateTime createdDate;
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
+    @JsonIgnore
     private User user;
 
     public String getCode() {
-        return code;
+        return token;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setCode(String token) {
+        this.token = token;
     }
 
 

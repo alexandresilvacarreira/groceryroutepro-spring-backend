@@ -68,7 +68,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/verify-account")
+    @PostMapping("/verify-account/")
     public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken){
         Map<String, Object> response = new HashMap<>();
 

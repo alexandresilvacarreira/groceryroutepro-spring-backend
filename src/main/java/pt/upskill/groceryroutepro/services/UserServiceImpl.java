@@ -10,8 +10,8 @@ import pt.upskill.groceryroutepro.entities.Confirmation;
 import pt.upskill.groceryroutepro.entities.Role;
 import pt.upskill.groceryroutepro.entities.Store;
 import pt.upskill.groceryroutepro.entities.User;
-import pt.upskill.groceryroutepro.models.Login;
 import pt.upskill.groceryroutepro.models.SignUp;
+import pt.upskill.groceryroutepro.repositories.ConfirmationRepository;
 import pt.upskill.groceryroutepro.repositories.RoleRepository;
 import pt.upskill.groceryroutepro.repositories.StoreRepository;
 import pt.upskill.groceryroutepro.repositories.UserRepository;
@@ -37,6 +37,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailService emailService;
 
+    @Autowired
+    ConfirmationRepository confirmationRepository;
+
 
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
@@ -50,10 +53,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean verifyEmail(String verificationCode) {
         //get the user from the verification code and set its verification to true
-        User user = userRepository.findByConfirmation_Token(verificationCode);
+
+
+        // TODO devia ser assim certo??
+        /*try {
+            Confirmation confirmation = confirmationRepository.findByToken(verificationCode);
+        } catch (NotFoundException e){
+            throw NotFoundException e
+        }*/
+        Confirmation confirmation = confirmationRepository.findByToken(verificationCode);
+
+        User user = userRepository.findById(confirmation.getUser().getId()).get();
+
 
         if (user!=null){
             user.setVerifiedEmail(true);
+            userRepository.save(user);
+
 
             //delete confimration???
             return true;
@@ -65,9 +81,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createAccount(SignUp signup) {
-
-
-
         if(userRepository.getByEmail(signup.getEmail()) != null) {
             return null;
         }
@@ -86,14 +99,19 @@ public class UserServiceImpl implements UserService {
         user.setVerifiedEmail(false);
 
         Confirmation confirmation = new Confirmation();
-        confirmation.setCode(UUID.randomUUID().toString().replace("-","").substring(0,12));
-        confirmation.setUser(user);
-        // TODO: 29/12/2023 necessário isto??? user no confirmation e confimation no user?
+        confirmation.setCode(UUID.randomUUID().toString());
         user.setConfirmation(confirmation);
+        confirmation.setUser(user);
+
+        // TODO: 29/12/2023 necessário isto??? user no confirmation e confimation no user?
+
+        userRepository.save(user);
+        confirmationRepository.save(confirmation);
+
 
         emailService.sendSimpleMessage(user, "GroceryRoutePro Email Confirmation", "não vai entrar nada", EmailType.EMAILVERIFICATION);
 
-        return userRepository.save(user);
+        return user;
 
 
         //meter o raio do codigo de confirmação
