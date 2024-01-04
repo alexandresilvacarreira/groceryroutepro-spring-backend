@@ -10,5 +10,7 @@ public interface UserService {
     boolean verifyEmail(String verificationCode);
     User createAccount(SignUp signup);
 
+    boolean getPasswordLink(String email);
+
 
 }

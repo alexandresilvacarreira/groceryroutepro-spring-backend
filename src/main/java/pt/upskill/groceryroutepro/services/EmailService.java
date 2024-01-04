@@ -5,6 +5,6 @@ import pt.upskill.groceryroutepro.utils.Enum.EmailType;
 
 public interface EmailService {
 
-    void sendSimpleMessage(User user, String subject, String text, EmailType emailType);
+    void sendSimpleMessage(User user, String subject, EmailType emailType);
 
 }
