@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,6 +39,9 @@ public class User {
 
     @ManyToOne
     private Role role;
+
+    @OneToMany
+    private List<PasswordLink> passwordLinkList = new ArrayList<>();
 
     public User() {
     }
@@ -136,6 +141,14 @@ public class User {
 
     public void setVerifiedEmail(boolean verifiedEmail) {
         this.verifiedEmail = verifiedEmail;
+    }
+
+    public List<PasswordLink> getPasswordLinkList() {
+        return passwordLinkList;
+    }
+
+    public void setPasswordLinkList(List<PasswordLink> passwordLinkList) {
+        this.passwordLinkList = passwordLinkList;
     }
 
     @Override

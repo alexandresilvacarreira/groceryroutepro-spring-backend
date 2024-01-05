@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.EmailVerificationToken;
+import pt.upskill.groceryroutepro.models.Emailmodel;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.services.AuthService;
 import pt.upskill.groceryroutepro.services.UserService;
@@ -62,7 +63,7 @@ public class UserController {
     }
 
     @PostMapping("/verify-account/")
-    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken) {
+    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken){
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -78,7 +79,29 @@ public class UserController {
                 response.put("message", "Erro ao verificar conta");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-        } catch (Exception e) {
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/users/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(@RequestBody Emailmodel emailmodel){
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            //TODO isto não está bem é suposto devolver logo erro
+            if (userService.getPasswordLink(emailmodel.getEmail())) {
+                // devolver o user?
+                response.put("success", true);
+                response.put("message", "Pedido de mudança de password efetuado com sucesso");
+                return ResponseEntity.ok(response);
+
+            } else {
+                response.put("success", false);
+                response.put("message", "Erro ao realizar pedido de mudança de password");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

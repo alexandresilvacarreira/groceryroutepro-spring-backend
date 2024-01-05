@@ -6,15 +6,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pt.upskill.groceryroutepro.entities.Confirmation;
-import pt.upskill.groceryroutepro.entities.Role;
-import pt.upskill.groceryroutepro.entities.Store;
-import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.entities.*;
 import pt.upskill.groceryroutepro.models.SignUp;
-import pt.upskill.groceryroutepro.repositories.ConfirmationRepository;
-import pt.upskill.groceryroutepro.repositories.RoleRepository;
-import pt.upskill.groceryroutepro.repositories.StoreRepository;
-import pt.upskill.groceryroutepro.repositories.UserRepository;
+import pt.upskill.groceryroutepro.repositories.*;
 import pt.upskill.groceryroutepro.utils.Enum.EmailType;
 
 import java.util.HashSet;
@@ -39,6 +33,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     ConfirmationRepository confirmationRepository;
+
+    @Autowired
+    PasswordLinkRepository passwordLinkRepository;
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
@@ -107,11 +104,35 @@ public class UserServiceImpl implements UserService {
         confirmationRepository.save(confirmation);
 
 
-        emailService.sendSimpleMessage(user, "GroceryRoutePro Email Confirmation", "não vai entrar nada", EmailType.EMAILVERIFICATION);
+        emailService.sendSimpleMessage(user, "GroceryRoutePro Email Confirmation", EmailType.EMAILVERIFICATION);
 
         return user;
 
 
         //meter o raio do codigo de confirmação
+    }
+
+
+    @Override
+    public boolean getPasswordLink(String email) {
+        User user = userRepository.getByEmail(email);
+        PasswordLink passwordLink = new PasswordLink();
+        passwordLink.setToken(UUID.randomUUID().toString().replace("-",""));
+
+        user.getPasswordLinkList().add(passwordLink);
+        passwordLink.setUser(user);
+
+        passwordLinkRepository.save(passwordLink);
+        //TODO REDUNDANTE???
+        userRepository.save(user);
+
+
+
+        emailService.sendSimpleMessage(user, "GroceryRoutePro Change Password", EmailType.PASSWORDLINK);
+
+
+
+
+        return true;
     }
 }
