@@ -7,16 +7,19 @@ import java.time.LocalDateTime;
 
 @Entity
 public class PasswordLink {
+
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     private String token;
     private LocalDateTime createdDate;
+
     @ManyToOne
-    @JoinColumn(name = "user_id", unique = true)
-    @JsonIgnore
     private User user;
+
+    public PasswordLink() {
+    }
 
     public String getToken() {
         return token;

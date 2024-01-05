@@ -40,7 +40,8 @@ public class User {
     @ManyToOne
     private Role role;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<PasswordLink> passwordLinkList = new ArrayList<>();
 
     public User() {
