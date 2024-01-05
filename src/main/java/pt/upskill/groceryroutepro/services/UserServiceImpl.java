@@ -69,7 +69,6 @@ public class UserServiceImpl implements UserService {
             user.setVerifiedEmail(true);
             userRepository.save(user);
 
-
             //delete confimration???
             return true;
         }
@@ -81,7 +80,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createAccount(SignUp signup) {
         if(userRepository.getByEmail(signup.getEmail()) != null) {
-            return null;
+            throw new RuntimeException("O utilizador já existe");
         }
         User user = new User();
         user.setName(signup.getName());

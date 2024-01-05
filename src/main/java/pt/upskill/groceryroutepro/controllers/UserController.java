@@ -26,10 +26,12 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/users/get-authenticated-user")
-    public User getAuthenticatedUser() {
+    public ResponseEntity getAuthenticatedUser() {
 
         User authenticatedUser = this.userService.getAuthenticatedUser();
-        return authenticatedUser;
+        if (authenticatedUser != null)
+            return ResponseEntity.ok(authenticatedUser);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 //
 //        Map<String, Object> response = new HashMap<>();
 //        try {
@@ -50,30 +52,17 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
-        // fazer verificação dos dados de sign up iguais ao frontend
-
-
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<?> signUp(@RequestBody SignUp signUp) {
         try {
-            if (userService.createAccount(signUp) != null) {
-                response.put("success", true);
-                response.put("message", "Conta registada com sucesso");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "Erro ao registar conta");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            userService.createAccount(signUp);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @PostMapping("/verify-account/")
-    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken){
+    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -89,7 +78,7 @@ public class UserController {
                 response.put("message", "Erro ao verificar conta");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
