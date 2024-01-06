@@ -3,9 +3,13 @@ package pt.upskill.groceryroutepro.config;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -81,14 +85,12 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
 
-        User user = userRepository.getByEmail(authentication.getName());
+        User user = userRepository.getByEmail(authentication.getName()); //TODO usar model/DTO para não expor tanta coisa
 
         Map<String, Object> serverMessage = new HashMap<>();
         serverMessage.put("success", true);
         serverMessage.put("message", "Autenticado com sucesso");
         serverMessage.put("user", user);
-        //TODO DTO EM VEZ DE USER
-
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(serverMessage);
@@ -97,16 +99,26 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
     private void handleFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         // Podemos personalizar esta lógica
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 
-        Map<String, Object> serverMessage = new HashMap<>();
-        serverMessage.put("success", false);
-        serverMessage.put("message", "Erro ao autenticar");
-
         ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(serverMessage);
-        response.getWriter().write(json);
+        ObjectNode jsonResponse = objectMapper.createObjectNode();
+
+        // Existem vários tipos de AuthenticationException: BadCredentialsException, InternalAuthenticationServiceException, etc.
+        if (exception instanceof BadCredentialsException) {
+            jsonResponse.put("error", "Credenciais inválidas.");
+        } else if (exception instanceof LockedException) {
+            jsonResponse.put("error", "Conta bloquada.");
+        } else if (exception instanceof DisabledException) {
+            jsonResponse.put("error", "Conta desativada.");
+        } else {
+            jsonResponse.put("error", "Credenciais inválidas.");
+        }
+
+        response.getWriter().write(jsonResponse.toString());
+
     }
 
     private void handleLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {

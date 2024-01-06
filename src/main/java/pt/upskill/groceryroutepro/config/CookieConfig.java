@@ -20,14 +20,21 @@ public class CookieConfig extends WebMvcConfigurerAdapter  implements HandlerInt
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("JSESSIONID".equals(cookie.getName())) {
-                        cookie.setHttpOnly(true);
-                        cookie.setSecure(false);  // TODO mudar para true quando em produção com HTTPS
-                        response.addCookie(cookie);
+//                        cookie.setHttpOnly(true);
+//                        cookie.setSecure(false);  // TODO mudar para true quando em produção com HTTPS
+//                        response.addCookie(cookie);
+                        response.setHeader("Set-Cookie", modifyJSessionIdCookie(cookie));
                     }
                 }
             }
         }
         return true;
     }
+
+    private String modifyJSessionIdCookie(Cookie cookie) {
+        String updatedCookie = String.format("%s=%s; HttpOnly=true; Secure=false; SameSite=None", cookie.getName(), cookie.getValue()); // TODO mudar Secure=true quando em produção com HTTPS
+        return updatedCookie;
+    }
+
 
 }

@@ -26,18 +26,15 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     EmailService emailService;
 
-
-
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     @Override
     public User validateLogin(Login login) {
         User user = userRepository.getByEmail(login.getEmail());
-        if(user != null && passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+        if (user != null && passwordEncoder.matches(login.getPassword(), user.getPassword())) {
             return user;
         }
         return null;
     }
-
 
 }
