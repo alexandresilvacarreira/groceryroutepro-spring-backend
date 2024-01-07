@@ -1,19 +1,16 @@
 package pt.upskill.groceryroutepro.controllers;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pt.upskill.groceryroutepro.entities.PasswordLink;
 import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.models.ChangePasswordRequestModel;
 import pt.upskill.groceryroutepro.models.EmailVerificationToken;
 import pt.upskill.groceryroutepro.models.Emailmodel;
 import pt.upskill.groceryroutepro.models.SignUp;
-import pt.upskill.groceryroutepro.services.AuthService;
 import pt.upskill.groceryroutepro.services.UserService;
 
 import java.util.HashMap;
@@ -25,6 +22,7 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
 
     @GetMapping("/users/get-authenticated-user")
     public ResponseEntity getAuthenticatedUser() {
@@ -90,7 +88,7 @@ public class UserController {
 
         try {
             //TODO isto não está bem é suposto devolver logo erro
-            if (userService.getPasswordLink(emailmodel.getEmail())) {
+            if (userService.getPasswordLinkFromEmail(emailmodel.getEmail())) {
                 // devolver o user?
                 response.put("success", true);
                 response.put("message", "Pedido de mudança de password efetuado com sucesso");
@@ -104,6 +102,21 @@ public class UserController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+
+    @PostMapping("/change-password/")
+    public ResponseEntity<String> changePassword(
+            @RequestBody ChangePasswordRequestModel changePasswordRequest) {
+
+        PasswordLink passwordLink = userService.getPasswordLinkFromToken(changePasswordRequest.getToken());
+        if (passwordLink == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
+        }
+
+        userService.changePassword(passwordLink, changePasswordRequest.getPassword());
+
+        return ResponseEntity.ok("Password alterada com sucesso");
     }
 
 

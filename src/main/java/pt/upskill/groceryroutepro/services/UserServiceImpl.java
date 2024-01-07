@@ -10,11 +10,11 @@ import pt.upskill.groceryroutepro.entities.*;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.repositories.*;
 import pt.upskill.groceryroutepro.utils.Enum.EmailType;
+import pt.upskill.groceryroutepro.utils.Validations;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+import static pt.upskill.groceryroutepro.utils.Validations.isValidPassword;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean getPasswordLink(String email) {
+    public boolean getPasswordLinkFromEmail(String email) {
         User user = userRepository.getByEmail(email);
         PasswordLink passwordLink = new PasswordLink();
         passwordLink.setToken(UUID.randomUUID().toString().replace("-",""));
@@ -134,5 +134,23 @@ public class UserServiceImpl implements UserService {
 
 
         return true;
+    }
+
+    @Override
+    public PasswordLink getPasswordLinkFromToken(String token) {
+         PasswordLink passwordLink = passwordLinkRepository.findByToken(token);
+        return passwordLink;
+    }
+
+
+    @Override
+    public void changePassword(PasswordLink passwordLink, String password) {
+        if (isValidPassword(password)){
+            User user = passwordLink.getUser();
+
+            user.setPassword(password);
+            userRepository.save(user);
+        }
+
     }
 }

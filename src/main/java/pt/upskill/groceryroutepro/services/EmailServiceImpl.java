@@ -46,7 +46,8 @@ public class EmailServiceImpl implements EmailService {
                         " GroceryRoutePro. Para garantir a segurança da sua conta, siga as instruções abaixo para concluir" +
                         " o processo de alteração da palavra-passe:" +
                         "\n\n1. Clique na seguinte ligação para aceder à página de reposição da palavra-passe:\n\n" +
-                        passwordChangeLink + user.getPasswordLinkList().get(user.getPasswordLinkList().size()-1) + "\n\n2. Será direcionado para uma página segura onde poderá introduzir" +
+                        passwordChangeLink + user.getPasswordLinkList().get(user.getPasswordLinkList().size()-1).getToken() +
+                        "\n\n2. Será direcionado para uma página segura onde poderá introduzir" +
                         " uma nova palavra-passe para a sua conta.\n\n" +
                         "3. Introduza a sua nova palavra-passe e confirme-a escrevendo-a novamente.\n\n" +
                         "Clique no botão \"Enviar\" ou \"Alterar palavra-passe\" para guardar a sua nova palavra-passe.\n\n" +
