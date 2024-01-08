@@ -1,4 +1,4 @@
-package pt.upskill.groceryroutepro.Exceptions;
+package pt.upskill.groceryroutepro.exceptions;
 
 import org.springframework.http.HttpStatus;
 

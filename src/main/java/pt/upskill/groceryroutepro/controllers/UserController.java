@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import pt.upskill.groceryroutepro.Exceptions.ValidationException;
+import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.entities.PasswordLink;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.ChangePasswordRequestModel;
@@ -52,12 +52,17 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody SignUp signUp) {
+    public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
+        Map<String, Object> response = new HashMap<>();
         try {
             userService.createAccount(signUp);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            response.put("success", true);
+            response.put("message", "Conta criada com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
     }
 

@@ -99,25 +99,29 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
     private void handleFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         // Podemos personalizar esta lógica
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType("application/json");
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode jsonResponse = objectMapper.createObjectNode();
+        String message;
 
         // Existem vários tipos de AuthenticationException: BadCredentialsException, InternalAuthenticationServiceException, etc.
         if (exception instanceof BadCredentialsException) {
-            jsonResponse.put("error", "Credenciais inválidas.");
+            message = "Credenciais inválidas.";
         } else if (exception instanceof LockedException) {
-            jsonResponse.put("error", "Conta bloquada.");
+            message = "Conta bloquada.";
         } else if (exception instanceof DisabledException) {
-            jsonResponse.put("error", "Conta desativada.");
+            message = "Conta desativada.";
         } else {
-            jsonResponse.put("error", "Credenciais inválidas.");
+            message = "Credenciais inválidas.";
         }
 
-        response.getWriter().write(jsonResponse.toString());
+        Map<String, Object> serverMessage = new HashMap<>();
+        serverMessage.put("success", false);
+        serverMessage.put("message", message);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(serverMessage);
+        response.getWriter().write(json);
 
     }
 
