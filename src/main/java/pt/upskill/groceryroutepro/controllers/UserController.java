@@ -67,15 +67,15 @@ public class UserController {
     }
 
     @PostMapping("/verify-account/")
-    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken){
+    public ResponseEntity<Map<String, Object>> verifyAccount(@RequestBody EmailVerificationToken emailVerificationToken) {
         Map<String, Object> response = new HashMap<>();
 
         try {
             userService.verifyEmail(emailVerificationToken.getToken());
-                response.put("success", true);
-                response.put("message", "Conta verificada com sucesso");
-                return ResponseEntity.ok(response);
-        } catch (ValidationException e){
+            response.put("success", true);
+            response.put("message", "Conta verificada com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(response);
@@ -83,25 +83,24 @@ public class UserController {
     }
 
     @PostMapping("/users/forgot-password")
-    public ResponseEntity<Map<String, Object>> forgotPassword(@RequestBody Emailmodel emailmodel){
+    public ResponseEntity<Map<String, Object>> forgotPassword(@RequestBody Emailmodel emailmodel) {
         Map<String, Object> response = new HashMap<>();
 
         try {
             //TODO isto não está bem é suposto devolver logo erro
-            if (userService.getPasswordLinkFromEmail(emailmodel.getEmail())) {
-                // devolver o user?
-                response.put("success", true);
-                response.put("message", "Pedido de mudança de password efetuado com sucesso");
-                return ResponseEntity.ok(response);
+            userService.getPasswordLinkFromEmail(emailmodel.getEmail());
+            // devolver o user?
+            response.put("success", true);
+            response.put("message", "Pedido de mudança de password efetuado com sucesso");
+            return ResponseEntity.ok(response);
 
-            } else {
-                response.put("success", false);
-                response.put("message", "Email não existe em base de dados");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        } catch (
+                ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
+
     }
 
 

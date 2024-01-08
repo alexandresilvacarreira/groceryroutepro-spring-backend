@@ -108,6 +108,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean getPasswordLinkFromEmail(String email) {
         User user = userRepository.getByEmail(email);
+
+        if (user==null) throw new BadRequestException("Não existe nenhuma conta com este email");
+
         PasswordLink passwordLink = new PasswordLink();
         passwordLink.setToken(UUID.randomUUID().toString().replace("-",""));
 
@@ -115,7 +118,7 @@ public class UserServiceImpl implements UserService {
         passwordLink.setUser(user);
 
         passwordLinkRepository.save(passwordLink);
-        //TODO REDUNDANTE???
+
         userRepository.save(user);
 
 
