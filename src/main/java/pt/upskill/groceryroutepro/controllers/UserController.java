@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import pt.upskill.groceryroutepro.Exceptions.ValidationException;
 import pt.upskill.groceryroutepro.entities.PasswordLink;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.ChangePasswordRequestModel;
@@ -65,20 +66,14 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            //TODO isto não está bem é suposto devolver logo erro
-            if (userService.verifyEmail(emailVerificationToken.getToken())) {
-                // devolver o user?
+            userService.verifyEmail(emailVerificationToken.getToken());
                 response.put("success", true);
                 response.put("message", "Conta verificada com sucesso");
                 return ResponseEntity.ok(response);
-
-            } else {
-                response.put("success", false);
-                response.put("message", "Erro ao verificar conta");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        } catch (ValidationException e){
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
     }
 
@@ -96,7 +91,7 @@ public class UserController {
 
             } else {
                 response.put("success", false);
-                response.put("message", "Erro ao realizar pedido de mudança de password");
+                response.put("message", "Email não existe em base de dados");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         } catch (Exception e){

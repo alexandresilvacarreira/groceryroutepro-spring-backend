@@ -6,11 +6,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pt.upskill.groceryroutepro.Exceptions.Types.ConfirmationNotFoundException;
+import pt.upskill.groceryroutepro.Exceptions.Types.UserAlreadyVerifiedException;
 import pt.upskill.groceryroutepro.entities.*;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.repositories.*;
 import pt.upskill.groceryroutepro.utils.Enum.EmailType;
-import pt.upskill.groceryroutepro.utils.Validations;
 
 import java.util.*;
 
@@ -48,21 +49,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean verifyEmail(String verificationCode) {
-        //get the user from the verification code and set its verification to true
-
-
-        // TODO devia ser assim certo??
-        /*try {
-            Confirmation confirmation = confirmationRepository.findByToken(verificationCode);
-        } catch (NotFoundException e){
-            throw NotFoundException e
-        }*/
         Confirmation confirmation = confirmationRepository.findByToken(verificationCode);
+        if (confirmation==null){
+            throw new ConfirmationNotFoundException("Token não se encontra em base de dados");
+        }
 
         User user = userRepository.findById(confirmation.getUser().getId()).get();
 
 
         if (user!=null){
+
+            if (user.isVerifiedEmail()){
+                throw new  UserAlreadyVerifiedException("User já está verificado");
+            }
             user.setVerifiedEmail(true);
             userRepository.save(user);
 
