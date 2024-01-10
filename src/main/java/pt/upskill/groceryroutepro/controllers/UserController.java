@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import pt.upskill.groceryroutepro.exceptions.ValidationException;
-import pt.upskill.groceryroutepro.entities.PasswordLink;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.models.ChangePasswordRequestModel;
 import pt.upskill.groceryroutepro.models.EmailVerificationToken;
@@ -71,7 +70,7 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            userService.verifyEmail(emailVerificationToken.getToken());
+            userService.verifyEmail(emailVerificationToken);
             response.put("success", true);
             response.put("message", "Conta verificada com sucesso");
             return ResponseEntity.ok(response);
@@ -104,18 +103,22 @@ public class UserController {
     }
 
 
-    @PostMapping("/change-password/")
-    public ResponseEntity<String> changePassword(
+    @PostMapping("/users/change-password/")
+    public ResponseEntity<Map<String, Object>> changePassword(
             @RequestBody ChangePasswordRequestModel changePasswordRequest) {
 
-        PasswordLink passwordLink = userService.getPasswordLinkFromToken(changePasswordRequest.getToken());
-        if (passwordLink == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
+        Map<String, Object> response = new HashMap<>();
+        try {
+            userService.changePassword(changePasswordRequest.getEmail(),
+                    changePasswordRequest.getToken(), changePasswordRequest.getPassword());
+            response.put("success", true);
+            response.put("message", "Password Alterada com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
-
-        userService.changePassword(passwordLink, changePasswordRequest.getPassword());
-
-        return ResponseEntity.ok("Password alterada com sucesso");
     }
 
 

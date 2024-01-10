@@ -18,14 +18,21 @@ public class Confirmation {
     @JsonIgnore
     private User user;
 
-    public String getCode() {
+    public String getToken() {
         return token;
     }
 
-    public void setCode(String token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
 
     public User getUser() {
         return user;

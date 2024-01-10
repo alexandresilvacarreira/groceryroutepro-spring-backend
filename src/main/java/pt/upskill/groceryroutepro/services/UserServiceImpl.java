@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.entities.*;
+import pt.upskill.groceryroutepro.exceptions.types.UnauthorizedException;
+import pt.upskill.groceryroutepro.models.EmailVerificationToken;
 import pt.upskill.groceryroutepro.models.SignUp;
 import pt.upskill.groceryroutepro.repositories.*;
 import pt.upskill.groceryroutepro.utils.Enum.EmailType;
@@ -15,6 +17,8 @@ import pt.upskill.groceryroutepro.utils.Enum.EmailType;
 import java.util.*;
 
 import static pt.upskill.groceryroutepro.utils.Validations.isValidPassword;
+import static pt.upskill.groceryroutepro.utils.Validator.isExpired;
+import static pt.upskill.groceryroutepro.utils.Validator.verifyToken;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -39,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
+
     @Override
     public User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -47,28 +52,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean verifyEmail(String verificationCode) {
-        Confirmation confirmation = confirmationRepository.findByToken(verificationCode);
-        if (confirmation==null){
-            throw new BadRequestException("Token inválido");
-        }
-        User user = userRepository.findById(confirmation.getUser().getId()).get();
-        if (user!=null){
+    public void verifyEmail(EmailVerificationToken emailVerificationToken) {
+        User user = userRepository.findByEmail(emailVerificationToken.getEmail());
+        if (user == null) throw new BadRequestException("Link de verificação incorreto");
+        Confirmation confirmation = confirmationRepository.findByUser_Id(user.getId());
+        String hashToken = confirmation.getToken();
+        if (!verifyToken(emailVerificationToken.getToken(), hashToken)) throw new BadRequestException("Token inválido");
 
-            if (user.isVerifiedEmail()){
-                throw new BadRequestException("Email já está verificado");
-            }
-            user.setVerifiedEmail(true);
-            userRepository.save(user);
-            return true;
+
+        if (user.isVerifiedEmail()) {
+            throw new BadRequestException("Email já está verificado");
         }
-        return false;
+        user.setVerifiedEmail(true);
+        userRepository.save(user);
     }
 
 
     @Override
     public User createAccount(SignUp signup) {
-        if(userRepository.getByEmail(signup.getEmail()) != null) {
+        if (userRepository.getByEmail(signup.getEmail()) != null) {
             throw new BadRequestException("O utilizador já existe");
         }
         User user = new User();
@@ -86,7 +88,8 @@ public class UserServiceImpl implements UserService {
         user.setVerifiedEmail(false);
 
         Confirmation confirmation = new Confirmation();
-        confirmation.setCode(UUID.randomUUID().toString());
+        String confirmationToken = UUID.randomUUID().toString().replace("-", "");
+        confirmation.setToken(passwordEncoder.encode(confirmationToken));
         user.setConfirmation(confirmation);
         confirmation.setUser(user);
 
@@ -96,7 +99,7 @@ public class UserServiceImpl implements UserService {
         confirmationRepository.save(confirmation);
 
 
-        emailService.sendSimpleMessage(user, "GroceryRoutePro Email Confirmation", EmailType.EMAILVERIFICATION);
+        emailService.sendSimpleMessage(user, "GroceryRoutePro Email Confirmation", confirmationToken, EmailType.EMAILVERIFICATION);
 
         return user;
 
@@ -109,12 +112,16 @@ public class UserServiceImpl implements UserService {
     public boolean getPasswordLinkFromEmail(String email) {
         User user = userRepository.getByEmail(email);
 
-        if (user==null) throw new BadRequestException("Não existe nenhuma conta com este email");
+        if (user == null) throw new BadRequestException("Não existe nenhuma conta com este email");
 
-        PasswordLink passwordLink = new PasswordLink();
-        passwordLink.setToken(UUID.randomUUID().toString().replace("-",""));
+        PasswordLink passwordLink = passwordLinkRepository.findByUser_Id(user.getId());
 
-        user.getPasswordLinkList().add(passwordLink);
+        if (passwordLink==null) passwordLink = new PasswordLink();
+
+        String token = UUID.randomUUID().toString().replace("-", "");
+
+        passwordLink.setToken(passwordEncoder.encode(token));
+
         passwordLink.setUser(user);
 
         passwordLinkRepository.save(passwordLink);
@@ -122,10 +129,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
 
-
-        emailService.sendSimpleMessage(user, "GroceryRoutePro Change Password", EmailType.PASSWORDLINK);
-
-
+        emailService.sendSimpleMessage(user, "GroceryRoutePro Change Password", token, EmailType.PASSWORDLINK);
 
 
         return true;
@@ -133,19 +137,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PasswordLink getPasswordLinkFromToken(String token) {
-         PasswordLink passwordLink = passwordLinkRepository.findByToken(token);
+        String encodedToken = passwordEncoder.encode(token);
+        PasswordLink passwordLink = passwordLinkRepository.findByToken(encodedToken);
         return passwordLink;
     }
 
 
-    @Override
-    public void changePassword(PasswordLink passwordLink, String password) {
-        if (isValidPassword(password)){
-            User user = passwordLink.getUser();
 
-            user.setPassword(password);
-            userRepository.save(user);
-        }
+    @Override
+    public void changePassword(String email, String token, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user ==null) throw new BadRequestException("Link de alteração de palavra-chave incorreto");
+        PasswordLink passwordLink = passwordLinkRepository.findByUser_Id(user.getId());
+        if (!verifyToken(token, passwordLink.getToken()))throw new BadRequestException("Link de alteração de palavra-chave incorreto");
+       if (isExpired(passwordLink.getCreatedDate())) throw new UnauthorizedException("Link expirado");
+      // if (isValidPassword(password)) throw new BadRequestException("Password não está no formato correto");
+
+       String encondedPassword = passwordEncoder.encode(password);
+       user.setPassword(encondedPassword);
+       passwordLinkRepository.delete(passwordLink);
+       userRepository.save(user);
 
     }
+
+
 }

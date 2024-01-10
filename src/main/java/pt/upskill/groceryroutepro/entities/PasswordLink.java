@@ -12,13 +12,15 @@ public class PasswordLink {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String token;
     private LocalDateTime createdDate;
 
-    @ManyToOne
+    @OneToOne
     private User user;
 
     public PasswordLink() {
+        this.createdDate=LocalDateTime.now();
     }
 
     public String getToken() {
@@ -36,5 +38,13 @@ public class PasswordLink {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 }

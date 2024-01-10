@@ -66,7 +66,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user", "/users/forgot-password","/change-password/").permitAll() //TODO mudar o get-authenticated-user para o .authenticated()
+                .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user", "/users/forgot-password","/users/change-password/").permitAll() //TODO mudar o get-authenticated-user para o .authenticated()
                 .antMatchers("/").authenticated()
                 .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")

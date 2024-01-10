@@ -29,24 +29,26 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender emailSender;
-    public void sendSimpleMessage(User user, String subject, EmailType emailType) {
+
+    public void sendSimpleMessage(User user, String subject, String detail, EmailType emailType) {
         try {
-            String text="";
+            String text = "";
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("groceryroutepro@gmail.com");
             message.setTo(user.getEmail());
             message.setSubject(subject);
 
 
-            if (emailType==EmailType.EMAILVERIFICATION){
-                text = "Olá " + user.getName() + "\n\nA tua conta foi criada. Por favor carrega no link em baixo e introduz o código" +
-                        " para verificar a tua conta. \n\n" + verificationLink + "\n\nCódigo:\n\n" + user.getConfirmation().getCode();
+            if (emailType == EmailType.EMAILVERIFICATION) {
+                text = "Olá " + user.getName() + "\n\nA tua conta foi criada com sucesso. Por favor carrega no link em baixo e introduz o código" +
+                        " para verificar a tua conta. \n\n" + verificationLink + user.getEmail() + "\n\nCódigo:\n\n"
+                        + detail + "\n\nBoas Compras! \n\n Equipa de apoio GroceryRoutePro";
             } else if (emailType == EmailType.PASSWORDLINK) {
-                text = "Olá "+ user.getName() + "\n\nRecebemos um pedido para alterar a palavra-passe associada à sua conta na" +
+                text = "Olá " + user.getName() + "\n\nRecebemos um pedido para alterar a palavra-passe associada à sua conta na" +
                         " GroceryRoutePro. Para garantir a segurança da sua conta, siga as instruções abaixo para concluir" +
                         " o processo de alteração da palavra-passe:" +
                         "\n\n1. Clique na seguinte ligação para aceder à página de reposição da palavra-passe:\n\n" +
-                        passwordChangeLink + user.getPasswordLinkList().get(user.getPasswordLinkList().size()-1).getToken() +
+                        passwordChangeLink + user.getEmail() + "-" + detail +
                         "\n\n2. Será direcionado para uma página segura onde poderá introduzir" +
                         " uma nova palavra-passe para a sua conta.\n\n" +
                         "3. Introduza a sua nova palavra-passe e confirme-a escrevendo-a novamente.\n\n" +

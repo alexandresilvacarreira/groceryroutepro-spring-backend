@@ -9,4 +9,7 @@ import pt.upskill.groceryroutepro.entities.PasswordLink;
 public interface PasswordLinkRepository extends JpaRepository<PasswordLink,Long> {
     PasswordLink findByToken(String token);
 
+    PasswordLink findByUser_Id(Long id);
+
+
 }

@@ -40,9 +40,9 @@ public class User {
     @ManyToOne
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<PasswordLink> passwordLinkList = new ArrayList<>();
+    private PasswordLink passwordLink;
 
     public User() {
     }
@@ -144,12 +144,12 @@ public class User {
         this.verifiedEmail = verifiedEmail;
     }
 
-    public List<PasswordLink> getPasswordLinkList() {
-        return passwordLinkList;
+    public PasswordLink getPasswordLink() {
+        return passwordLink;
     }
 
-    public void setPasswordLinkList(List<PasswordLink> passwordLinkList) {
-        this.passwordLinkList = passwordLinkList;
+    public void setPasswordLink(PasswordLink passwordLink) {
+        this.passwordLink = passwordLink;
     }
 
     @Override

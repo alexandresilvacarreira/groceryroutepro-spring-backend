@@ -1,6 +1,7 @@
 package pt.upskill.groceryroutepro.models;
 
 public class ChangePasswordRequestModel {
+    private String email;
     private String password;
 
     private String token;
@@ -22,5 +23,13 @@ public class ChangePasswordRequestModel {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -8,4 +8,5 @@ import pt.upskill.groceryroutepro.entities.Confirmation;
 public interface ConfirmationRepository extends JpaRepository<Confirmation,Long> {
     Confirmation findByToken(String token);
 
+    Confirmation findByUser_Id(Long id);
 }
