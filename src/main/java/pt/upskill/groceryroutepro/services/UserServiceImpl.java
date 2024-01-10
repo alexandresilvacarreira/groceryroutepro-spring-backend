@@ -135,12 +135,6 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    @Override
-    public PasswordLink getPasswordLinkFromToken(String token) {
-        String encodedToken = passwordEncoder.encode(token);
-        PasswordLink passwordLink = passwordLinkRepository.findByToken(encodedToken);
-        return passwordLink;
-    }
 
 
 
@@ -155,7 +149,8 @@ public class UserServiceImpl implements UserService {
 
        String encondedPassword = passwordEncoder.encode(password);
        user.setPassword(encondedPassword);
-       passwordLinkRepository.delete(passwordLink);
+       passwordLink.setToken(null);
+       passwordLinkRepository.save(passwordLink);
        userRepository.save(user);
 
     }

@@ -14,7 +14,6 @@ public interface UserService {
 
     boolean getPasswordLinkFromEmail(String email);
 
-    PasswordLink getPasswordLinkFromToken(String token);
 
     void changePassword(String email, String token, String password);
 
