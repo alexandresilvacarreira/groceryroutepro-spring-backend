@@ -109,10 +109,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean getPasswordLinkFromEmail(String email) {
+    public void getPasswordLinkFromEmail(String email) {
         User user = userRepository.getByEmail(email);
 
-        if (user == null) throw new BadRequestException("Não existe nenhuma conta com este email");
+        if (user == null) return;
 
         PasswordLink passwordLink = passwordLinkRepository.findByUser_Id(user.getId());
 
@@ -130,9 +130,6 @@ public class UserServiceImpl implements UserService {
 
 
         emailService.sendSimpleMessage(user, "GroceryRoutePro Change Password", token, EmailType.PASSWORDLINK);
-
-
-        return true;
     }
 
 

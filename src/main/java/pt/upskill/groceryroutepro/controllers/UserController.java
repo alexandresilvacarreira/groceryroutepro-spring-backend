@@ -86,9 +86,7 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            //TODO isto não está bem é suposto devolver logo erro
             userService.getPasswordLinkFromEmail(emailmodel.getEmail());
-            // devolver o user?
             response.put("success", true);
             response.put("message", "Pedido de mudança de password efetuado com sucesso");
             return ResponseEntity.ok(response);

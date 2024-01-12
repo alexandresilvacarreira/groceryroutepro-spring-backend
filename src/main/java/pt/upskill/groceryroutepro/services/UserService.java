@@ -12,7 +12,7 @@ public interface UserService {
     void verifyEmail(EmailVerificationToken emailVerificationToken);
     User createAccount(SignUp signup);
 
-    boolean getPasswordLinkFromEmail(String email);
+    void getPasswordLinkFromEmail(String email);
 
 
     void changePassword(String email, String token, String password);
