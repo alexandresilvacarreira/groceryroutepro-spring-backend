@@ -28,6 +28,11 @@ public class Price {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToOne
+    @JoinColumn(name = "generic_product_id", unique = true)
+    @JsonIgnore
+    private GenericProduct genericProduct;
+
     public Price() {
     }
 
@@ -102,6 +107,15 @@ public class Price {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    // TODO omitir o getter para o produto, para não devolver informação repetida nos pedidos
+//    public GenericProduct getGenericProduct() {
+//        return genericProduct;
+//    }
+
+    public void setGenericProduct(GenericProduct genericProduct) {
+        this.genericProduct = genericProduct;
     }
 
     @Override

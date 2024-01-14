@@ -32,6 +32,17 @@ public class Product {
     )
     private Set<Category> categories = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "generic_product_id")
+    @JsonIgnore
+    private GenericProduct genericProduct;
+
+    @OneToOne
+    @JoinColumn(name = "cheapest_for_generic_product_id")
+    @JsonIgnore
+    private GenericProduct cheapestForGenericProduct;
+
+
     public Product() {
     }
 
@@ -97,6 +108,24 @@ public class Product {
 
     public void setCategories(Set<Category> categories) {
         this.categories = categories;
+    }
+
+    // TODO omitir o getter para não repetir info na resposta
+//    public GenericProduct getGenericProduct() {
+//        return genericProduct;
+//    }
+
+    public void setGenericProduct(GenericProduct genericProduct) {
+        this.genericProduct = genericProduct;
+    }
+
+    // TODO omitir o getter para não repetir info na resposta
+//    public GenericProduct getCheapestForGenericProduct() {
+//        return cheapestForGenericProduct;
+//    }
+
+    public void setCheapestForGenericProduct(GenericProduct cheapestForGenericProduct) {
+        this.cheapestForGenericProduct = cheapestForGenericProduct;
     }
 
     @Override
