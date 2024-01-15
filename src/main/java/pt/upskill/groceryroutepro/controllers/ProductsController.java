@@ -172,7 +172,7 @@ public class ProductsController {
         }
     }
 
-    @PostMapping("/merge-to-generic-table/{:chainName}")
+    @PostMapping("/merge-to-generic-table/{chainName}")
     public ResponseEntity mergeContinente(@PathVariable String chainName) {
         try {
             genericProductsService.mergeToGenericTable(chainName);

@@ -312,14 +312,34 @@ public class GenericProductsServiceImpl implements GenericProductsService {
 
             String productBrand = product.getBrand().toLowerCase();
             if (!productBrand.equals("")) {
-                processedBrand = productBrand.replaceAll("\\s", "").toLowerCase();
+                processedBrand = productBrand.replaceAll("\\s", "");
             }
 
             // Nome
 
-            String productName = product.getName().toLowerCase();
-            String processedName = productName.replaceAll("\\s", "");
-            String genericProductName = StringUtils.capitalize(productName);
+            String productName = "";
+            String processedName = "";
+            String genericProductName = "";
+
+            switch (chainName) {
+                case "auchan":
+//                        processedName = processedName.replace(productQuantity, "");
+//                        genericProductName = genericProductName.replace(productQuantity, "");
+                    break;
+                case "minipreço":
+                    productName = product.getName().toLowerCase();
+                    if (!productBrand.equals("")) {
+                        productName = productName.replace(productBrand, "");
+                    }
+                    if (processedQuantity != null && !processedQuantity.equals(""))
+                        productName = productName.replace(processedQuantity, "");
+                    break;
+                default:
+                    productName = product.getName().toLowerCase();
+            }
+
+            processedName = productName.replaceAll("\\s", "");
+            genericProductName = StringUtils.capitalize(productName);
 
             this.genericProductsTemp = genericProductRepository.findAll();
 
@@ -359,7 +379,6 @@ public class GenericProductsServiceImpl implements GenericProductsService {
 
                 GenericProduct genericProductToSave = genericProduct;
                 boolean canBeSaved = false;
-                boolean isNewGenericProduct = true;
 
                 // Os else-if são só conjuntos de critérios com diferente prioridade
                 // para fazer o merge
@@ -379,7 +398,6 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                     genericProductToSave.setProcessedBrand(processedBrand);
                     genericProductToSave.setProcessedQuantity(processedQuantity);
                     canBeSaved = true;
-                    isNewGenericProduct = true;
                     genericProductToSave.setId(null);
                 }
 
@@ -390,7 +408,6 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                         genericProductToSave.getChains().add(product.getChain());
                         product.setGenericProduct(genericProductToSave);
                     }
-
 
                     for (Category category : productCategories) {
                         if (!genericProductCategories.contains(category)) {
