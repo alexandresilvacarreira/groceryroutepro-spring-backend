@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import pt.upskill.groceryroutepro.entities.GenericProduct;
 import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.models.ProductWPriceList;
 import pt.upskill.groceryroutepro.models.Pagination;
 import pt.upskill.groceryroutepro.models.ProductDetails;
@@ -110,20 +111,18 @@ public class ProductsController {
 
     @GetMapping("/generic-products/{genericProductId}")
     public ResponseEntity getGenericProduct(@PathVariable Long genericProductId) {
-        Map<String, Object> results = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         try {
-            GenericProduct genericProduct = genericProductsService.getProductById(genericProductId);
-            if (genericProduct != null) {
-                results.put("genericProduct", genericProduct);
-//                results.put("Products", genericProduct.getProducts());
-                return ResponseEntity.ok(results);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-        } catch (Exception e) {
-            String errorMessage = "Erro ao obter produto: " + e.getMessage();
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            GenericProduct genericProduct = genericProductsService.getGenericProductById(genericProductId);
+            Map<String, Object> data = new HashMap<>();
+            data.put("genericProduct", genericProduct);
+            response.put("data", data);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
     }
 
@@ -134,32 +133,31 @@ public class ProductsController {
                                               @RequestParam(defaultValue = "10") Integer size,
                                               @RequestParam(defaultValue = "1,2,3,4,5,6,7") List<Long> chains,
                                               @RequestParam(defaultValue = "1,2,3,4,5,6,7,8,9,10") List<Long> categories,
-                                              @RequestParam(defaultValue = "pricePrimaryValue,asc") String sort) {
+                                              @RequestParam(defaultValue = "name,asc") String sort) {
 
         String[] sortParams = sort.split(",");
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortParams[1].equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortParams[0]));
 
-        Map<String, Object> results = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+
+        String processedSearch = search.toLowerCase().replaceAll("\\s","");
 
         try {
-            Slice<GenericProduct> genericProducts = genericProductsService.getProductsByParams(search, categories, chains, pageable);
-            Map<String, Object> genericProductsMap = new HashMap<>();
-            genericProductsMap.put("genericProducts", genericProducts.getContent());
-            results.put("data", genericProductsMap);
-            results.put("success", true);
-            Pagination pagination = new Pagination(genericProducts.getNumber(), genericProducts.getNumberOfElements(), genericProducts.hasNext(), genericProducts.hasPrevious());
-            results.put("pagination", pagination);
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            String errorMessage = "Erro ao obter produtos: " + e.getMessage();
-            results.put("message", errorMessage);
-            results.put("success", false);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(results);
+            Slice<GenericProduct> genericProducts = genericProductsService.getGenericProductsByParams(processedSearch, categories, chains, pageable);
+            Map<String, Object> data = new HashMap<>();
+            data.put("genericProducts", genericProducts.getContent());
+            data.put("pagination", new Pagination(genericProducts.getNumber(), genericProducts.getNumberOfElements(), genericProducts.hasNext(), genericProducts.hasPrevious()));
+            response.put("data", data);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
         }
 
     }
-
 
     @PostMapping("/create-merged-table")
     public ResponseEntity createMergedTable() {
@@ -176,6 +174,17 @@ public class ProductsController {
     public ResponseEntity mergeContinente(@PathVariable String chainName) {
         try {
             genericProductsService.mergeToGenericTable(chainName);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/update-generic-products-prices")
+    public ResponseEntity updateGenericProductPrices() {
+        try {
+            genericProductsService.updateGenericProductPrices();
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();

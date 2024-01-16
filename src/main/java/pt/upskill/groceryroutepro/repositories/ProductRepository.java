@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pt.upskill.groceryroutepro.entities.Chain;
+import pt.upskill.groceryroutepro.entities.GenericProduct;
 import pt.upskill.groceryroutepro.entities.Product;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 
@@ -58,4 +59,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     );
 
     List<Product> findByChain(Chain chain);
+
+
+    @Query("SELECT p FROM Product p WHERE p.chain = :chain AND p.genericProduct.id IS NULL")
+    List<Product> findByChainAndNullGenericProduct(Chain chain);
+
+    List<Product> findByGenericProductIn(List<GenericProduct> genericProducts);
+
+
 }

@@ -16,21 +16,25 @@ import java.util.List;
 @Repository
 public interface GenericProductRepository extends JpaRepository<GenericProduct, Long> {
 
-
     @Query("SELECT p " +
             "FROM " +
             "GenericProduct p " +
             "JOIN p.categories c " +
             "JOIN p.chains ch " +
-            "WHERE " +
-            "p.name LIKE %:search% " +
-            "AND c IN :categoryIds " +
-            "AND ch IN :chainIds")
-    Slice<GenericProduct> findGenericProductByParams (
+            "WHERE (p.name LIKE %:search% " +
+            "OR p.brand LIKE %:search% " +
+            "OR p.processedName LIKE %:search% " +
+            "OR p.processedBrand LIKE %:search%)" +
+            "AND c.id IN :categoryIds " +
+            "AND ch.id IN :chainIds")
+    Slice<GenericProduct> findGenericProductByParams(
             @Param("search") String search,
             @Param("categoryIds") List<Long> categoryIds,
             @Param("chainIds") List<Long> chainIds,
             Pageable pageable
     );
+
+    List<GenericProduct> findAllByCurrentCheapestProductIsNull();
+
 
 }
