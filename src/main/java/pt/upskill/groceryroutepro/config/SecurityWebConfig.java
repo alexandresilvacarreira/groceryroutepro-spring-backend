@@ -108,7 +108,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         if (exception instanceof BadCredentialsException) {
             message = "Credenciais inválidas.";
         } else if (exception instanceof LockedException) {
-            message = "Conta bloquada.";
+            message = "Conta bloqueada.";
         } else if (exception instanceof DisabledException) {
             message = "Conta desativada.";
         } else {
