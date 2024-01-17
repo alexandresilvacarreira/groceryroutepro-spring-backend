@@ -20,7 +20,6 @@ public class Product {
     private String quantity;
     private String imageUrl;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Price> prices = new ArrayList<>();
     @ManyToOne
     private Chain chain;

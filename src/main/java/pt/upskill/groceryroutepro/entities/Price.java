@@ -26,6 +26,7 @@ public class Price {
     private LocalDateTime collectionDate;
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonIgnore
     private Product product;
 
     @OneToOne

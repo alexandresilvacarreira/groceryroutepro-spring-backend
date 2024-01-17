@@ -136,11 +136,8 @@ public class ProductsController {
                                               @RequestParam(defaultValue = "name,asc") String sort) {
 
         String[] sortParams = sort.split(",");
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortParams[1].equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortParams[0]));
-
         Map<String, Object> response = new HashMap<>();
-
         String processedSearch = search.toLowerCase().replaceAll("\\s","");
 
         try {
