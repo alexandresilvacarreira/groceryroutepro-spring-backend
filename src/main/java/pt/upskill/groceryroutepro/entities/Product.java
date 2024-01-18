@@ -41,6 +41,12 @@ public class Product {
     @JsonIgnore
     private GenericProduct cheapestForGenericProduct;
 
+    @OneToOne
+    private ProductQuantityFastest productQuantityFastest;
+
+    @OneToOne
+    private ProductQuantityCheapest productQuantityCheapest;
+
 
     public Product() {
     }
