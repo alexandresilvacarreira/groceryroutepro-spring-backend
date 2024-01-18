@@ -51,6 +51,23 @@ public class Product {
     public Product() {
     }
 
+
+    public ProductQuantityFastest getProductQuantityFastest() {
+        return productQuantityFastest;
+    }
+
+    public void setProductQuantityFastest(ProductQuantityFastest productQuantityFastest) {
+        this.productQuantityFastest = productQuantityFastest;
+    }
+
+    public ProductQuantityCheapest getProductQuantityCheapest() {
+        return productQuantityCheapest;
+    }
+
+    public void setProductQuantityCheapest(ProductQuantityCheapest productQuantityCheapest) {
+        this.productQuantityCheapest = productQuantityCheapest;
+    }
+
     public Long getId() {
         return id;
     }
