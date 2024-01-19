@@ -44,7 +44,29 @@ public class User {
     @JsonIgnore
     private PasswordLink passwordLink;
 
+    @OneToOne
+    private ShoppingList currentShoppingList;
+
+    @OneToMany(mappedBy = "user")
+    private List<ShoppingList> shoppingLists;
+
     public User() {
+    }
+
+    public ShoppingList getCurrentShoppingList() {
+        return currentShoppingList;
+    }
+
+    public void setCurrentShoppingList(ShoppingList currentShoppingList) {
+        this.currentShoppingList = currentShoppingList;
+    }
+
+    public List<ShoppingList> getShoppingLists() {
+        return shoppingLists;
+    }
+
+    public void setShoppingLists(List<ShoppingList> shoppingLists) {
+        this.shoppingLists = shoppingLists;
     }
 
     public Long getId() {

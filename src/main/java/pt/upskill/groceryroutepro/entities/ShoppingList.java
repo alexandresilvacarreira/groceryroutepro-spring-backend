@@ -1,5 +1,6 @@
 package pt.upskill.groceryroutepro.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
@@ -12,7 +13,6 @@ public class ShoppingList {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-    private String name;
 
     private double fastestListCost;
 
@@ -22,9 +22,11 @@ public class ShoppingList {
     private LocalDateTime creationDate;
 
     @ManyToOne
+    @JsonIgnore
     private User user;
 
-    @OneToOne
+    @OneToOne(mappedBy = "currentShoppingList")
+    @JsonIgnore
     private User currentShoppingListForUser;
 
     @OneToMany(mappedBy = "shoppingList")
@@ -33,8 +35,18 @@ public class ShoppingList {
     @OneToMany(mappedBy = "shoppingList")
     private List<ProductQuantityCheapest> cheapestProductQuantities;
 
+    @OneToMany(mappedBy = "shoppingList")
+    private List<ProductQuantityGeneric> genericProductQuantities;
 
     public ShoppingList() {
+    }
+
+    public List<ProductQuantityGeneric> getGenericProductQuantities() {
+        return genericProductQuantities;
+    }
+
+    public void setGenericProductQuantities(List<ProductQuantityGeneric> genericProductQuantities) {
+        this.genericProductQuantities = genericProductQuantities;
     }
 
     public Long getId() {
@@ -43,14 +55,6 @@ public class ShoppingList {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public double getFastestListCost() {

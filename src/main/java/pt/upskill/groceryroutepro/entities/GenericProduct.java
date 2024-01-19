@@ -48,9 +48,19 @@ public class GenericProduct {
 //    @JsonIgnore
     private List<Product> products = new ArrayList<>(); // Lista de produtos no supermercado
 
+    @OneToOne
+    private ProductQuantityGeneric productQuantityGeneric;
+
     public GenericProduct() {
     }
 
+    public ProductQuantityGeneric getProductQuantityGeneric() {
+        return productQuantityGeneric;
+    }
+
+    public void setProductQuantityGeneric(ProductQuantityGeneric productQuantityGeneric) {
+        this.productQuantityGeneric = productQuantityGeneric;
+    }
 
     public Long getId() {
         return id;
@@ -155,7 +165,6 @@ public class GenericProduct {
     public void setCurrentLowestPricePrimaryValue(double currentLowestPricePrimaryValue) {
         this.currentLowestPricePrimaryValue = currentLowestPricePrimaryValue;
     }
-
 
 
     @Override

@@ -11,7 +11,7 @@ import java.util.List;
 public class Chain {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     @OneToMany(mappedBy = "chain")
@@ -54,6 +54,16 @@ public class Chain {
 
     public void setStores(List<Store> stores) {
         this.stores = stores;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Chain))
+            return false;
+        Chain other = (Chain) o;
+        if (other.getId().equals(this.getId()) && other.getName().equals(this.getName()))
+            return true;
+        return false;
     }
 
     @Override

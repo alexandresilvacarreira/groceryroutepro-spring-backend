@@ -5,12 +5,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import pt.upskill.groceryroutepro.entities.GenericProduct;
+import pt.upskill.groceryroutepro.entities.ShoppingList;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.models.ChangePasswordRequestModel;
 import pt.upskill.groceryroutepro.models.EmailVerificationToken;
 import pt.upskill.groceryroutepro.models.Emailmodel;
 import pt.upskill.groceryroutepro.models.SignUp;
+import pt.upskill.groceryroutepro.services.ShoppingListService;
 import pt.upskill.groceryroutepro.services.UserService;
 
 import java.util.HashMap;
@@ -24,7 +27,42 @@ public class ShoppingListController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    ShoppingListService shoppingListService;
 
+    @PostMapping("/add-product")
+    public ResponseEntity addProduct(@RequestBody Long genericProductId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            shoppingListService.addProduct(genericProductId);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+        } catch (Exception e1) {
+            return ResponseEntity.badRequest().body(e1.getMessage());
+        }
+    }
 
+    @GetMapping("/get")
+    public ResponseEntity getShoppingList() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            ShoppingList shoppingList = shoppingListService.getCurrentShoppingList();
+            Map<String, Object> data = new HashMap<>();
+            data.put("shoppingList", shoppingList);
+            response.put("data", data);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+        } catch (Exception e1) {
+            return ResponseEntity.badRequest().body(e1.getMessage());
+        }
+    }
 
 }
