@@ -25,4 +25,9 @@ public class ProductsServiceImpl implements ProductsService {
     public Slice<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable) {
         return productRepository.findProductsByParams(search, categoryIds, chainIds, pageable);
     }
+
+    @Override
+    public Product createProduct(Product product) {
+        return productRepository.save(product);
+    }
 }

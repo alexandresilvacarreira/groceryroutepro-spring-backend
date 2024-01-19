@@ -80,4 +80,14 @@ public class ProductsController {
 
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<?> createProduct(@RequestBody Product product) {
+        try {
+            Product createdProduct = productsService.createProduct(product);
+            return ResponseEntity.ok(createdProduct);
+        } catch (Exception e) {
+            String errorMessage = "Erro ao criar o produto: " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+        }
+    }
 }

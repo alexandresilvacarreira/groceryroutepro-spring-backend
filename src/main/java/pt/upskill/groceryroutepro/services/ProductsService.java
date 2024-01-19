@@ -13,4 +13,5 @@ public interface ProductsService {
 
     Slice<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable);
 
+    Product createProduct(Product product);
 }
