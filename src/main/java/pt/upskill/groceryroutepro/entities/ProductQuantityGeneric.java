@@ -1,5 +1,6 @@
 package pt.upskill.groceryroutepro.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
@@ -12,8 +13,9 @@ public class ProductQuantityGeneric {
     private Long id;
     private int quantity;
     @ManyToOne
+    @JsonIgnore
     private ShoppingList shoppingList;
-    @OneToOne(mappedBy = "productQuantityGeneric")
+    @ManyToOne
     private GenericProduct genericProduct;
 
     public ProductQuantityGeneric() {

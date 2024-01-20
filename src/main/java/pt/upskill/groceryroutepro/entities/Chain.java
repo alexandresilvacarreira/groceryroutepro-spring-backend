@@ -56,15 +56,15 @@ public class Chain {
         this.stores = stores;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Chain))
-            return false;
-        Chain other = (Chain) o;
-        if (other.getId().equals(this.getId()) && other.getName().equals(this.getName()))
-            return true;
-        return false;
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (!(o instanceof Chain))
+//            return false;
+//        Chain other = (Chain) o;
+//        if (other.getId().equals(this.getId()) && other.getName().equals(this.getName()))
+//            return true;
+//        return false;
+//    }
 
     @Override
     public String toString() {

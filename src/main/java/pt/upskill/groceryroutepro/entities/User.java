@@ -44,10 +44,11 @@ public class User {
     @JsonIgnore
     private PasswordLink passwordLink;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "current_shopping_list_id")
     private ShoppingList currentShoppingList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL},fetch = FetchType.EAGER)
     private List<ShoppingList> shoppingLists;
 
     public User() {

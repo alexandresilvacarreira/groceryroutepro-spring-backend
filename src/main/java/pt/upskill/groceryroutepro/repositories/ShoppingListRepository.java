@@ -9,6 +9,6 @@ import pt.upskill.groceryroutepro.entities.User;
 @Repository
 public interface ShoppingListRepository extends JpaRepository<ShoppingList,Long> {
 
-    ShoppingList findFirstByCurrentShoppingListForUser(User user);
+    ShoppingList findByCurrentShoppingListForUser(User user);
 
 }

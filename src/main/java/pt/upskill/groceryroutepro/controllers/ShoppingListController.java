@@ -31,18 +31,40 @@ public class ShoppingListController {
     ShoppingListService shoppingListService;
 
     @PostMapping("/add-product")
-    public ResponseEntity addProduct(@RequestBody Long genericProductId) {
+    public ResponseEntity addProduct(@RequestParam Long genericProductId) {
         Map<String, Object> response = new HashMap<>();
         try {
             shoppingListService.addProduct(genericProductId);
+            response.put("success", true);
+            response.put("message", "Produto adicionado!");
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/remove-product")
+    public ResponseEntity removeProduct(@RequestParam Long genericProductId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            shoppingListService.removeProduct(genericProductId);
+            response.put("message", "Produto removido!");
             response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (ValidationException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(e.getStatusCode()).body(response);
-        } catch (Exception e1) {
-            return ResponseEntity.badRequest().body(e1.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

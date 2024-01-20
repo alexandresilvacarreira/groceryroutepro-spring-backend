@@ -2,6 +2,8 @@ package pt.upskill.groceryroutepro.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class Product {
     private String quantity;
     private String imageUrl;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Price> prices = new ArrayList<>();
     @ManyToOne
     private Chain chain;
@@ -41,31 +44,34 @@ public class Product {
     @JsonIgnore
     private GenericProduct cheapestForGenericProduct;
 
-    @OneToOne
-    private ProductQuantityFastest productQuantityFastest;
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL})
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<ProductQuantityFastest> productQuantityFastestList;
 
-    @OneToOne
-    private ProductQuantityCheapest productQuantityCheapest;
-
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL})
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<ProductQuantityCheapest> productQuantityCheapestList;
 
     public Product() {
     }
 
 
-    public ProductQuantityFastest getProductQuantityFastest() {
-        return productQuantityFastest;
+    public List<ProductQuantityFastest> getProductQuantityFastestList() {
+        return productQuantityFastestList;
     }
 
-    public void setProductQuantityFastest(ProductQuantityFastest productQuantityFastest) {
-        this.productQuantityFastest = productQuantityFastest;
+    public void setProductQuantityFastestList(List<ProductQuantityFastest> productQuantityFastestList) {
+        this.productQuantityFastestList = productQuantityFastestList;
     }
 
-    public ProductQuantityCheapest getProductQuantityCheapest() {
-        return productQuantityCheapest;
+    public List<ProductQuantityCheapest> getProductQuantityCheapestList() {
+        return productQuantityCheapestList;
     }
 
-    public void setProductQuantityCheapest(ProductQuantityCheapest productQuantityCheapest) {
-        this.productQuantityCheapest = productQuantityCheapest;
+    public void setProductQuantityCheapestList(List<ProductQuantityCheapest> productQuantityCheapestList) {
+        this.productQuantityCheapestList = productQuantityCheapestList;
     }
 
     public Long getId() {
@@ -133,9 +139,9 @@ public class Product {
     }
 
     // TODO omitir o getter para não repetir info na resposta
-//    public GenericProduct getGenericProduct() {
-//        return genericProduct;
-//    }
+    public GenericProduct getGenericProduct() {
+        return genericProduct;
+    }
 
     public void setGenericProduct(GenericProduct genericProduct) {
         this.genericProduct = genericProduct;

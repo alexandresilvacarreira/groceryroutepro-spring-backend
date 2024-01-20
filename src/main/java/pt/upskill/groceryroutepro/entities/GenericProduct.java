@@ -2,6 +2,8 @@ package pt.upskill.groceryroutepro.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -46,20 +48,23 @@ public class GenericProduct {
 
     @OneToMany(mappedBy = "genericProduct", cascade = CascadeType.ALL)
 //    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Product> products = new ArrayList<>(); // Lista de produtos no supermercado
 
-    @OneToOne
-    private ProductQuantityGeneric productQuantityGeneric;
+    @OneToMany(mappedBy = "genericProduct")
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<ProductQuantityGeneric> productQuantityGenericList;
 
     public GenericProduct() {
     }
 
-    public ProductQuantityGeneric getProductQuantityGeneric() {
-        return productQuantityGeneric;
+    public List<ProductQuantityGeneric> getProductQuantityGenericList() {
+        return productQuantityGenericList;
     }
 
-    public void setProductQuantityGeneric(ProductQuantityGeneric productQuantityGeneric) {
-        this.productQuantityGeneric = productQuantityGeneric;
+    public void setProductQuantityGenericList(List<ProductQuantityGeneric> productQuantityGenericList) {
+        this.productQuantityGenericList = productQuantityGenericList;
     }
 
     public Long getId() {

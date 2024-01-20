@@ -11,4 +11,5 @@ public interface ShoppingListService {
 
     ShoppingList getCurrentShoppingList();
 
+    void removeProduct(Long genericProductId);
 }
