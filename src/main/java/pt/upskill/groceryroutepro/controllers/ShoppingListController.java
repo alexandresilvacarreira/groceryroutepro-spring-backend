@@ -31,12 +31,15 @@ public class ShoppingListController {
     ShoppingListService shoppingListService;
 
     @PostMapping("/add-product")
-    public ResponseEntity addProduct(@RequestParam Long genericProductId) {
+    public ResponseEntity addProduct(@RequestBody Map<String, Long> genericProductId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            shoppingListService.addProduct(genericProductId);
-            response.put("success", true);
+            ShoppingList shoppingList = shoppingListService.addProduct(genericProductId.get("genericProductId"));
+            Map<String, Object> data = new HashMap<>();
+            data.put("shoppingList", shoppingList);
+            response.put("data", data);
             response.put("message", "Produto adicionado!");
+            response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (ValidationException e) {
             response.put("success", false);
@@ -50,11 +53,13 @@ public class ShoppingListController {
     }
 
     @PostMapping("/remove-product")
-    public ResponseEntity removeProduct(@RequestParam Long genericProductId) {
+    public ResponseEntity removeProduct(@RequestBody Map<String, Long> genericProductId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            shoppingListService.removeProduct(genericProductId);
-            response.put("message", "Produto removido!");
+            ShoppingList shoppingList = shoppingListService.removeProduct(genericProductId.get("genericProductId"));
+            Map<String, Object> data = new HashMap<>();
+            data.put("shoppingList", shoppingList);
+            response.put("data", data);
             response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (ValidationException e) {
@@ -69,11 +74,13 @@ public class ShoppingListController {
     }
 
     @PostMapping("/remove-all")
-    public ResponseEntity removeAll(@RequestParam Long genericProductId) {
+    public ResponseEntity removeAll(@RequestBody Map<String, Long> genericProductId) {
         Map<String, Object> response = new HashMap<>();
         try {
-            shoppingListService.removeAll(genericProductId);
-            response.put("message", "Produto removido!");
+            ShoppingList shoppingList = shoppingListService.removeAll(genericProductId.get("genericProductId"));
+            Map<String, Object> data = new HashMap<>();
+            data.put("shoppingList", shoppingList);
+            response.put("data", data);
             response.put("success", true);
             return ResponseEntity.ok(response);
         } catch (ValidationException e) {

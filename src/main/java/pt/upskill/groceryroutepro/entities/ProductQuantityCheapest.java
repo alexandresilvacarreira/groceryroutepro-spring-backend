@@ -12,6 +12,7 @@ public class ProductQuantityCheapest {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private int quantity;
+    private double value;
     @ManyToOne
     @JsonIgnore
     private ShoppingList shoppingList;
@@ -19,6 +20,14 @@ public class ProductQuantityCheapest {
     private Product product;
 
     public ProductQuantityCheapest() {
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
     }
 
     public Long getId() {

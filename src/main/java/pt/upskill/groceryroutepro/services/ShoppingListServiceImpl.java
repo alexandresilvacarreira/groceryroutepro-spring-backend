@@ -38,7 +38,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     ChainRepository chainRepository;
 
     @Override
-    public void addProduct(Long genericProductId) {
+    public ShoppingList addProduct(Long genericProductId) {
 
         User user = userService.getAuthenticatedUser();
 
@@ -48,16 +48,20 @@ public class ShoppingListServiceImpl implements ShoppingListService {
 
         ShoppingList shoppingList = user.getCurrentShoppingList();
         GenericProduct genericProductToAdd = genericProductRepository.findById(genericProductId).get();
+        double cost = genericProductToAdd.getCurrentLowestPricePrimaryValue();
 
         // Se ainda não houver lista
-        if (shoppingList == null) {
+        if (shoppingList == null || shoppingList.getGenericProductQuantities().isEmpty()) {
 
-            shoppingList = new ShoppingList();
-            shoppingList.setCreationDate(LocalDateTime.now());
+            if (shoppingList == null) {
+                shoppingList = new ShoppingList();
+                shoppingList.setCreationDate(LocalDateTime.now());
+            }
 
             List<ProductQuantityGeneric> genericProductQuantities = new ArrayList<>();
             ProductQuantityGeneric productQuantityGeneric = new ProductQuantityGeneric();
             productQuantityGeneric.setQuantity(1);
+            productQuantityGeneric.setValue(cost);
             productQuantityGeneric.setGenericProduct(genericProductToAdd);
             productQuantityGeneric.setShoppingList(shoppingList);
             genericProductQuantities.add(productQuantityGeneric);
@@ -66,6 +70,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             List<ProductQuantityCheapest> cheapestProductQuantities = new ArrayList<>();
             ProductQuantityCheapest productQuantityCheapest = new ProductQuantityCheapest();
             productQuantityCheapest.setQuantity(1);
+            productQuantityCheapest.setValue(cost);
             productQuantityCheapest.setProduct(genericProductToAdd.getCurrentCheapestProduct());
             productQuantityCheapest.setShoppingList(shoppingList);
             cheapestProductQuantities.add(productQuantityCheapest);
@@ -74,13 +79,14 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             List<ProductQuantityFastest> fastestProductQuantities = new ArrayList<>();
             ProductQuantityFastest productQuantityFastest = new ProductQuantityFastest();
             productQuantityFastest.setQuantity(1);
+            productQuantityFastest.setValue(cost);
             productQuantityFastest.setProduct(genericProductToAdd.getCurrentCheapestProduct());
             productQuantityFastest.setShoppingList(shoppingList);
             fastestProductQuantities.add(productQuantityFastest);
             shoppingList.setFastestProductQuantities(fastestProductQuantities);
 
-            shoppingList.setCheapestListCost(genericProductToAdd.getCurrentLowestPricePrimaryValue());
-            shoppingList.setFastestListCost(genericProductToAdd.getCurrentLowestPricePrimaryValue());
+            shoppingList.setCheapestListCost(cost);
+            shoppingList.setFastestListCost(cost);
 
             shoppingList.setCurrentShoppingListForUser(user);
             user.setCurrentShoppingList(shoppingList);
@@ -112,6 +118,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                     ProductQuantityGeneric productQuantityGeneric = new ProductQuantityGeneric();
                     productQuantityGeneric.setGenericProduct(genericProductToAdd);
                     productQuantityGeneric.setQuantity(1);
+                    productQuantityGeneric.setValue(cost);
                     productQuantityGeneric.setShoppingList(shoppingList);
                     genericProductQuantities.add(productQuantityGeneric);
                     shoppingList.setGenericProductQuantities(genericProductQuantities);
@@ -251,10 +258,13 @@ public class ShoppingListServiceImpl implements ShoppingListService {
 //        shoppingListRepository.save(shoppingList);
 //        userRepository.save(user);
         }
+
+        return user.getCurrentShoppingList();
+
     }
 
     @Override
-    public void removeProduct(Long genericProductId) {
+    public ShoppingList removeProduct(Long genericProductId) {
 
         User user = userService.getAuthenticatedUser();
 
@@ -313,10 +323,11 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         }
 
 //        shoppingListRepository.save(shoppingList);
+        return user.getCurrentShoppingList();
     }
 
     @Override
-    public void removeAll(Long genericProductId) {
+    public ShoppingList removeAll(Long genericProductId) {
 
         User user = userService.getAuthenticatedUser();
 
@@ -340,6 +351,8 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         productQuantityGenericRepository.delete(productQuantityGenericToUpdate);
         this.generateLists(shoppingList);
 
+        return user.getCurrentShoppingList();
+
     }
 
     @Override
@@ -358,6 +371,10 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         int updatedQuantity = quantity;
         updatedQuantity = add ? updatedQuantity + 1 : updatedQuantity - 1;
         productQuantityGenericToUpdate.setQuantity(updatedQuantity);
+        double genericProductPrice = productQuantityGenericToUpdate.getGenericProduct().getCurrentLowestPricePrimaryValue();
+        double updatedGenericValue = productQuantityGenericToUpdate.getValue();
+        updatedGenericValue = add ? updatedGenericValue + genericProductPrice : updatedGenericValue - genericProductPrice;
+        productQuantityGenericToUpdate.setValue(updatedGenericValue);
         boolean fastestListUpdated = false;
         boolean cheapestListUpdated = false;
         for (int i = 0; i < genericProductQuantities.size(); i++) {
@@ -368,6 +385,9 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 List<Price> productInFastestListPrices = productInFastestList.getPrices();
                 double currentFastestCost = shoppingList.getFastestListCost();
                 double productInFastestListPrice = productInFastestListPrices.get(productInFastestListPrices.size() - 1).getPrimaryValue();
+                double currentFastestProductValue = productQuantityFastest.getValue();
+                currentFastestProductValue = add ? currentFastestProductValue + productInFastestListPrice : currentFastestProductValue - productInFastestListPrice;
+                productQuantityFastest.setValue(currentFastestProductValue);
                 double updatedFastestListCost = add ? currentFastestCost + productInFastestListPrice : currentFastestCost - productInFastestListPrice;
                 shoppingList.setFastestListCost(updatedFastestListCost);
                 fastestListUpdated = true;
@@ -379,6 +399,9 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 List<Price> productInCheapestListPrices = productInFastestList.getPrices();
                 double currentCheapestCost = shoppingList.getCheapestListCost();
                 double productInCheapestListPrice = productInCheapestListPrices.get(productInCheapestListPrices.size() - 1).getPrimaryValue();
+                double currentCheapestProductValue = productQuantityCheapest.getValue();
+                currentCheapestProductValue = add ? currentCheapestProductValue + productInCheapestListPrice : currentCheapestProductValue - productInCheapestListPrice;
+                productQuantityCheapest.setValue(currentCheapestProductValue);
                 double updatedCheapestListCost = add ? currentCheapestCost + productInCheapestListPrice : currentCheapestCost - productInCheapestListPrice;
                 shoppingList.setCheapestListCost(updatedCheapestListCost);
                 cheapestListUpdated = true;
@@ -413,6 +436,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             productQuantityFastest.setProduct(currentCheapestProduct);
             productQuantityFastest.setShoppingList(shoppingList);
             productQuantityFastest.setQuantity(genericProductQuantity.getQuantity());
+            productQuantityFastest.setValue(listCost);
             shoppingList.getFastestProductQuantities().add(productQuantityFastest);
             shoppingList.setFastestListCost(listCost);
 
@@ -420,6 +444,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             productQuantityCheapest.setProduct(currentCheapestProduct);
             productQuantityCheapest.setShoppingList(shoppingList);
             productQuantityCheapest.setQuantity(genericProductQuantity.getQuantity());
+            productQuantityCheapest.setValue(listCost);
             shoppingList.getCheapestProductQuantities().add(productQuantityCheapest);
             shoppingList.setCheapestListCost(listCost);
 
@@ -475,12 +500,14 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                             if (product.getChain().getName().equals(((Chain) countProductChainsList.get(i).get("chain")).getName())) {
                                 int quantity = genericProductQuantity.getQuantity();
                                 Price currentPrice = product.getPrices().get(product.getPrices().size() - 1);
+                                double cost = currentPrice.getPrimaryValue() * quantity;
                                 ProductQuantityFastest productQuantityFastest = new ProductQuantityFastest();
                                 productQuantityFastest.setProduct(product);
                                 productQuantityFastest.setShoppingList(shoppingList);
                                 productQuantityFastest.setQuantity(quantity);
+                                productQuantityFastest.setValue(cost);
                                 productQuantityFastestList.add(productQuantityFastest);
-                                fastestListCost += quantity * currentPrice.getPrimaryValue();
+                                fastestListCost += cost;
                                 moveToNextGenericProduct = true;
                                 break;
                             }
@@ -502,12 +529,14 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 int quantity = genericProductQuantity.getQuantity();
                 GenericProduct genericProduct = genericProductQuantity.getGenericProduct();
                 Product currentCheapestProduct = genericProduct.getCurrentCheapestProduct();
+                double cost = quantity * genericProduct.getCurrentLowestPricePrimaryValue();
                 ProductQuantityCheapest productQuantityCheapest = new ProductQuantityCheapest();
                 productQuantityCheapest.setProduct(currentCheapestProduct);
                 productQuantityCheapest.setShoppingList(shoppingList);
+                productQuantityCheapest.setValue(cost);
                 productQuantityCheapest.setQuantity(genericProductQuantity.getQuantity());
                 productQuantityCheapestList.add(productQuantityCheapest);
-                cheapestListCost += quantity * genericProduct.getCurrentLowestPricePrimaryValue();
+                cheapestListCost += cost;
             }
 
             shoppingList.setCheapestListCost(cheapestListCost);

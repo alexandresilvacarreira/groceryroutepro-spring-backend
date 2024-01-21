@@ -7,11 +7,11 @@ import pt.upskill.groceryroutepro.models.SignUp;
 
 public interface ShoppingListService {
 
-    void addProduct(Long genericProductId);
+    ShoppingList addProduct(Long genericProductId);
 
     ShoppingList getCurrentShoppingList();
 
-    void removeProduct(Long genericProductId);
+    ShoppingList removeProduct(Long genericProductId);
 
-    void removeAll(Long genericProductId);
+    ShoppingList removeAll(Long genericProductId);
 }

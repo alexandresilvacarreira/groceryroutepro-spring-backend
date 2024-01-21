@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) auth.getPrincipal();
-        return this.userRepository.getByEmail(email); //TODO enviar só a informação necessária - criar UserModel/UserDto
+        return this.userRepository.getByEmail(email); //TODO a password foi escondida com o @JsonIgnore
     }
 
     @Override

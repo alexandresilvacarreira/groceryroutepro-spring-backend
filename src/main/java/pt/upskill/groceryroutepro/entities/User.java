@@ -17,7 +17,9 @@ public class User {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @JsonIgnore
     private String email;
+    @JsonIgnore
     private String password;
     private boolean includeWhiteLabel = true;
     private double maxStoreRadiusKm = 5.5;
@@ -27,6 +29,7 @@ public class User {
     private boolean verifiedEmail;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Confirmation confirmation;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -49,6 +52,7 @@ public class User {
     private ShoppingList currentShoppingList;
 
     @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL},fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<ShoppingList> shoppingLists;
 
     public User() {
