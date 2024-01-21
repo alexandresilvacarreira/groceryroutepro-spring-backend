@@ -277,8 +277,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         if (quantity > 1) {
 //
             this.updateQuantityAndCosts(shoppingList, productQuantityGenericToUpdate, genericProductId, false);
-            return;
-//
+
 //            int updatedQuantity = quantity - 1;
 //            productQuantityGenericToUpdate.setQuantity(updatedQuantity);
 //            boolean fastestListUpdated = false;
@@ -314,6 +313,32 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         }
 
 //        shoppingListRepository.save(shoppingList);
+    }
+
+    @Override
+    public void removeAll(Long genericProductId) {
+
+        User user = userService.getAuthenticatedUser();
+
+        if (user == null) {
+            throw new BadRequestException("Utilizador não encontrado");
+        }
+
+        ShoppingList shoppingList = user.getCurrentShoppingList();
+        List<ProductQuantityGeneric> genericProductQuantities = shoppingList.getGenericProductQuantities();
+        ProductQuantityGeneric productQuantityGenericToUpdate = null;
+        for (ProductQuantityGeneric genericProductQuantity : genericProductQuantities) {
+            if (genericProductQuantity.getGenericProduct().getId().equals(genericProductId)) {
+                productQuantityGenericToUpdate = genericProductQuantity;
+                break;
+            }
+        }
+
+        genericProductQuantities.remove(productQuantityGenericToUpdate);
+        List<ProductQuantityGeneric> updatedGenericList = new ArrayList<>(genericProductQuantities);
+        shoppingList.setGenericProductQuantities(updatedGenericList);
+        productQuantityGenericRepository.delete(productQuantityGenericToUpdate);
+        this.generateLists(shoppingList);
 
     }
 

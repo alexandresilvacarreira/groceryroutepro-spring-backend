@@ -68,6 +68,25 @@ public class ShoppingListController {
         }
     }
 
+    @PostMapping("/remove-all")
+    public ResponseEntity removeAll(@RequestParam Long genericProductId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            shoppingListService.removeAll(genericProductId);
+            response.put("message", "Produto removido!");
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/get")
     public ResponseEntity getShoppingList() {
         Map<String, Object> response = new HashMap<>();
