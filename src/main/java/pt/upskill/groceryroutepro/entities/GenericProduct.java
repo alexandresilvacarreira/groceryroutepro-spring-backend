@@ -49,7 +49,7 @@ public class GenericProduct {
     @OneToMany(mappedBy = "genericProduct", cascade = CascadeType.ALL)
 //    @JsonIgnore
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Product> products = new ArrayList<>(); // Lista de produtos no supermercado
+    private List<Product> products = new ArrayList<>();
 
     @OneToMany(mappedBy = "genericProduct")
     @JsonIgnore

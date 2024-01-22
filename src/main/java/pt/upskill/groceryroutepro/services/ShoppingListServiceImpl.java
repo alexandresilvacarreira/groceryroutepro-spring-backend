@@ -259,7 +259,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
 //        userRepository.save(user);
         }
 
-        return user.getCurrentShoppingList();
+        return shoppingList;
 
     }
 
@@ -286,7 +286,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         // Caso a quantidade seja maior que 1, basta atualizar as quantidades e custos
         if (quantity > 1) {
 //
-            this.updateQuantityAndCosts(shoppingList, productQuantityGenericToUpdate, genericProductId, false);
+           this.updateQuantityAndCosts(shoppingList, productQuantityGenericToUpdate, genericProductId, false);
 
 //            int updatedQuantity = quantity - 1;
 //            productQuantityGenericToUpdate.setQuantity(updatedQuantity);
@@ -323,7 +323,8 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         }
 
 //        shoppingListRepository.save(shoppingList);
-        return user.getCurrentShoppingList();
+//        return user.getCurrentShoppingList();
+        return shoppingList;
     }
 
     @Override
@@ -351,7 +352,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         productQuantityGenericRepository.delete(productQuantityGenericToUpdate);
         this.generateLists(shoppingList);
 
-        return user.getCurrentShoppingList();
+        return shoppingList;
 
     }
 
@@ -410,6 +411,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 break;
         }
         shoppingListRepository.save(shoppingList);
+//        return shoppingList;
     }
 
     private void generateLists(ShoppingList shoppingList) {
@@ -507,6 +509,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                                 productQuantityFastest.setQuantity(quantity);
                                 productQuantityFastest.setValue(cost);
                                 productQuantityFastestList.add(productQuantityFastest);
+                                shoppingList.getFastestProductQuantities().add(productQuantityFastest);
                                 fastestListCost += cost;
                                 moveToNextGenericProduct = true;
                                 break;
@@ -517,7 +520,6 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             }
 
             shoppingList.setFastestListCost(fastestListCost);
-//            shoppingListRepository.save(shoppingList);
             productQuantityFastestRepository.saveAll(productQuantityFastestList);
 
             ////////////////////// Criar lista de produtos "mais barata" //////////////////////////////////
@@ -534,17 +536,19 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 productQuantityCheapest.setProduct(currentCheapestProduct);
                 productQuantityCheapest.setShoppingList(shoppingList);
                 productQuantityCheapest.setValue(cost);
-                productQuantityCheapest.setQuantity(genericProductQuantity.getQuantity());
+                productQuantityCheapest.setQuantity(quantity);
+                shoppingList.getCheapestProductQuantities().add(productQuantityCheapest);
                 productQuantityCheapestList.add(productQuantityCheapest);
                 cheapestListCost += cost;
             }
 
             shoppingList.setCheapestListCost(cheapestListCost);
-//            shoppingListRepository.save(shoppingList);
+//            shoppingList.setCheapestProductQuantities(productQuantityCheapestList);
             productQuantityCheapestRepository.saveAll(productQuantityCheapestList);
         }
 
         shoppingListRepository.save(shoppingList);
+//        return shoppingList;
     }
 
 
