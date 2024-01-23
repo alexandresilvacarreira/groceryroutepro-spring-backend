@@ -149,177 +149,219 @@ public class GenericProductsServiceImpl implements GenericProductsService {
     public void mergeToGenericTable(String chainName) {
 
 //        List<Product> products = productRepository.findByChain(chainRepository.findByName(chainName));
-        List<Product> products = productRepository.findByChainAndNullGenericProduct(chainRepository.findByName(chainName));
+        List<Product> products = productRepository.findByChainAndNotNullGenericProduct(chainRepository.findByName(chainName));
+//        List<Product> products = productRepository.findByChainAndNullGenericProduct(chainRepository.findByName(chainName));
+        List<GenericProduct> genericProductsList = new ArrayList<>(genericProductRepository.findAll());
 
-        for (Product product : products) {
+        int batchSize = 10000;
 
-            String processedBrand = null;
-            String processedQuantity = null;
+        for (int i = 0; i < products.size(); i += batchSize) {
 
-            // Quantidade
+            int endIndex = Math.min(i + batchSize, products.size());
+            List<Product> batch = products.subList(i, endIndex);
 
-            String productQuantity = product.getQuantity();
+            List<GenericProduct> genericProductsToSave = new ArrayList<>();
 
-            if (!productQuantity.equals("")) {
-                Pattern pattern = Pattern.compile("\\d+");
-                Matcher matcher = pattern.matcher(product.getQuantity());
-                if (matcher.find()) {
-                    String firstNumber = matcher.group();
-                    processedQuantity = firstNumber;
-                }
-            }
+            for (Product product : batch) {
 
-            // Marca
+                String processedBrand = null;
+                String processedQuantity = null;
 
-            String productBrand = "";
-            if (!chainName.equals("auchan")) { // Não temos info da marca da Auchan
-                productBrand = product.getBrand().toLowerCase();
-                if (!productBrand.equals("")) {
-                    processedBrand = productBrand.replaceAll("\\s", "");
-                }
-            }
+                // Quantidade
 
-            // Nome
+                String productQuantity = product.getQuantity();
 
-            String processedName = "";
-            String genericProductName = "";
-
-            String productName = product.getName().toLowerCase();
-
-            switch (chainName) {
-                case "auchan":
-                    if (!productQuantity.equals("")) {
-                        productName = productName.replace(productQuantity, "");
+                if (!productQuantity.equals("")) {
+                    Pattern pattern = Pattern.compile("\\d+");
+                    Matcher matcher = pattern.matcher(product.getQuantity());
+                    if (matcher.find()) {
+                        String firstNumber = matcher.group();
+                        processedQuantity = firstNumber;
                     }
-                    break;
-                case "minipreço":
+                }
+
+                // Marca
+
+                String productBrand = "";
+                if (!chainName.equals("auchan")) { // Não temos info da marca da Auchan
+                    productBrand = product.getBrand().toLowerCase();
                     if (!productBrand.equals("")) {
-                        productName = productName.replace(productBrand, "");
+                        processedBrand = productBrand.replaceAll("\\s", "");
                     }
-                    if (processedQuantity != null && !processedQuantity.equals(""))
-                        productName = productName.replace(processedQuantity, "");
-                    break;
-            }
-
-            processedName = productName.replaceAll("\\s", "");
-            genericProductName = StringUtils.capitalize(productName);
-
-            List<GenericProduct> genericProductsList = genericProductRepository.findAll();
-
-            for (int i = 0; i < genericProductsList.size(); i++) {
-
-                GenericProduct genericProduct = genericProductsList.get(i);
-
-                int nameDistance = 999;
-                int brandDistance = 999;
-                int quantityDistance = 999;
-                String genericProcessedName = genericProduct.getProcessedName();
-                String genericProcessedBrand = genericProduct.getProcessedBrand();
-                String genericProcessedQuantity = genericProduct.getProcessedQuantity();
-
-                if (genericProcessedName != null && processedName != null) {
-                    nameDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedName, processedName);
                 }
 
-                if (!chainName.equals("auchan") && genericProcessedBrand != null && processedBrand != null) {
-                    brandDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedBrand, processedBrand);
-                }
+                // Nome
 
-                if (genericProcessedQuantity != null && processedQuantity != null) {
-                    quantityDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedQuantity, processedQuantity);
-                }
+                String processedName = "";
+                String genericProductName = "";
 
-                boolean hasSameCategory = false;
-                Set<Category> productCategories = product.getCategories();
-                Set<Category> genericProductCategories = genericProduct.getCategories();
+                String productName = product.getName().toLowerCase();
 
-                for (Category category : productCategories) {
-                    if (genericProductCategories.contains(category)) {
-                        hasSameCategory = true;
+                switch (chainName) {
+                    case "auchan":
+                        if (!productQuantity.equals("")) {
+                            productName = productName.replace(productQuantity, "");
+                        }
                         break;
-                    }
+                    case "minipreço":
+                        if (!productBrand.equals("")) {
+                            productName = productName.replace(productBrand, "");
+                        }
+                        if (processedQuantity != null && !processedQuantity.equals(""))
+                            productName = productName.replace(processedQuantity, "");
+                        break;
                 }
 
-                GenericProduct genericProductToSave = genericProduct;
-                boolean canBeSaved = false;
+                processedName = productName.replaceAll("\\s", "");
+                genericProductName = StringUtils.capitalize(productName);
 
-                if (chainName.equals("auchan")) { // Auchan não tem informação da marca discriminada, a comparação é ligeiramente diferente
-                    // Os else-if são só conjuntos de critérios com diferente prioridade
-                    // para fazer o merge
-                    boolean containsBrandInName = false;
-                    if (genericProcessedBrand != null && !genericProcessedBrand.equals("")) {
-                        containsBrandInName = processedName.lastIndexOf(genericProcessedBrand) != -1;
-                    }
-                    if (nameDistance == 0) {
-                        canBeSaved = true;
-                    } else if (nameDistance <= 3 && containsBrandInName && hasSameCategory) {
-                        canBeSaved = true;
-                    } else if (nameDistance <= 5 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
-                        canBeSaved = true;
-                    } else if (nameDistance <= 7 && containsBrandInName && quantityDistance <= 1 && hasSameCategory) {
-                        canBeSaved = true;
-                    } else if (i == genericProductsList.size() - 1) {
-                        // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
-                        genericProductToSave = new GenericProduct();
-                        genericProductToSave.setName(genericProductName);
-                        genericProductToSave.setBrand(productBrand);
-                        genericProductToSave.setQuantity(productQuantity);
-                        genericProductToSave.setProcessedName(processedName);
-                        genericProductToSave.setProcessedBrand(processedBrand);
-                        genericProductToSave.setProcessedQuantity(processedQuantity);
-                        canBeSaved = true;
-                        genericProductToSave.setId(null);
-                    }
-                } else {
-                    // Os else-if são só conjuntos de critérios com diferente prioridade
-                    // para fazer o merge
-                    if (nameDistance == 0 && brandDistance == 0) {
-                        canBeSaved = true;
-                    } else if (nameDistance <= 3 && brandDistance == 0 && hasSameCategory) {
-                        canBeSaved = true;
-                    } else if (nameDistance <= 5 && brandDistance == 0 && quantityDistance == 0 && hasSameCategory) {
-                        canBeSaved = true;
-                    } else if (i == genericProductsList.size() - 1) {
-                        // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
-                        genericProductToSave = new GenericProduct();
-                        genericProductToSave.setName(genericProductName);
-                        genericProductToSave.setBrand(productBrand);
-                        genericProductToSave.setQuantity(productQuantity);
-                        genericProductToSave.setProcessedName(processedName);
-                        genericProductToSave.setProcessedBrand(processedBrand);
-                        genericProductToSave.setProcessedQuantity(processedQuantity);
-                        canBeSaved = true;
-                        genericProductToSave.setId(null);
-                    }
-                }
+//            List<GenericProduct> genericProductsList = new ArrayList<>(genericProductRepository.findAll());
 
-                if (canBeSaved) {
+                for (int j = 0; j < genericProductsList.size(); j++) {
 
-                    if (genericProductToSave.getProducts().isEmpty() || !genericProductToSave.getProducts().contains(product)) {
-                        genericProductToSave.getProducts().add(product);
-                        genericProductToSave.getChains().add(product.getChain());
-                        product.setGenericProduct(genericProductToSave);
+                    GenericProduct genericProduct = genericProductsList.get(j);
+
+                    int nameDistance = 999;
+                    int brandDistance = 999;
+                    int quantityDistance = 999;
+                    String genericProcessedName = genericProduct.getProcessedName();
+                    String genericProcessedBrand = genericProduct.getProcessedBrand();
+                    String genericProcessedQuantity = genericProduct.getProcessedQuantity();
+
+                    if (genericProcessedName != null && processedName != null) {
+                        nameDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedName, processedName);
                     }
+
+                    if (!chainName.equals("auchan") && genericProcessedBrand != null && processedBrand != null) {
+                        brandDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedBrand, processedBrand);
+                    }
+
+                    if (genericProcessedQuantity != null && processedQuantity != null) {
+                        quantityDistance = LevenshteinDistance.getDefaultInstance().apply(genericProcessedQuantity, processedQuantity);
+                    }
+
+                    boolean hasSameCategory = false;
+                    Set<Category> productCategories = product.getCategories();
+                    Set<Category> genericProductCategories = genericProduct.getCategories();
 
                     for (Category category : productCategories) {
-                        if (!genericProductCategories.contains(category)) {
-                            genericProductCategories.add(category);
+                        if (genericProductCategories.contains(category)) {
+                            hasSameCategory = true;
+                            break;
                         }
                     }
 
-                    genericProductRepository.save(genericProductToSave);
+                    GenericProduct genericProductToSave = genericProduct;
+                    boolean canBeSaved = false;
 
-                    break;
+                    if (chainName.equals("auchan")) { // Auchan não tem informação da marca discriminada, a comparação é ligeiramente diferente
+                        // Os else-if são só conjuntos de critérios com diferente prioridade
+                        // para fazer o merge
+                        boolean containsBrandInName = false;
+                        if (genericProcessedBrand != null && !genericProcessedBrand.equals("")) {
+                            containsBrandInName = processedName.lastIndexOf(genericProcessedBrand) != -1;
+                        }
+                        if (nameDistance == 0 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
+                            canBeSaved = true;
+                        } else if (nameDistance <= 2 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
+                            canBeSaved = true;
+//                    } else if (nameDistance <= 5 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
+//                        canBeSaved = true;
+//                    } else if (nameDistance <= 7 && containsBrandInName && quantityDistance <= 1 && hasSameCategory) {
+//                        canBeSaved = true;
+                        } else if (j == genericProductsList.size() - 1) {
+                            // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
+                            genericProductToSave = new GenericProduct();
+                            genericProductToSave.setName(genericProductName);
+                            genericProductToSave.setBrand(productBrand);
+                            genericProductToSave.setQuantity(productQuantity);
+                            genericProductToSave.setProcessedName(processedName);
+                            genericProductToSave.setProcessedBrand(processedBrand);
+                            genericProductToSave.setProcessedQuantity(processedQuantity);
+                            canBeSaved = true;
+                        }
+                    } else {
+                        // Os else-if são só conjuntos de critérios com diferente prioridade
+                        // para fazer o merge
+                        if (nameDistance == 0 && brandDistance == 0 && quantityDistance == 0 && hasSameCategory) {
+                            canBeSaved = true;
+                        } else if (nameDistance <= 2 && brandDistance <= 2 && quantityDistance == 0 && hasSameCategory) {
+                            canBeSaved = true;
+//                    } else if (nameDistance <= 5 && brandDistance == 0 && quantityDistance == 0 && hasSameCategory) {
+//                        canBeSaved = true;
+                        } else if (j == genericProductsList.size() - 1) {
+                            // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
+                            genericProductToSave = new GenericProduct();
+                            genericProductToSave.setName(genericProductName);
+                            genericProductToSave.setBrand(productBrand);
+                            genericProductToSave.setQuantity(productQuantity);
+                            genericProductToSave.setProcessedName(processedName);
+                            genericProductToSave.setProcessedBrand(processedBrand);
+                            genericProductToSave.setProcessedQuantity(processedQuantity);
+                            canBeSaved = true;
+                        }
+                    }
+
+                    if (canBeSaved) {
+
+                        if (genericProductToSave.getProducts().isEmpty() || !genericProductToSave.getProducts().contains(product)) {
+                            genericProductToSave.getProducts().add(product);
+                            Set<Chain> genericProductToSaveChains = genericProductToSave.getChains();
+                            Chain productChain = product.getChain();
+                            if (!genericProductToSaveChains.isEmpty() && !genericProductToSaveChains.contains(productChain)) {
+                                genericProductToSave.getChains().add(productChain);
+                            }
+                            product.setGenericProduct(genericProductToSave);
+                        }
+
+                        for (Category category : productCategories) {
+                            if (!genericProductCategories.contains(category)) {
+                                genericProductCategories.add(category);
+                            }
+                        }
+
+                        // Verificar e atualizar preços
+//                        List<Product> productsInGenericProduct = new ArrayList<>(genericProductToSave.getProducts());
+//                        for (Product productInGenericProduct : productsInGenericProduct) {
+//
+//                            List<Price> productPrices = productInGenericProduct.getPrices();
+//                            Price currentProductPrice = productPrices.get(productPrices.size() - 1); // O último da lista é sempre o mais recente
+//
+//                            Price currentGenericProductPrice = genericProductToSave.getCurrentLowestPrice();
+//                            Product currentCheapestProduct = genericProductToSave.getCurrentCheapestProduct();
+//
+//                            if (currentGenericProductPrice == null || currentProductPrice.getPrimaryValue() < currentGenericProductPrice.getPrimaryValue()) {
+//
+//                                // Elminar o preço e produtos antigos, caso contrário será enviada uma exceção porque a relação é one-to-one
+//                                if (currentGenericProductPrice != null && currentCheapestProduct != null) {
+//                                    currentGenericProductPrice.setGenericProduct(null);
+//                                    currentCheapestProduct.setCheapestForGenericProduct(null);
+////                                productRepository.save(currentCheapestProduct);
+////                                priceRepository.save(currentGenericProductPrice);
+//                                }
+//
+//                                // Atualizar GenericProduct
+//                                genericProductToSave.setCurrentLowestPrice(currentProductPrice);
+//                                genericProductToSave.setCurrentLowestPricePrimaryValue(currentProductPrice.getPrimaryValue());
+//                                genericProductToSave.setCurrentCheapestProduct(productInGenericProduct);
+//                                currentProductPrice.setGenericProduct(genericProductToSave);
+//                                productInGenericProduct.setCheapestForGenericProduct(genericProductToSave);
+//                            }
+//                        }
+                        genericProductsList.add(genericProductToSave);
+                        genericProductsToSave.add(genericProductToSave);
+                        break;
+                    }
                 }
             }
+            genericProductRepository.saveAll(genericProductsToSave);
         }
-
     }
 
     @Override
     public void updateGenericProductPrices() {
 
-        int batchSize = 1000;
+        int batchSize = 10000;
 
         List<GenericProduct> genericProducts = genericProductRepository.findAllByCurrentCheapestProductIsNull();
 
@@ -332,11 +374,11 @@ public class GenericProductsServiceImpl implements GenericProductsService {
 
 //            List<Product> products = new ArrayList<>(productRepository.findByGenericProductIn(batch));
 
-            for (GenericProduct genericProduct : batch){
+            for (GenericProduct genericProduct : batch) {
 
                 List<Product> products = new ArrayList<>(genericProduct.getProducts());
 
-                for (Product product : products){
+                for (Product product : products) {
 
                     List<Price> productPrices = product.getPrices();
                     Price currentProductPrice = productPrices.get(productPrices.size() - 1); // O último da lista é sempre o mais recente
@@ -347,7 +389,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                     if (currentGenericProductPrice == null || currentProductPrice.getPrimaryValue() < currentGenericProductPrice.getPrimaryValue()) {
 
                         // Elminar o preço e produtos antigos, caso contrário será enviada uma exceção porque a relação é one-to-one
-                        if (currentGenericProductPrice != null && currentCheapestProduct != null){
+                        if (currentGenericProductPrice != null && currentCheapestProduct != null) {
                             currentGenericProductPrice.setGenericProduct(null);
                             currentCheapestProduct.setCheapestForGenericProduct(null);
 //                            productRepository.save(currentCheapestProduct);
@@ -360,55 +402,13 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                         genericProduct.setCurrentCheapestProduct(product);
                         currentProductPrice.setGenericProduct(genericProduct);
                         product.setCheapestForGenericProduct(genericProduct);
-
                     }
-
                 }
-                productRepository.saveAll(products);
+//                productRepository.saveAll(products); //TODO experimentar sem isto
             }
             genericProductRepository.saveAll(batch);
         }
     }
-
-
-
-
-    //        for (GenericProduct genericProduct : genericProducts) {
-//
-//            // Criar cópia da lista, para evitar ConcurrentModificationException
-//            List<Product> products = new ArrayList<>(genericProduct.getProducts());
-//
-//            for (Product product : products) {
-//
-//                List<Price> productPrices = product.getPrices();
-//                Price currentProductPrice = productPrices.get(productPrices.size() - 1); // O último da lista é sempre o mais recente
-//
-//                Price currentGenericProductPrice = genericProduct.getCurrentLowestPrice();
-//                Product currentCheapestProduct = genericProduct.getCurrentCheapestProduct();
-//
-//                if (currentGenericProductPrice == null || currentProductPrice.getPrimaryValue() < currentGenericProductPrice.getPrimaryValue()) {
-//
-//                    // Elminar o preço e produtos antigos, caso contrário será enviada uma exceção porque a relação é one-to-one
-//                    if (currentGenericProductPrice != null && currentCheapestProduct != null){
-//                        currentGenericProductPrice.setGenericProduct(null);
-//                        currentCheapestProduct.setCheapestForGenericProduct(null);
-//                        productRepository.save(currentCheapestProduct);
-//                        priceRepository.save(currentGenericProductPrice);
-//                    }
-//
-//                    // Atualizar GenericProduct
-//                    genericProduct.setCurrentLowestPrice(currentProductPrice);
-//                    genericProduct.setCurrentLowestPricePrimaryValue(currentProductPrice.getPrimaryValue());
-//                    genericProduct.setCurrentCheapestProduct(product);
-//                    currentProductPrice.setGenericProduct(genericProduct);
-//                    product.setCheapestForGenericProduct(genericProduct);
-//
-//                    genericProductRepository.save(genericProduct);
-//                    productRepository.save(product);
-//                    priceRepository.save(currentProductPrice);
-//                }
-//            }
-//        }
 
 
 }

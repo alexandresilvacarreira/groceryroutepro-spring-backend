@@ -19,6 +19,7 @@ import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.services.GenericProductsService;
 import pt.upskill.groceryroutepro.services.ProductsService;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,9 +169,23 @@ public class ProductsController {
     }
 
     @PostMapping("/merge-to-generic-table/{chainName}")
-    public ResponseEntity mergeContinente(@PathVariable String chainName) {
+    public ResponseEntity mergeToGenericTable(@PathVariable String chainName) {
         try {
             genericProductsService.mergeToGenericTable(chainName);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/merge-all-to-generic-table")
+    public ResponseEntity mergeAllToGenericTable() {
+        try {
+            List<String> chainNames = Arrays.asList("continente", "intermarché", "minipreço", "auchan");
+            for (String chainName : chainNames){
+                genericProductsService.mergeToGenericTable(chainName);
+            }
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();

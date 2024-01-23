@@ -65,6 +65,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByChainAndNullGenericProduct(Chain chain);
 
     List<Product> findByGenericProductIn(List<GenericProduct> genericProducts);
+    @Query("SELECT p FROM Product p WHERE p.chain = :chain AND p.genericProduct.id IS NULL")
+    List<Product> findByChainAndNotNullGenericProduct(Chain chain);
 
+    List<Product> findAllByChainAndGenericProductIsNotNull(Chain chain);
 
 }

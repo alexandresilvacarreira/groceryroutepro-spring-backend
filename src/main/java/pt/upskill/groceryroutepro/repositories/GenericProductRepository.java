@@ -36,5 +36,4 @@ public interface GenericProductRepository extends JpaRepository<GenericProduct, 
 
     List<GenericProduct> findAllByCurrentCheapestProductIsNull();
 
-
 }
