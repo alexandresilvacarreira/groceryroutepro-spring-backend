@@ -70,7 +70,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/","/shopping-list/**").authenticated()
 //                .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
-                .antMatchers("/scraper/**", "/products/**").permitAll() //TODO proteger isto!
+                .antMatchers("/scraper/**", "/products/**", "/google-maps-api/**").permitAll() //TODO proteger isto!
                 .antMatchers("**").denyAll();
     }
 
