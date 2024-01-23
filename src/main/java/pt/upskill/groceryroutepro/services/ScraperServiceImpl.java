@@ -44,6 +44,9 @@ public class ScraperServiceImpl implements ScraperService {
     @Autowired
     ChainRepository chainRepository;
 
+    @Autowired
+    GenericProductsService genericProductsService;
+
     private List<String> userAgentList = Arrays.asList(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
@@ -96,7 +99,7 @@ public class ScraperServiceImpl implements ScraperService {
                 }
 
                 String url = scraperParams.getUrl() + "&start=" + start + "&sz=" + size;
-                scrapeContinente(url, scraperParams.getCategory());
+                this.scrapeContinente(url, scraperParams.getCategory());
                 start += size;
             }
 
@@ -241,6 +244,9 @@ public class ScraperServiceImpl implements ScraperService {
                 // Guardar produto
                 productRepository.save(product);
 
+                //Atualizar GenericProducts
+                genericProductsService.updateGenericProducts(product);
+
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -288,7 +294,7 @@ public class ScraperServiceImpl implements ScraperService {
                 }
 
                 String url = scraperParams.getUrl() + "&start=" + start + "&sz=" + size;
-                scrapeAuchan(url, scraperParams.getCategory());
+                this.scrapeAuchan(url, scraperParams.getCategory());
                 start += size;
             }
 
@@ -427,6 +433,9 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Guardar produto
                 productRepository.save(product);
+
+                //Atualizar GenericProducts
+                genericProductsService.updateGenericProducts(product);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -657,6 +666,9 @@ public class ScraperServiceImpl implements ScraperService {
 
                 // Guardar produto
                 productRepository.save(product);
+
+                //Atualizar GenericProducts
+                genericProductsService.updateGenericProducts(product);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -863,6 +875,9 @@ public class ScraperServiceImpl implements ScraperService {
                 // Guardar produto
                 productRepository.save(product);
 
+                //Atualizar GenericProducts
+                genericProductsService.updateGenericProducts(product);
+
             }
 
 
@@ -912,9 +927,8 @@ public class ScraperServiceImpl implements ScraperService {
                     .addHeader("x-pdv", "{\"ref\":\"03622\",\"isEcommerce\":true}")
                     .addHeader("Alt-Used", "www.loja-online.intermarche.pt")
                     .addHeader("Connection", "keep-alive")
-                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/mercearia/arroz-massa-e-farinha/massa/10179")
-                    .addHeader("Cookie", "datadome=iKf01CU1s5nRvY3m~fENy3jqHsqcXqwMbAP3HGXYjWZT2f~41muWa_uA4KRyVAuKUqmgV2fAMseXZAHNj93TicXl5xYhtiZKmHSbgsfquFTutzutaWMMTIx7KqbnAgSF; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
-                    .addHeader("Sec-Fetch-Dest", "empty")
+                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/mercearia/arroz-massa-e-farinha/farinha/11717")
+//                    .addHeader("Cookie", "datadome=K0uYCkbUK7VY~sl5a0SNRG9SkvjBlGu6oJC8vqETdwKtCXjkrJVcxk9XujJNL8n6W5UQ1WgZWVMKqlC8MGgKMymImAlq_8CLbbues8oCOFjOAObGQru8nFHqj_T9AdJT; itm_device_id=08658591-bbcd-4d03-9219-db4bf532a7bd; itm_usid=a02ca707-a700-4c4c-91e2-8864839266af; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}; datadome=V~gI1MmkrURswVESZMni4zB71SQkT56_8ogiSSA9HqAkBGDMEfCT2OJaONu87_Cmjwxh_YBjyZ9Ix_sTLcDAltKvje~k74x0r4GdLDPm8sojdAg_RaEj3itxAnYWIP8o")                    .addHeader("Sec-Fetch-Dest", "empty")
                     .addHeader("Sec-Fetch-Mode", "cors")
                     .addHeader("Sec-Fetch-Site", "same-origin")
                     .addHeader("Pragma", "no-cache")
@@ -986,8 +1000,6 @@ public class ScraperServiceImpl implements ScraperService {
                             subcategoriesIntermarche.get("nbProducts_alternativas alimentares, bio, saudável").add(categoryLvl3NbProducts);
                         }
                     }
-
-
                 }
             }
 
@@ -1057,12 +1069,12 @@ public class ScraperServiceImpl implements ScraperService {
                     .addHeader("Origin", "https://www.loja-online.intermarche.pt")
                     .addHeader("Alt-Used", "www.loja-online.intermarche.pt")
                     .addHeader("Connection", "keep-alive")
-//                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/frescos/padaria-e-pastelaria/pao-e-broa/10036?ordre=decroissant&page=1&trier=prix")
+                    .addHeader("Referer", "https://www.loja-online.intermarche.pt/shelves/mercearia/arroz-massa-e-farinha/11715")
                     .addHeader("Sec-Fetch-Dest", "empty")
                     .addHeader("Sec-Fetch-Mode", "cors")
                     .addHeader("Sec-Fetch-Site", "same-origin")
                     .addHeader("TE", "trailers")
-//                    .addHeader("Cookie", "datadome=s~czXC6YhG_b~GFk81bxI~9ktq5Dm4vongGkkVsgiBZtAV2IpxzzPKmUvqw1JoB9R7pp~d7pTLAhl6P9T6R83F0t0jWqYo0qK_sBJwIXD6CC7JeKIW_zk4Fzhe9WNL5Q; itm_device_id=c27ffc45-01f9-4b99-bab5-b9471fd451a9; itm_usid=1484064c-612a-44ed-b018-a9c090267413; didomi_token=eyJ1c2VyX2lkIjoiMThjZmQxNzMtZDg0MC02M2JmLWJlOWMtNGMwOWMzOTQ2OTE1IiwiY3JlYXRlZCI6IjIwMjQtMDEtMTJUMDk6NTM6MjguMDU3WiIsInVwZGF0ZWQiOiIyMDI0LTAxLTEyVDA5OjUzOjI5LjI3M1oiLCJ2ZW5kb3JzIjp7ImRpc2FibGVkIjpbImdvb2dsZSIsImM6bmVzdGxlLVFMclRMeTl0IiwiYzpzYWxlY3ljbGUiLCJjOmx1Y2t5Y2FydC1MSmJQRnJTaiIsImM6YmluZy1hZHMiLCJjOm1lZGlhbm9lLThLc3BUNVFaIiwiYzpwaW50ZXJlc3QiLCJjOmFiLXRhc3R5IiwiYzpxdWFudHVtLWFkdmVydGlzaW5nIiwiYzpjb250ZW50c3F1YXJlIiwiYzp1c2FiaWxsYSIsImM6cHJvY3RlcmFuLVEzVkVKTmlZIiwiYzpnb29nbGVhbmEtckp4emNjNjMiLCJjOnNuYXBjaGF0LWZ6TlVFaXpqIiwiYzpkYXRhZG9tZS1lNkRqZ21yNyIsImM6ZGlkb21pLVRmeHp0QXo5IiwiYzpkeW5hdHJhY2UtUVlGbWlUTUMiLCJjOnF1ZXVlaXQtV1laZkxSeEwiLCJjOmFkb3Rtb2IiLCJjOm1hdGNoYS1heXozQkxMOSJdfSwicHVycG9zZXMiOnsiZGlzYWJsZWQiOlsiZ2VvbG9jYXRpb25fZGF0YSIsImRldmljZV9jaGFyYWN0ZXJpc3RpY3MiXX0sInZlcnNpb24iOjIsImFjIjoiQUFBQS5BQUFBIn0=; euconsent-v2=CP4RQoAP4RQoAAHABBENAiEgAAAAAAAAAB6YAAAAAADioAMAARBqKQAYAAiDUSgAwABEGodABgACINRCADAAEQagkAGAAIg1DIAMAARBqAAA.YAAAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}")
+//                    .addHeader("Cookie", "datadome=qxk8ELwDnjdUiX~02T6en3Kzic81WtXHrHNMDUz4PUtA4XSN7_JB9Xk1Cf~mN2ZaPszWL_Br6G6G7fmdcdTiJhBqgFYaWlTA5gof7942t83eIhI7C60r8MyIpBAUl2hR; itm_device_id=08658591-bbcd-4d03-9219-db4bf532a7bd; itm_usid=a02ca707-a700-4c4c-91e2-8864839266af; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}; datadome=V~gI1MmkrURswVESZMni4zB71SQkT56_8ogiSSA9HqAkBGDMEfCT2OJaONu87_Cmjwxh_YBjyZ9Ix_sTLcDAltKvje~k74x0r4GdLDPm8sojdAg_RaEj3itxAnYWIP8o")
                     .build();
 
 
@@ -1120,6 +1132,9 @@ public class ScraperServiceImpl implements ScraperService {
                 // Guardar produto
                 productRepository.save(product);
 
+                //Atualizar GenericProducts
+                genericProductsService.updateGenericProducts(product);
+
             }
 
 
@@ -1130,7 +1145,7 @@ public class ScraperServiceImpl implements ScraperService {
     }
 
 
-    public Product createOrGetProduct(String productName, String productQuantity, String productBrand, String imageUrl, Long chainId) {
+    private Product createOrGetProduct(String productName, String productQuantity, String productBrand, String imageUrl, Long chainId) {
         Product product = productRepository.findByAttributes(productName, productQuantity, productBrand, imageUrl, chainId);
         if (product == null) {
             product = new Product();
