@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import pt.upskill.groceryroutepro.entities.Price;
 import pt.upskill.groceryroutepro.entities.Chain;
 import pt.upskill.groceryroutepro.entities.GenericProduct;
 import pt.upskill.groceryroutepro.entities.Product;
@@ -27,7 +28,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "p.image_url AS imageUrl, " +
                     "p.name, " +
                     "p.quantity, " +
-                    "p.generic_product_id AS genericProductId, " +
                     "c.name AS chain, " +
                     "c.id AS chainId, " +
                     "pr.id AS priceId, " +

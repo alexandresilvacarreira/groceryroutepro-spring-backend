@@ -21,7 +21,19 @@ public class Chain {
     @JsonIgnore
     private List<Store> stores = new ArrayList<>();
 
+    @OneToOne
+    @JsonIgnore
+    private User user;
+
     public Chain() {
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Long getId() {

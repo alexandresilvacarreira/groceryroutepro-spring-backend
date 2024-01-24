@@ -156,6 +156,7 @@ public class Product {
         this.cheapestForGenericProduct = cheapestForGenericProduct;
     }
 
+
     @Override
     public String toString() {
         try {

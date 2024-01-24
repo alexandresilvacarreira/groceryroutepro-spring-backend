@@ -10,15 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import pt.upskill.groceryroutepro.entities.GenericProduct;
+import pt.upskill.groceryroutepro.entities.Category;
 import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.models.ProductData;
 import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.models.ProductWPriceList;
 import pt.upskill.groceryroutepro.models.Pagination;
 import pt.upskill.groceryroutepro.models.ProductDetails;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
+import pt.upskill.groceryroutepro.repositories.CategoryRepository;
 import pt.upskill.groceryroutepro.services.GenericProductsService;
 import pt.upskill.groceryroutepro.services.ProductsService;
 
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +32,9 @@ import java.util.Map;
 @Component
 @RequestMapping("/products")
 public class ProductsController {
+
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Autowired
     ProductsService productsService;
@@ -90,13 +97,33 @@ public class ProductsController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createProduct(@RequestBody Product product) {
+    public ResponseEntity createProduct(@RequestBody ProductData productData) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            Product createdProduct = productsService.createProduct(product);
-            return ResponseEntity.ok(createdProduct);
+            productsService.createProduct(productData);
+            response.put("success", true);
+            response.put("message", "Produto criado com sucesso");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            String errorMessage = "Erro ao criar o produto: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+            response.put("success", false);
+            response.put("message", "Erro ao criar produto");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity editProduct(@RequestBody ProductData productData) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            productsService.editProduct(productData);
+            response.put("success", true);
+            response.put("message", "Produto editado com sucesso");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Erro ao editar produto");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
@@ -194,4 +221,27 @@ public class ProductsController {
         }
     }
 
+
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return ResponseEntity.ok(categories);
+    }
+
+
 }
+
+//public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
+//        Map<String, Object> response = new HashMap<>();
+//        try {
+//            userService.createAccount(signUp);
+//            response.put("success", true);
+//            response.put("message", "Conta criada com sucesso");
+//            return ResponseEntity.ok(response);
+//        } catch (ValidationException e) {
+//            response.put("success", false);
+//            response.put("message", e.getMessage());
+//            return ResponseEntity.status(e.getStatusCode()).body(response);
+//        }
+//    }

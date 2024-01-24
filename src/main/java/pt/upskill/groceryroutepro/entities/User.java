@@ -63,6 +63,12 @@ public class User {
     @JoinColumn(name = "current_route_id")
     private Route currentRoute;
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Chain chain;
+
+
+
     public User() {
     }
 
@@ -96,6 +102,13 @@ public class User {
 
     public void setShoppingLists(List<ShoppingList> shoppingLists) {
         this.shoppingLists = shoppingLists;
+    }
+    public Chain getChain() {
+        return chain;
+    }
+
+    public void setChain(Chain chain) {
+        this.chain = chain;
     }
 
     public Long getId() {

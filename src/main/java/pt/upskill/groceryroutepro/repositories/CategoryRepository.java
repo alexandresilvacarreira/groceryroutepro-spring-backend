@@ -5,8 +5,12 @@ import org.springframework.stereotype.Repository;
 import pt.upskill.groceryroutepro.entities.Category;
 import pt.upskill.groceryroutepro.entities.Role;
 
+import java.util.List;
+import java.util.Set;
+
 @Repository
 public interface CategoryRepository extends JpaRepository<Category,Long> {
     Category findByName(String categoryName);
+
 
 }
