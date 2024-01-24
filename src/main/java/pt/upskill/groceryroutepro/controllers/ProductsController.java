@@ -99,16 +99,6 @@ public class ProductsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
         }
     }
-    @PostMapping("/merge-products")
-    public ResponseEntity mergeProducts() {
-        try {
-            genericProductsService.mergeProducts();
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
 
     @GetMapping("/generic-products/{genericProductId}")
     public ResponseEntity getGenericProduct(@PathVariable Long genericProductId) {
