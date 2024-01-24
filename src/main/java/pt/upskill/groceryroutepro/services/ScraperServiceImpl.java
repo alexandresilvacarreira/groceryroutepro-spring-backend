@@ -1084,7 +1084,7 @@ public class ScraperServiceImpl implements ScraperService {
             Map<String, Object> responseMap = jsonParser.parseMap(responseString);
 
             List<Map<String, Object>> products = (List<Map<String, Object>>) responseMap.get("produits");
-
+            if (products == null) return; // Quando não há produtos é porque enviam um captcha
             // Iterar produtos
             for (Map<String, Object> productData : products) {
 

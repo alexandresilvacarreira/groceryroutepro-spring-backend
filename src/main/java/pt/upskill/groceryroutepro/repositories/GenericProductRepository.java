@@ -20,19 +20,20 @@ public interface GenericProductRepository extends JpaRepository<GenericProduct, 
             "FROM " +
             "GenericProduct p " +
             "JOIN p.categories c " +
-            "JOIN p.chains ch " +
-            "WHERE (p.name LIKE %:search% " +
-            "OR p.brand LIKE %:search% " +
-            "OR p.processedName LIKE %:search% " +
-            "OR p.processedBrand LIKE %:search%)" +
+            "JOIN p.chains s " +
+            "WHERE (p.processedName LIKE CONCAT('%',:search,'%')" +
+            "OR p.processedBrand LIKE CONCAT('%',:search,'%'))" +
             "AND c.id IN :categoryIds " +
-            "AND ch.id IN :chainIds")
+            "AND s.id IN :chainIds" +
+            " GROUP BY p.id")
     Slice<GenericProduct> findGenericProductByParams(
             @Param("search") String search,
             @Param("categoryIds") List<Long> categoryIds,
             @Param("chainIds") List<Long> chainIds,
             Pageable pageable
     );
+
+
 
     List<GenericProduct> findAllByCurrentCheapestProductIsNull();
 

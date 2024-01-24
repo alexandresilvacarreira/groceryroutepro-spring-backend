@@ -27,6 +27,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "p.image_url AS imageUrl, " +
                     "p.name, " +
                     "p.quantity, " +
+                    "p.generic_product_id AS genericProductId, " +
                     "c.name AS chain, " +
                     "c.id AS chainId, " +
                     "pr.id AS priceId, " +

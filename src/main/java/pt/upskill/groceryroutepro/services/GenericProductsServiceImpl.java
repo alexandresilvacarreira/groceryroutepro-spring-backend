@@ -412,10 +412,10 @@ public class GenericProductsServiceImpl implements GenericProductsService {
 
     @Override
     public void updateGenericProducts(Product product) {
-        GenericProduct genericProduct = genericProductRepository.findById(product.getGenericProduct().getId()).get();
+        GenericProduct genericProduct = product.getGenericProduct();
         if (genericProduct != null) {
             // Se o produto já tem GenericProduct associado, temos apenas de verificar o preço
-            this.updateGenericProductPrice(genericProduct);
+            this.updateGenericProductPrice(genericProductRepository.findById(genericProduct.getId()).get());
         } else {
             // Se não existe, tentamos categorizar/criar novo produto
             this.matchToGenericProduct(product);

@@ -62,6 +62,7 @@ public class EmailServiceImpl implements EmailService {
                         "Equipa de apoio GroceryRoutePro";
             }
             message.setText(text);
+            System.out.println(text);
             emailSender.send(message);
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
