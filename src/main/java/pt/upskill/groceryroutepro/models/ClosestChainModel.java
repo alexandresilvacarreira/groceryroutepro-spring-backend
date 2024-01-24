@@ -3,7 +3,7 @@ package pt.upskill.groceryroutepro.models;
 public class ClosestChainModel {
     private String chain;
     private double dist;
-    private LatLng coordinates;
+    private LatLngName coordinates;
 
     public ClosestChainModel(String chain) {
         this.chain = chain;
@@ -25,11 +25,11 @@ public class ClosestChainModel {
         this.dist = dist;
     }
 
-    public LatLng getCoordinates() {
+    public LatLngName getCoordinates() {
         return coordinates;
     }
 
-    public void setCoordinates(LatLng coordinates) {
+    public void setCoordinates(LatLngName coordinates) {
         this.coordinates = coordinates;
     }
 }

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
+import pt.upskill.groceryroutepro.models.CreateRouteModel;
 import pt.upskill.groceryroutepro.models.LatLng;
+import pt.upskill.groceryroutepro.models.LatLngName;
 import pt.upskill.groceryroutepro.services.GoogleApiService;
 import pt.upskill.groceryroutepro.services.GoogleApiServiceImpl;
 import pt.upskill.groceryroutepro.services.UserService;
@@ -43,7 +45,7 @@ public class GoogleMapController {
 
 
     @PostMapping("/create-route")
-    public ResponseEntity createRoute(@RequestBody Map<String, LatLng> coordinates) {
+    public ResponseEntity createRoute(@RequestBody Map<String, LatLngName> coordinates) {
         Map<String, Object> response = new HashMap<>();
 
         User user = userService.getAuthenticatedUser();
@@ -51,12 +53,19 @@ public class GoogleMapController {
         //if (user == null) throw new BadRequestException("Utilizador não autenticado"); //TODO;
 
 
-        LatLng partida = coordinates.get("partida");
-        LatLng destino = coordinates.get("destino");
+        LatLngName partida = coordinates.get("partida");
+        partida.setNameLocation("Partida");
+        LatLngName destino = coordinates.get("destino");
+        destino.setNameLocation("Destino");
 
-        String routes = googleApiService.createRoute(partida, destino, user);
 
-        response.put("rotas",routes);
+        //por definição calculamos sempre o mais barato primeiro e depois o mais rappido
+
+        CreateRouteModel createdRoute = googleApiService.createRoute(partida, destino, user);
+
+        // fazer para a ooutra rota tbm
+
+        response.put("rotas",createdRoute);
 
         return ResponseEntity.ok(response);
     }

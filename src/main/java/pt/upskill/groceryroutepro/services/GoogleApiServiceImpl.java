@@ -6,15 +6,17 @@ import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.models.ClosestChainModel;
+import pt.upskill.groceryroutepro.models.CreateRouteModel;
 import pt.upskill.groceryroutepro.models.LatLng;
+import pt.upskill.groceryroutepro.models.LatLngName;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static pt.upskill.groceryroutepro.utils.Util.capitalizeEveryWord;
 
 @Service
 public class GoogleApiServiceImpl implements GoogleApiService {
@@ -63,17 +65,19 @@ public class GoogleApiServiceImpl implements GoogleApiService {
     }
 
     @Override
-    public String createRoute(LatLng partida, LatLng destino, User user) {
+    public CreateRouteModel createRoute(LatLngName partida, LatLngName destino, User user) {
+        //TODO MUDAR QUANDO RECEBER A SHOPPING LIST
+        Double shoppingListCost = 1000.99;
         //create route between partida and destino and return polyline
-        List<String> result = new ArrayList<>();
         String polyline = this.createAToBRoute(partida, destino);
 
         //User get chain from shopping list
         // create new list of chains
+        //TODO PASSAR PARA VARIAVEL NO METODO
 
         ArrayList<String> chains = new ArrayList<>();
-        chains.add("auchan");
-        chains.add("pingo doce");
+        chains.add(capitalizeEveryWord( "auchan"));
+        chains.add(capitalizeEveryWord("pingo doce"));
 
 
         List<LatLng> routeCoordinates = decodePolyline(polyline);
@@ -83,17 +87,25 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         ClosestChainModel[] closestChainModels = findClosestLocation(routeCoordinates, chains, partida, destino, 3000);
 
 
-        //create route based on the new waypoints and get polyline?
 
+        Map <String, Object> createRouteWithWaypointsResult =createRouteWithWaypoints(partida, destino, closestChainModels);
+
+        String finalPolyline = (String)createRouteWithWaypointsResult.get("polyline");
+        Integer totalTime = (Integer) createRouteWithWaypointsResult.get("totalTime");
+        ArrayList<LatLngName> markers = new ArrayList<>();
+        markers.add(partida);
         for (int i = 0; i < closestChainModels.length; i++) {
-            System.out.println("lat" + closestChainModels[i].getCoordinates());
+            markers.add(closestChainModels[i].getCoordinates());
         }
-        return createRouteWithWaypoints(partida, destino, closestChainModels);
+        markers.add(destino);
+
+        CreateRouteModel newRoute = new CreateRouteModel(finalPolyline, markers, totalTime, shoppingListCost);
+        return newRoute;
     }
 
     private ClosestChainModel[] findClosestLocation(List<LatLng> routeCoordinates, ArrayList<String> chainlist, LatLng partida, LatLng destino, double radius) {
         boolean allPlacesFound = true;
-        int count = 0;
+
         ClosestChainModel[] closestChainArray = new ClosestChainModel[chainlist.size()];
         for (int i = 0; i < closestChainArray.length; i++) {
             ClosestChainModel closestChainModel = new ClosestChainModel(chainlist.get(i));
@@ -112,11 +124,13 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             for (int i = 0; i < routeCoordinates.size(); i = i + adder) {
                 for (int j = 0; j < closestChainArray.length; j++) {
                     //Coordinate from the route chosen by the user
-                    LatLng newCoordinate = getPlaceCoordinate(closestChainArray[j].getChain(), routeCoordinates.get(i), radius);
+                    LatLngName newCoordinate = getPlaceCoordinate(closestChainArray[j].getChain(), routeCoordinates.get(i), radius);
+
 
                     if (newCoordinate != null) {
                         //calcular distancias das coordenadas à partida e ao destino
                         placeFound[j] = true;
+                        newCoordinate.setNameLocation(closestChainArray[j].getChain());
                         double distPartida = calculateHaversineDistance(newCoordinate.getLat(), newCoordinate.getLng(), partida.getLat(), partida.getLng());
                         double distDestino = calculateHaversineDistance(newCoordinate.getLat(), newCoordinate.getLng(), destino.getLat(), destino.getLng());
                         double total = distPartida + distDestino;
@@ -145,20 +159,18 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                 }
             }
 
-            //TODO APAGAR
 
-            count += 1;
-            System.out.println(count);
+
+
+
 
 
         } while (!allPlacesFound && radius <= 7000);
-        if (radius > 7000) {
+        if (radius > 7000) throw new BadRequestException("Não foi possível criar encontrar lojas na sua localização");
             // no places found in the 7 km range
-            //TODO fazer qualquer coisa BAD REQUEST?
-            String out = "não encontrou";
 
 
-        }
+
         return closestChainArray;
 
 
@@ -198,7 +210,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         return null;
     }
 
-    private String createRouteWithWaypoints(LatLng partida, LatLng destino, ClosestChainModel[] closestChainModels) {
+    private Map<String, Object> createRouteWithWaypoints(LatLng partida, LatLng destino, ClosestChainModel[] closestChainModels) {
         try {
 
             OkHttpClient client = new OkHttpClient();
@@ -239,7 +251,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
             String polyline = (String) ((Map<String, Object>) ((Map<String, Object>) ((List<Map<String, Object>>) responseMap.get("routes")).get(0)).get("overview_polyline")).get("points");
 
-            String replacedPolyline = polyline.replace("\\\\+", "\\\\");
+            String replacedPolyline = polyline;//.replace("\\\\+", "\\\\");
             System.out.println(replacedPolyline);
 
 
@@ -258,27 +270,29 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             Integer totalTime = 0;
 
             for (int i = 0; i < legs.size(); i++) {
-                Map<String, Object>  leg = legs.get(i);
+                Map<String, Object> leg = legs.get(i);
                 Map<String, Object> duration = (Map<String, Object>) leg.get("duration");
 
-                totalTime=totalTime+( (Integer) duration.get("value"));
-                System.out.println("leg"+i+": "+totalTime );
+                totalTime = totalTime + ((Integer) duration.get("value"));
+                System.out.println("leg" + i + ": " + totalTime);
             }
-
 
 
             // Access the "location" object
             System.out.println(totalTime);
 
+            Map<String, Object> results = new HashMap<>();
+            results.put("polyline",polyline);
+            results.put("totalTime", totalTime);
 
-            return replacedPolyline;
+            return results;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private LatLng getPlaceCoordinate(String chain, LatLng biasCoordinates, double radius) {
+    private LatLngName getPlaceCoordinate(String chain, LatLng biasCoordinates, double radius) {
         try {
 
             OkHttpClient client = new OkHttpClient();
@@ -327,7 +341,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                 Double lat = (Double) locationMap.get("lat");
                 Double lng = (Double) locationMap.get("lng");
 
-                LatLng location = new LatLng(lat, lng);
+                LatLngName location = new LatLngName(lat, lng);
 
                 return location;
             }
