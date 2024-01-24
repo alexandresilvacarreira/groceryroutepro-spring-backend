@@ -59,7 +59,27 @@ public class User {
     @JsonIgnore
     private List<Route> routes = new ArrayList<>();
 
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "current_route_id")
+    private Route currentRoute;
+
     public User() {
+    }
+
+    public List<Route> getRoutes() {
+        return routes;
+    }
+
+    public void setRoutes(List<Route> routes) {
+        this.routes = routes;
+    }
+
+    public Route getCurrentRoute() {
+        return currentRoute;
+    }
+
+    public void setCurrentRoute(Route currentRoute) {
+        this.currentRoute = currentRoute;
     }
 
     public ShoppingList getCurrentShoppingList() {

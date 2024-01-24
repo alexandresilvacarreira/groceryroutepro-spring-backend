@@ -55,7 +55,7 @@ public class GoogleMapController {
             partida.setNameLocation("Partida");
             LatLngName destino = coordinates.get("destino");
             destino.setNameLocation("Destino");
-            List<CreateRouteModel> rotas =googleApiService.generateRoutes(partida,destino);
+            List<CreateRouteModel> rotas = googleApiService.generateRoutes(partida,destino);
             response.put("rotas",rotas);
 
             return ResponseEntity.ok(response);

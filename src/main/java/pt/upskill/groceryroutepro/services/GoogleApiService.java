@@ -9,10 +9,5 @@ import java.util.List;
 
 public interface GoogleApiService {
 
-
-
-
-
-
     List<CreateRouteModel> generateRoutes(LatLngName partida, LatLngName Destino);
 }
