@@ -12,6 +12,7 @@ public class CreateRouteModel {
 
     private Double shoppingListCost;
 
+
     public CreateRouteModel(String polyline, ArrayList<LatLngName> coordenadasMarcadores, Integer totalTime, Double shoppingListCost) {
         this.polyline = polyline;
         this.coordenadasMarcadores = coordenadasMarcadores;

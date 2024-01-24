@@ -32,6 +32,9 @@ public class GoogleMapController {
     @Autowired
     UserService userService;
 
+
+
+
    /* @PostMapping("/get-polyline")
     public ResponseEntity getCoordinates(@RequestBody Map<String, String> polylineObject) {
         String polyline = polylineObject.get("polyline");
@@ -47,26 +50,21 @@ public class GoogleMapController {
     @PostMapping("/create-route")
     public ResponseEntity createRoute(@RequestBody Map<String, LatLngName> coordinates) {
         Map<String, Object> response = new HashMap<>();
+        try{
+            LatLngName partida = coordinates.get("partida");
+            partida.setNameLocation("Partida");
+            LatLngName destino = coordinates.get("destino");
+            destino.setNameLocation("Destino");
+            List<CreateRouteModel> rotas =googleApiService.generateRoutes(partida,destino);
+            response.put("rotas",rotas);
 
-        User user = userService.getAuthenticatedUser();
-
-        //if (user == null) throw new BadRequestException("Utilizador não autenticado"); //TODO;
-
-
-        LatLngName partida = coordinates.get("partida");
-        partida.setNameLocation("Partida");
-        LatLngName destino = coordinates.get("destino");
-        destino.setNameLocation("Destino");
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e){
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+        }
 
 
-        //por definição calculamos sempre o mais barato primeiro e depois o mais rappido
-
-        CreateRouteModel createdRoute = googleApiService.createRoute(partida, destino, user);
-
-        // fazer para a ooutra rota tbm
-
-        response.put("rotas",createdRoute);
-
-        return ResponseEntity.ok(response);
     }
 }

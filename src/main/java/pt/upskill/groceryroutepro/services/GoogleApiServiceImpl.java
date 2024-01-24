@@ -1,10 +1,13 @@
 package pt.upskill.groceryroutepro.services;
 
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
+import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.entities.ShoppingList;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.models.ClosestChainModel;
@@ -15,6 +18,7 @@ import pt.upskill.groceryroutepro.models.LatLngName;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static pt.upskill.groceryroutepro.utils.Util.capitalizeEveryWord;
 
@@ -24,8 +28,59 @@ public class GoogleApiServiceImpl implements GoogleApiService {
     @Value("${google.api.key}")
     private String googleKey;
 
+    @Autowired
+    UserService userService;
 
-    private List<LatLng> decodePolyline(String encodedPolyline) {
+    @Override
+    public List<CreateRouteModel> generateRoutes(LatLngName partida, LatLngName destino) {
+        User user = userService.getAuthenticatedUser();
+
+        if (user == null) throw new BadRequestException("Utilizador não autenticado");
+
+        //por definição calculamos sempre o mais barato primeiro e depois o mais rappido
+
+
+        ShoppingList shoppingList= user.getCurrentShoppingList();
+
+        List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
+                .map(c->c.getProduct().getChain().getName()).collect(Collectors.toList());
+
+        List<String> uniqueCheapestChainList = new ArrayList<>();
+        for (String cheapestChain : cheapestChainsList){
+            if (!uniqueCheapestChainList.contains(cheapestChain)){
+                uniqueCheapestChainList.add(cheapestChain);
+            }
+        }
+
+
+        List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
+                .map(c->c.getProduct().getChain().getName()).collect(Collectors.toList());
+
+        List<String> uniqueFastestChainList = new ArrayList<>();
+        for (String fastestChain : fastestChainsList){
+            if (!uniqueFastestChainList.contains(fastestChain)){
+                uniqueFastestChainList.add(fastestChain);
+            }
+        }
+
+
+
+        CreateRouteModel createdRouteCheapest = createRoute(partida, destino, uniqueCheapestChainList, shoppingList.getCheapestListCost());
+        CreateRouteModel createdRouteFastest = createRoute(partida, destino,uniqueFastestChainList, shoppingList.getFastestListCost());
+
+        // fazer para a ooutra rota tbm
+
+
+        List<CreateRouteModel> rotas =  new ArrayList<>();
+        rotas.add(createdRouteCheapest);
+        rotas.add(createdRouteFastest);
+
+        return  rotas;
+
+
+    }
+
+    private static List<LatLng> decodePolyline(String encodedPolyline) {
 
         List<LatLng> polylinePoints = new ArrayList<>();
         int index = 0;
@@ -64,8 +119,8 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         return polylinePoints;
     }
 
-    @Override
-    public CreateRouteModel createRoute(LatLngName partida, LatLngName destino, User user) {
+
+    public CreateRouteModel createRoute(LatLngName partida, LatLngName destino, List<String> chains, double totalCost) {
         //TODO MUDAR QUANDO RECEBER A SHOPPING LIST
         Double shoppingListCost = 1000.99;
         //create route between partida and destino and return polyline
@@ -75,9 +130,11 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         // create new list of chains
         //TODO PASSAR PARA VARIAVEL NO METODO
 
-        ArrayList<String> chains = new ArrayList<>();
-        chains.add(capitalizeEveryWord( "auchan"));
-        chains.add(capitalizeEveryWord("pingo doce"));
+
+
+
+
+
 
 
         List<LatLng> routeCoordinates = decodePolyline(polyline);
@@ -103,7 +160,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         return newRoute;
     }
 
-    private ClosestChainModel[] findClosestLocation(List<LatLng> routeCoordinates, ArrayList<String> chainlist, LatLng partida, LatLng destino, double radius) {
+    private ClosestChainModel[] findClosestLocation(List<LatLng> routeCoordinates, List<String> chainlist, LatLng partida, LatLng destino, double radius) {
         boolean allPlacesFound = true;
 
         ClosestChainModel[] closestChainArray = new ClosestChainModel[chainlist.size()];
@@ -238,7 +295,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                     waypoints +
                     "&key=" + googleKey;
 
-            System.out.println(url);
+
 
             Request request = new Request.Builder()
                     .url(url)
@@ -252,7 +309,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             String polyline = (String) ((Map<String, Object>) ((Map<String, Object>) ((List<Map<String, Object>>) responseMap.get("routes")).get(0)).get("overview_polyline")).get("points");
 
             String replacedPolyline = polyline;//.replace("\\\\+", "\\\\");
-            System.out.println(replacedPolyline);
+
 
 
             // calculate total time
@@ -274,12 +331,12 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                 Map<String, Object> duration = (Map<String, Object>) leg.get("duration");
 
                 totalTime = totalTime + ((Integer) duration.get("value"));
-                System.out.println("leg" + i + ": " + totalTime);
+
             }
 
 
             // Access the "location" object
-            System.out.println(totalTime);
+
 
             Map<String, Object> results = new HashMap<>();
             results.put("polyline",polyline);

@@ -12,5 +12,7 @@ public interface GoogleApiService {
 
 
 
-    CreateRouteModel createRoute(LatLngName partida, LatLngName Destino, User user);
+
+
+    List<CreateRouteModel> generateRoutes(LatLngName partida, LatLngName Destino);
 }

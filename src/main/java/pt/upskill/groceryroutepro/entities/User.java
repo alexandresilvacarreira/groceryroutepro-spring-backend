@@ -55,6 +55,10 @@ public class User {
     @JsonIgnore
     private List<ShoppingList> shoppingLists;
 
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Route> routes = new ArrayList<>();
+
     public User() {
     }
 
