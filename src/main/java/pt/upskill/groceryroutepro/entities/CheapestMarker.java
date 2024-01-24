@@ -2,14 +2,12 @@ package pt.upskill.groceryroutepro.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import pt.upskill.groceryroutepro.models.LatLngName;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 
 @Entity
-public class Marker {
+public class CheapestMarker {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -21,7 +19,7 @@ public class Marker {
     private double lng;
     private String label;
 
-    public Marker() {
+    public CheapestMarker() {
     }
 
     public Long getId() {

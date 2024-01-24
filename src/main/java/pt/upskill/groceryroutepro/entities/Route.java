@@ -2,10 +2,12 @@ package pt.upskill.groceryroutepro.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import pt.upskill.groceryroutepro.models.CreateRouteModel;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,7 +17,7 @@ public class Route {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime creationgDate;
+    private LocalDateTime creationDate;
     @ManyToOne
     @JsonIgnore
     private User user;
@@ -24,13 +26,25 @@ public class Route {
     @JsonIgnore
     private User currentRouteForUser;
     @OneToMany(mappedBy = "route")
-    private List<Marker> markers;
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<CheapestMarker> cheapestMarkers;
+
+    @OneToMany(mappedBy = "route")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<FastestMarker> fastestMarkers;
+    @Column(length = 5000)
     private String cheapestPolyline;
+    @Column(length = 5000)
     private String fastestPolyline;
     private int totalCheapestTime;
     private int totalFastestTime;
 
     public Route() {
+        this.creationDate=LocalDateTime.now();
+        List<CheapestMarker> listC =new ArrayList<>();
+        this.cheapestMarkers= listC;
+        List<FastestMarker> listF =new ArrayList<>();
+        this.fastestMarkers= listF;
     }
 
     public Long getId() {
@@ -41,12 +55,12 @@ public class Route {
         this.id = id;
     }
 
-    public LocalDateTime getCreationgDate() {
-        return creationgDate;
+    public LocalDateTime getCreationDate() {
+        return creationDate;
     }
 
-    public void setCreationgDate(LocalDateTime creationgDate) {
-        this.creationgDate = creationgDate;
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 
     public User getUser() {
@@ -65,12 +79,20 @@ public class Route {
         this.currentRouteForUser = currentRouteForUser;
     }
 
-    public List<Marker> getMarkers() {
-        return markers;
+    public List<CheapestMarker> getCheapestMarkers() {
+        return cheapestMarkers;
     }
 
-    public void setMarkers(List<Marker> markers) {
-        this.markers = markers;
+    public void setCheapestMarkers(List<CheapestMarker> cheapestMarkers) {
+        this.cheapestMarkers = cheapestMarkers;
+    }
+
+    public List<FastestMarker> getFastestMarkers() {
+        return fastestMarkers;
+    }
+
+    public void setFastestMarkers(List<FastestMarker> fastestMarkers) {
+        this.fastestMarkers = fastestMarkers;
     }
 
     public String getCheapestPolyline() {

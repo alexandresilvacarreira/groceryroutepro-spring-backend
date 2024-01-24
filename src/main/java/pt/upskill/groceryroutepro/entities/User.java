@@ -2,6 +2,8 @@ package pt.upskill.groceryroutepro.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 
 import javax.persistence.*;
@@ -58,6 +60,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Route> routes = new ArrayList<>();
 
     @OneToOne(cascade = {CascadeType.ALL})

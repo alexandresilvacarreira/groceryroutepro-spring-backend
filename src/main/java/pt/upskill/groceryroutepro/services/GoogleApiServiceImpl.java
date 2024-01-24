@@ -6,21 +6,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
-import pt.upskill.groceryroutepro.entities.Product;
-import pt.upskill.groceryroutepro.entities.ShoppingList;
-import pt.upskill.groceryroutepro.entities.User;
+import pt.upskill.groceryroutepro.entities.*;
+import pt.upskill.groceryroutepro.entities.Route;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.models.ClosestChainModel;
 import pt.upskill.groceryroutepro.models.CreateRouteModel;
 import pt.upskill.groceryroutepro.models.LatLng;
 import pt.upskill.groceryroutepro.models.LatLngName;
+import pt.upskill.groceryroutepro.repositories.CheapestMarkerRepository;
+import pt.upskill.groceryroutepro.repositories.FastestMarkerRepository;
+import pt.upskill.groceryroutepro.repositories.RouteRepository;
+import pt.upskill.groceryroutepro.repositories.UserRepository;
 
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static pt.upskill.groceryroutepro.utils.Util.capitalizeEveryWord;
 
 @Service
 public class GoogleApiServiceImpl implements GoogleApiService {
@@ -31,6 +32,17 @@ public class GoogleApiServiceImpl implements GoogleApiService {
     @Autowired
     UserService userService;
 
+    @Autowired
+    RouteRepository routeRepository;
+
+    @Autowired
+    CheapestMarkerRepository cheapestMarkerRepository;
+    @Autowired
+    FastestMarkerRepository fastestMarkerRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
     @Override
     public List<CreateRouteModel> generateRoutes(LatLngName partida, LatLngName destino) {
         User user = userService.getAuthenticatedUser();
@@ -40,8 +52,12 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         //por definição calculamos sempre o mais barato primeiro e depois o mais rappido
 
 
+
+
+
         ShoppingList shoppingList= user.getCurrentShoppingList();
 
+        if (shoppingList==null) throw new BadRequestException("A tua lista de compras não tem produtos");
         List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
                 .map(c->c.getProduct().getChain().getName()).collect(Collectors.toList());
 
@@ -74,6 +90,53 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         List<CreateRouteModel> rotas =  new ArrayList<>();
         rotas.add(createdRouteCheapest);
         rotas.add(createdRouteFastest);
+
+        //saving route in repository
+        Route route = new Route();
+        //set user
+        route.setUser(user);
+        //set polylines
+        route.setCheapestPolyline(createdRouteCheapest.getPolyline());
+        route.setFastestPolyline(createdRouteFastest.getPolyline());
+        //total time
+        route.setTotalCheapestTime(createdRouteCheapest.getTotalTime());
+        route.setTotalFastestTime(createdRouteFastest.getTotalTime());
+
+
+        user.getRoutes().add(route);
+        userRepository.save(user);
+        routeRepository.save(route);
+
+        //Markers cheapest
+        for (int i = 0; i < createdRouteCheapest.getCoordenadasMarcadores().size(); i++) {
+            CheapestMarker cheapestMarker= new CheapestMarker();
+            cheapestMarker.setLat(createdRouteCheapest.getCoordenadasMarcadores().get(i).getLat());
+            cheapestMarker.setLng(createdRouteCheapest.getCoordenadasMarcadores().get(i).getLng());
+            cheapestMarker.setLabel(createdRouteCheapest.getCoordenadasMarcadores().get(i).getNameLocation());
+            cheapestMarker.setRoute(route);
+
+            cheapestMarkerRepository.save(cheapestMarker);
+            route.getCheapestMarkers().add(cheapestMarker);
+        }
+        //markers fastest
+        for (int i = 0; i < createdRouteFastest.getCoordenadasMarcadores().size(); i++) {
+            FastestMarker fastestMarker= new FastestMarker();
+            fastestMarker.setLat(createdRouteFastest.getCoordenadasMarcadores().get(i).getLat());
+            fastestMarker.setLng(createdRouteFastest.getCoordenadasMarcadores().get(i).getLng());
+            fastestMarker.setLabel(createdRouteFastest.getCoordenadasMarcadores().get(i).getNameLocation());
+            fastestMarker.setRoute(route);
+
+            fastestMarkerRepository.save(fastestMarker);
+            route.getFastestMarkers().add(fastestMarker);
+        }
+
+        user.getRoutes().add(route);
+        routeRepository.save(route);
+        userRepository.save(user);
+
+
+        //TODO current user???? que isto?
+
 
         return  rotas;
 
@@ -122,7 +185,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
     public CreateRouteModel createRoute(LatLngName partida, LatLngName destino, List<String> chains, double totalCost) {
         //TODO MUDAR QUANDO RECEBER A SHOPPING LIST
-        Double shoppingListCost = 1000.99;
+
         //create route between partida and destino and return polyline
         String polyline = this.createAToBRoute(partida, destino);
 
@@ -156,7 +219,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         }
         markers.add(destino);
 
-        CreateRouteModel newRoute = new CreateRouteModel(finalPolyline, markers, totalTime, shoppingListCost);
+        CreateRouteModel newRoute = new CreateRouteModel(finalPolyline, markers, totalTime, totalCost);
         return newRoute;
     }
 
