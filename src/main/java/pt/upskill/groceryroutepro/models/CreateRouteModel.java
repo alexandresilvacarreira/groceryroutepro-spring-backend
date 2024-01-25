@@ -1,6 +1,7 @@
 package pt.upskill.groceryroutepro.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CreateRouteModel {
 
@@ -12,12 +13,16 @@ public class CreateRouteModel {
 
     private Double shoppingListCost;
 
+    private List<LatLng> vertices;
+
+
 
     public CreateRouteModel(String polyline, ArrayList<LatLngName> coordenadasMarcadores, Integer totalTime, Double shoppingListCost) {
         this.polyline = polyline;
         this.coordenadasMarcadores = coordenadasMarcadores;
         this.totalTime = totalTime;
         this.shoppingListCost = shoppingListCost;
+        this.vertices=new ArrayList<>();
     }
 
     public String getPolyline() {
@@ -51,4 +56,13 @@ public class CreateRouteModel {
     public void setShoppingListCost(Double shoppingListCost) {
         this.shoppingListCost = shoppingListCost;
     }
+
+    public List<LatLng> getVertices() {
+        return vertices;
+    }
+
+    public void setVertices(List<LatLng> vertices) {
+        this.vertices = vertices;
+    }
+
 }

@@ -10,6 +10,7 @@ public class LatLngName extends LatLng{
     }
 
 
+
     public String getNameLocation() {
         return nameLocation;
     }

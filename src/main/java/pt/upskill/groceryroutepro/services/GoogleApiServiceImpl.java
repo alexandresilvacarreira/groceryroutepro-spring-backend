@@ -52,42 +52,37 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         //por definição calculamos sempre o mais barato primeiro e depois o mais rappido
 
 
+        ShoppingList shoppingList = user.getCurrentShoppingList();
 
-
-
-        ShoppingList shoppingList= user.getCurrentShoppingList();
-
-        if (shoppingList==null) throw new BadRequestException("A tua lista de compras não tem produtos");
+        if (shoppingList == null) throw new BadRequestException("A tua lista de compras não tem produtos");
         List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
-                .map(c->c.getProduct().getChain().getName()).collect(Collectors.toList());
+                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
 
         List<String> uniqueCheapestChainList = new ArrayList<>();
-        for (String cheapestChain : cheapestChainsList){
-            if (!uniqueCheapestChainList.contains(cheapestChain)){
+        for (String cheapestChain : cheapestChainsList) {
+            if (!uniqueCheapestChainList.contains(cheapestChain)) {
                 uniqueCheapestChainList.add(cheapestChain);
             }
         }
 
 
         List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
-                .map(c->c.getProduct().getChain().getName()).collect(Collectors.toList());
+                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
 
         List<String> uniqueFastestChainList = new ArrayList<>();
-        for (String fastestChain : fastestChainsList){
-            if (!uniqueFastestChainList.contains(fastestChain)){
+        for (String fastestChain : fastestChainsList) {
+            if (!uniqueFastestChainList.contains(fastestChain)) {
                 uniqueFastestChainList.add(fastestChain);
             }
         }
 
 
-
         CreateRouteModel createdRouteCheapest = createRoute(partida, destino, uniqueCheapestChainList, shoppingList.getCheapestListCost());
-        CreateRouteModel createdRouteFastest = createRoute(partida, destino,uniqueFastestChainList, shoppingList.getFastestListCost());
-
-        // fazer para a ooutra rota tbm
+        CreateRouteModel createdRouteFastest = createRoute(partida, destino, uniqueFastestChainList, shoppingList.getFastestListCost());
 
 
-        List<CreateRouteModel> rotas =  new ArrayList<>();
+
+        List<CreateRouteModel> rotas = new ArrayList<>();
         rotas.add(createdRouteCheapest);
         rotas.add(createdRouteFastest);
 
@@ -101,6 +96,9 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         //total time
         route.setTotalCheapestTime(createdRouteCheapest.getTotalTime());
         route.setTotalFastestTime(createdRouteFastest.getTotalTime());
+        //total cost
+        route.setTotalCheapestCost(createdRouteCheapest.getShoppingListCost());
+        route.setTotalFastestCost(createdRouteFastest.getShoppingListCost());
 
 
         user.getRoutes().add(route);
@@ -109,7 +107,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
         //Markers cheapest
         for (int i = 0; i < createdRouteCheapest.getCoordenadasMarcadores().size(); i++) {
-            CheapestMarker cheapestMarker= new CheapestMarker();
+            CheapestMarker cheapestMarker = new CheapestMarker();
             cheapestMarker.setLat(createdRouteCheapest.getCoordenadasMarcadores().get(i).getLat());
             cheapestMarker.setLng(createdRouteCheapest.getCoordenadasMarcadores().get(i).getLng());
             cheapestMarker.setLabel(createdRouteCheapest.getCoordenadasMarcadores().get(i).getNameLocation());
@@ -120,7 +118,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         }
         //markers fastest
         for (int i = 0; i < createdRouteFastest.getCoordenadasMarcadores().size(); i++) {
-            FastestMarker fastestMarker= new FastestMarker();
+            FastestMarker fastestMarker = new FastestMarker();
             fastestMarker.setLat(createdRouteFastest.getCoordenadasMarcadores().get(i).getLat());
             fastestMarker.setLng(createdRouteFastest.getCoordenadasMarcadores().get(i).getLng());
             fastestMarker.setLabel(createdRouteFastest.getCoordenadasMarcadores().get(i).getNameLocation());
@@ -138,7 +136,65 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         //TODO current user???? que isto?
 
 
-        return  rotas;
+        return rotas;
+
+
+    }
+
+    @Override
+    public List<CreateRouteModel> getRoutes() {
+        User user = userService.getAuthenticatedUser();
+
+        if (user == null) throw new BadRequestException("Utilizador não autenticado");
+        //get last
+        Route routes = user.getRoutes().get(user.getRoutes().size()-1);
+
+        List<CreateRouteModel> routesObject = new ArrayList<>();
+
+
+        //Cheapest route getting into dto
+        ArrayList<LatLngName> cheapestMarkers = new ArrayList<>();
+        for (int i = 0; i < routes.getCheapestMarkers().size(); i++) {
+
+            LatLngName cheapestMarker = new LatLngName(routes.getCheapestMarkers().get(i).getLat(),
+                    routes.getCheapestMarkers().get(i).getLng());
+            cheapestMarker.setNameLocation(routes.getCheapestMarkers().get(i).getLabel());
+            cheapestMarkers.add(cheapestMarker);
+        }
+
+        CreateRouteModel cheapestRoute = new CreateRouteModel(routes.getCheapestPolyline(),cheapestMarkers,
+                routes.getTotalCheapestTime(),routes.getTotalCheapestCost());
+
+        List<LatLng> cheapestVertices = decodePolyline(routes.getCheapestPolyline());
+        cheapestRoute.setVertices(cheapestVertices);
+        routesObject.add(cheapestRoute);
+
+        //Fastets route getting into Dto
+
+
+        ArrayList<LatLngName> fastestMarkers = new ArrayList<>();
+        for (int i = 0; i < routes.getFastestMarkers().size(); i++) {
+
+            LatLngName fastestMarker = new LatLngName(routes.getFastestMarkers().get(i).getLat(),
+                    routes.getFastestMarkers().get(i).getLng());
+            fastestMarker.setNameLocation(routes.getFastestMarkers().get(i).getLabel());
+            cheapestMarkers.add(fastestMarker);
+        }
+
+        CreateRouteModel fastestRoute = new CreateRouteModel(routes.getFastestPolyline(),fastestMarkers,
+                routes.getTotalFastestTime(),routes.getTotalFastestCost());
+
+        List<LatLng> fastestVertices = decodePolyline(routes.getFastestPolyline());
+        fastestRoute.setVertices(fastestVertices);
+        routesObject.add(fastestRoute);
+
+
+        //polyline
+        //vertices
+        //totalTime
+        //Markers
+
+        return routesObject;
 
 
     }
@@ -194,12 +250,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         //TODO PASSAR PARA VARIAVEL NO METODO
 
 
-
-
-
-
-
-
         List<LatLng> routeCoordinates = decodePolyline(polyline);
         // ciclo forpara introduzir modulos
 
@@ -207,10 +257,9 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         ClosestChainModel[] closestChainModels = findClosestLocation(routeCoordinates, chains, partida, destino, 3000);
 
 
+        Map<String, Object> createRouteWithWaypointsResult = createRouteWithWaypoints(partida, destino, closestChainModels);
 
-        Map <String, Object> createRouteWithWaypointsResult =createRouteWithWaypoints(partida, destino, closestChainModels);
-
-        String finalPolyline = (String)createRouteWithWaypointsResult.get("polyline");
+        String finalPolyline = (String) createRouteWithWaypointsResult.get("polyline");
         Integer totalTime = (Integer) createRouteWithWaypointsResult.get("totalTime");
         ArrayList<LatLngName> markers = new ArrayList<>();
         markers.add(partida);
@@ -280,15 +329,9 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             }
 
 
-
-
-
-
-
         } while (!allPlacesFound && radius <= 7000);
         if (radius > 7000) throw new BadRequestException("Não foi possível criar encontrar lojas na sua localização");
-            // no places found in the 7 km range
-
+        // no places found in the 7 km range
 
 
         return closestChainArray;
@@ -359,7 +402,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                     "&key=" + googleKey;
 
 
-
             Request request = new Request.Builder()
                     .url(url)
                     .build();
@@ -372,7 +414,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             String polyline = (String) ((Map<String, Object>) ((Map<String, Object>) ((List<Map<String, Object>>) responseMap.get("routes")).get(0)).get("overview_polyline")).get("points");
 
             String replacedPolyline = polyline;//.replace("\\\\+", "\\\\");
-
 
 
             // calculate total time
@@ -402,7 +443,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
 
             Map<String, Object> results = new HashMap<>();
-            results.put("polyline",polyline);
+            results.put("polyline", polyline);
             results.put("totalTime", totalTime);
 
             return results;

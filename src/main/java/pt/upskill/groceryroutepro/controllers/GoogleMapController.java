@@ -3,10 +3,7 @@ package pt.upskill.groceryroutepro.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.exceptions.ValidationException;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
@@ -56,7 +53,10 @@ public class GoogleMapController {
             LatLngName destino = coordinates.get("destino");
             destino.setNameLocation("Destino");
             List<CreateRouteModel> rotas = googleApiService.generateRoutes(partida,destino);
-            response.put("rotas",rotas);
+
+            response.put("success", true);
+            response.put("message", "Rotas criadas com sucesso");
+            //response.put("rotas",rotas);
 
             return ResponseEntity.ok(response);
         } catch (ValidationException e){
@@ -64,7 +64,22 @@ public class GoogleMapController {
             response.put("message", e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(response);
         }
+    }
 
+    @GetMapping("/get-route")
+    public ResponseEntity getRoute(){
+        Map<String, Object> response = new HashMap<>();
+        try{
 
+            List<CreateRouteModel> rotas = googleApiService.getRoutes();
+            response.put("success", true);
+            response.put("rotas", rotas);
+            return ResponseEntity.ok(response);
+        } catch (ValidationException e){
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(response);
+
+        }
     }
 }

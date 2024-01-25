@@ -39,6 +39,9 @@ public class Route {
     private int totalCheapestTime;
     private int totalFastestTime;
 
+    private double totalCheapestCost;
+    private double totalFastestCost;
+
     public Route() {
         this.creationDate=LocalDateTime.now();
         List<CheapestMarker> listC =new ArrayList<>();
@@ -125,5 +128,21 @@ public class Route {
 
     public void setTotalFastestTime(int totalFastestTime) {
         this.totalFastestTime = totalFastestTime;
+    }
+
+    public double getTotalCheapestCost() {
+        return totalCheapestCost;
+    }
+
+    public void setTotalCheapestCost(double totalCheapestCost) {
+        this.totalCheapestCost = totalCheapestCost;
+    }
+
+    public double getTotalFastestCost() {
+        return totalFastestCost;
+    }
+
+    public void setTotalFastestCost(double totalFastestCost) {
+        this.totalFastestCost = totalFastestCost;
     }
 }
