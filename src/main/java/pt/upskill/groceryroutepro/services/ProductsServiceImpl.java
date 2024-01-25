@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import pt.upskill.groceryroutepro.entities.Category;
 import pt.upskill.groceryroutepro.entities.Price;
 import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.models.ProductData;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.repositories.*;
@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Double.parseDouble;
-import static java.lang.Integer.parseInt;
 
 @Service
 public class ProductsServiceImpl implements ProductsService {
@@ -43,6 +42,7 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public void createProduct(ProductData productData) {
 
+
         Product product = new Product();
 
         product.setName(productData.getProduct().getName());
@@ -64,21 +64,34 @@ public class ProductsServiceImpl implements ProductsService {
         price.setPriceWoDiscount(productData.getPrice().getPriceWoDiscount());
         price.setCollectionDate(LocalDateTime.now());
 
-        if (!productData.getPrice().getPriceWoDiscount().isEmpty()) {
-            double a = parseDouble(productData.getPrice().getPriceWoDiscount());
-            double b = productData.getPrice().getPrimaryValue();
+        double a = parseDouble(productData.getPrice().getPriceWoDiscount());
+        double b = productData.getPrice().getPrimaryValue();
+
+        if (productData.getPrice().getPriceWoDiscount().isEmpty()) {
+            price.setProduct(product);
+
+            List<Price> prices = new ArrayList<>();
+            prices.add(price);
+            product.setPrices(prices);
+
+            productRepository.save(product);
+
+        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty() && a > b) {
+
             price.setDiscountPercentage((int) Math.round((a - b) * 100 / a));
+
+            price.setProduct(product);
+
+            List<Price> prices = new ArrayList<>();
+            prices.add(price);
+            product.setPrices(prices);
+
+            productRepository.save(product);
+
+        } else {
+            throw new BadRequestException("Produto com dados incorrectos");
         }
-
-        price.setProduct(product);
-
-        List<Price> prices = new ArrayList<>();
-        prices.add(price);
-        product.setPrices(prices);
-
-        productRepository.save(product);
     }
-
 
     public void editProduct(ProductData productData) {
 
@@ -106,18 +119,32 @@ public class ProductsServiceImpl implements ProductsService {
         price.setPriceWoDiscount(productData.getPrice().getPriceWoDiscount());
         price.setCollectionDate(LocalDateTime.now());
 
-        if (!productData.getPrice().getPriceWoDiscount().isEmpty()) {
-            double a = parseDouble(productData.getPrice().getPriceWoDiscount());
-            double b = productData.getPrice().getPrimaryValue();
+        double a = parseDouble(productData.getPrice().getPriceWoDiscount());
+        double b = productData.getPrice().getPrimaryValue();
+
+        if (productData.getPrice().getPriceWoDiscount().isEmpty()) {
+            price.setProduct(product);
+
+            List<Price> prices = new ArrayList<>();
+            prices.add(price);
+            product.setPrices(prices);
+
+            productRepository.save(product);
+
+        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty() && a > b) {
+
             price.setDiscountPercentage((int) Math.round((a - b) * 100 / a));
+
+            price.setProduct(product);
+
+            List<Price> prices = new ArrayList<>();
+            prices.add(price);
+            product.setPrices(prices);
+
+            productRepository.save(product);
+
+        } else {
+            throw new BadRequestException("Produto com dados incorrectos");
         }
-
-        price.setProduct(product);
-
-        List<Price> prices = new ArrayList<>();
-        prices.add(price);
-        product.setPrices(prices);
-
-        productRepository.save(product);
     }
 }
