@@ -48,8 +48,8 @@ public class GenericProductsServiceImpl implements GenericProductsService {
     }
 
     @Override
-    public Slice<GenericProduct> getGenericProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable) {
-        Slice<GenericProduct> genericProducts = genericProductRepository.findGenericProductByParams(search, categoryIds, chainIds, pageable);
+    public Slice<GenericProduct> getGenericProductsByParams(String search, String processedSearch, List<Long> categoryIds, List<Long> chainIds, Pageable pageable) {
+        Slice<GenericProduct> genericProducts = genericProductRepository.findGenericProductByParams(search, processedSearch, categoryIds, chainIds, pageable);
         if (genericProducts == null) throw new BadRequestException("Erro ao obter produtos.");
         return genericProducts;
     }

@@ -126,10 +126,10 @@ public class ScraperController {
     public ResponseEntity<String> scrapeAllChains() {
         try {
             this.scraperService.scrapeIntermarcheAll();
+            this.scraperService.scrapePingoDoceAll();
+            this.scraperService.scrapeMiniprecoAll();
             this.scraperService.scrapeContinenteAll();
             this.scraperService.scrapeAuchanAll();
-            this.scraperService.scrapeMiniprecoAll();
-            this.scraperService.scrapePingoDoceAll();
             return ResponseEntity.ok("Produtos guardados com sucesso");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());

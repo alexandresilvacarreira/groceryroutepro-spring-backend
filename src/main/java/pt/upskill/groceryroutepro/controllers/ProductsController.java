@@ -159,7 +159,7 @@ public class ProductsController {
         String processedSearch = search.toLowerCase().replaceAll("\\s","");
 
         try {
-            Slice<GenericProduct> genericProducts = genericProductsService.getGenericProductsByParams(processedSearch, categories, chains, pageable);
+            Slice<GenericProduct> genericProducts = genericProductsService.getGenericProductsByParams(search, processedSearch, categories, chains, pageable);
             Map<String, Object> data = new HashMap<>();
             data.put("genericProducts", genericProducts.getContent());
             data.put("pagination", new Pagination(genericProducts.getNumber(), genericProducts.getNumberOfElements(), genericProducts.hasNext(), genericProducts.hasPrevious()));

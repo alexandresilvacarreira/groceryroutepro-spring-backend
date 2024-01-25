@@ -17,7 +17,7 @@ public interface GenericProductsService {
 
     GenericProduct getGenericProductById(Long genericProductId);
 
-    Slice<GenericProduct> getGenericProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable);
+    Slice<GenericProduct> getGenericProductsByParams(String search, String processedSearch, List<Long> categoryIds, List<Long> chainIds, Pageable pageable);
 
     void updateGenericProducts(Product product);
 
