@@ -15,6 +15,12 @@ public class CreateRouteModel {
 
     private List<LatLng> vertices;
 
+    private List<Long> ChainIdList;
+    private List<String> ChainNameList;
+
+
+
+
 
 
     public CreateRouteModel(String polyline, ArrayList<LatLngName> coordenadasMarcadores, Integer totalTime, Double shoppingListCost) {
@@ -64,5 +70,22 @@ public class CreateRouteModel {
     public void setVertices(List<LatLng> vertices) {
         this.vertices = vertices;
     }
+
+    public List<Long> getChainIdList() {
+        return ChainIdList;
+    }
+
+    public void setChainIdList(List<Long> chainIdList) {
+        ChainIdList = chainIdList;
+    }
+
+    public List<String> getChainNameList() {
+        return ChainNameList;
+    }
+
+    public void setChainNameList(List<String> chainNameList) {
+        ChainNameList = chainNameList;
+    }
+
 
 }

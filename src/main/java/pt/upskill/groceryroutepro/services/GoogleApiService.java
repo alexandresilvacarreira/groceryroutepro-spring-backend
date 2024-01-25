@@ -12,4 +12,5 @@ public interface GoogleApiService {
     List<CreateRouteModel> generateRoutes(LatLngName partida, LatLngName Destino);
 
     List<CreateRouteModel> getRoutes();
+    boolean checkShoppingList();
 }

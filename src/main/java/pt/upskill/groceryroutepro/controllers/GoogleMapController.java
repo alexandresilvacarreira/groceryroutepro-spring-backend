@@ -71,11 +71,21 @@ public class GoogleMapController {
         Map<String, Object> response = new HashMap<>();
         try{
 
-            List<CreateRouteModel> rotas = googleApiService.getRoutes();
-            response.put("success", true);
-            response.put("rotas", rotas);
+            List<CreateRouteModel> routes = googleApiService.getRoutes();
+            Map<String, Object> data = new HashMap<>();
+            data.put("routes", routes);
+            if (googleApiService.checkShoppingList()){
+                response.put("success", true);
+            } else {
+                response.put("sucess", false);
+                response.put("message", "Existem alteraçãoes na lista de compras, poderá ser necessário gerar nova rota");
+            }
+
+
+            response.put("data", data);
             return ResponseEntity.ok(response);
         } catch (ValidationException e){
+            e.printStackTrace();
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(response);
