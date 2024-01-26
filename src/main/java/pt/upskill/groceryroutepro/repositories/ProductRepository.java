@@ -20,7 +20,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.name = :productName AND p.quantity = :productQuantity AND p.brand = :productBrand AND p.imageUrl = :productImageUrl AND p.chain.id = :chainId")
     Product findByAttributes(String productName, String productQuantity, String productBrand, String productImageUrl, Long chainId);
 
-
     @Query(nativeQuery = true, value =
             "SELECT " +
                     "p.id AS productId, " +
@@ -28,6 +27,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     "p.image_url AS imageUrl, " +
                     "p.name, " +
                     "p.quantity, " +
+                    "p.generic_product_id AS genericProductId, " +
                     "c.name AS chain, " +
                     "c.id AS chainId, " +
                     "pr.id AS priceId, " +
