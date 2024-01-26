@@ -149,107 +149,109 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         if (user == null) throw new BadRequestException("Utilizador não autenticado");
         //get last
         Route routes = user.getCurrentRoute();
-
-        if (routes == null) throw new BadRequestException("Não existem rotas criadas");
         List<CreateRouteModel> routesObject = new ArrayList<>();
+        if (routes != null) {
 
-        // getting chain ids
-        ShoppingList shoppingList = user.getCurrentShoppingList();
 
-        List<Long> cheapestChainsIdList = shoppingList.getCheapestProductQuantities().stream()
-                .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
-        List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
-                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
+            // getting chain ids
+            ShoppingList shoppingList = user.getCurrentShoppingList();
 
-        List<Long> uniqueCheapestIdChainList = new ArrayList<>();
-        List<String> uniqueCheapestChainList = new ArrayList<>();
-        for (Long cheapestChain : cheapestChainsIdList) {
-            if (!uniqueCheapestIdChainList.contains(cheapestChain)) {
-                uniqueCheapestIdChainList.add(cheapestChain);
+            List<Long> cheapestChainsIdList = shoppingList.getCheapestProductQuantities().stream()
+                    .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
+            List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
+                    .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
+
+            List<Long> uniqueCheapestIdChainList = new ArrayList<>();
+            List<String> uniqueCheapestChainList = new ArrayList<>();
+            for (Long cheapestChain : cheapestChainsIdList) {
+                if (!uniqueCheapestIdChainList.contains(cheapestChain)) {
+                    uniqueCheapestIdChainList.add(cheapestChain);
+                }
             }
-        }
-        for (String cheapestChain : cheapestChainsList) {
-            if (!uniqueCheapestChainList.contains(cheapestChain)) {
-                uniqueCheapestChainList.add(cheapestChain);
+            for (String cheapestChain : cheapestChainsList) {
+                if (!uniqueCheapestChainList.contains(cheapestChain)) {
+                    uniqueCheapestChainList.add(cheapestChain);
+                }
             }
-        }
 
-        List<Long> fastestChainsIdList = shoppingList.getFastestProductQuantities().stream()
-                .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
-        List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
-                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
+            List<Long> fastestChainsIdList = shoppingList.getFastestProductQuantities().stream()
+                    .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
+            List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
+                    .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
 
-        List<Long> uniqueFastestChainIdList = new ArrayList<>();
-        List<String> uniqueFastestChainNameList = new ArrayList<>();
-        for (Long fastestChain : fastestChainsIdList) {
-            if (!uniqueFastestChainIdList.contains(fastestChain)) {
-                uniqueFastestChainIdList.add(fastestChain);
+            List<Long> uniqueFastestChainIdList = new ArrayList<>();
+            List<String> uniqueFastestChainNameList = new ArrayList<>();
+            for (Long fastestChain : fastestChainsIdList) {
+                if (!uniqueFastestChainIdList.contains(fastestChain)) {
+                    uniqueFastestChainIdList.add(fastestChain);
+                }
             }
-        }
 
-        for (String fastestChain : fastestChainsList) {
-            if (!uniqueFastestChainNameList.contains(fastestChain)) {
-                uniqueFastestChainNameList.add(fastestChain);
+            for (String fastestChain : fastestChainsList) {
+                if (!uniqueFastestChainNameList.contains(fastestChain)) {
+                    uniqueFastestChainNameList.add(fastestChain);
+                }
             }
+            //cheapest
+
+
+
+
+
+
+
+
+            //Cheapest route getting into dto
+            ArrayList<LatLngName> cheapestMarkers = new ArrayList<>();
+            for (int i = 0; i < routes.getCheapestMarkers().size(); i++) {
+
+                LatLngName cheapestMarker = new LatLngName(routes.getCheapestMarkers().get(i).getLat(),
+                        routes.getCheapestMarkers().get(i).getLng());
+                cheapestMarker.setNameLocation(routes.getCheapestMarkers().get(i).getLabel());
+                cheapestMarkers.add(cheapestMarker);
+            }
+
+            CreateRouteModel cheapestRoute = new CreateRouteModel(routes.getCheapestPolyline(),cheapestMarkers,
+                    routes.getTotalCheapestTime(),routes.getTotalCheapestCost());
+
+            List<LatLng> cheapestVertices = decodePolyline(routes.getCheapestPolyline());
+            cheapestRoute.setVertices(cheapestVertices);
+            routesObject.add(cheapestRoute);
+
+            //Fastets route getting into Dto
+
+            ArrayList<LatLngName> fastestMarkers = new ArrayList<>();
+            for (int i = 0; i < routes.getFastestMarkers().size(); i++) {
+
+                LatLngName fastestMarker = new LatLngName(routes.getFastestMarkers().get(i).getLat(),
+                        routes.getFastestMarkers().get(i).getLng());
+                fastestMarker.setNameLocation(routes.getFastestMarkers().get(i).getLabel());
+                cheapestMarkers.add(fastestMarker);
+            }
+
+            CreateRouteModel fastestRoute = new CreateRouteModel(routes.getFastestPolyline(),fastestMarkers,
+                    routes.getTotalFastestTime(),routes.getTotalFastestCost());
+
+            List<LatLng> fastestVertices = decodePolyline(routes.getFastestPolyline());
+            fastestRoute.setVertices(fastestVertices);
+            routesObject.add(fastestRoute);
+
+
+
+
+            routesObject.get(0).setChainNameList(uniqueCheapestChainList);
+            routesObject.get(0).setChainIdList(uniqueCheapestIdChainList);
+
+            routesObject.get(1).setChainNameList(uniqueFastestChainNameList);
+            routesObject.get(1).setChainIdList(uniqueFastestChainIdList);
+
+
+
+
+
+
+
         }
-        //cheapest
-
-
-
-
-
-
-
-
-        //Cheapest route getting into dto
-        ArrayList<LatLngName> cheapestMarkers = new ArrayList<>();
-        for (int i = 0; i < routes.getCheapestMarkers().size(); i++) {
-
-            LatLngName cheapestMarker = new LatLngName(routes.getCheapestMarkers().get(i).getLat(),
-                    routes.getCheapestMarkers().get(i).getLng());
-            cheapestMarker.setNameLocation(routes.getCheapestMarkers().get(i).getLabel());
-            cheapestMarkers.add(cheapestMarker);
-        }
-
-        CreateRouteModel cheapestRoute = new CreateRouteModel(routes.getCheapestPolyline(),cheapestMarkers,
-                routes.getTotalCheapestTime(),routes.getTotalCheapestCost());
-
-        List<LatLng> cheapestVertices = decodePolyline(routes.getCheapestPolyline());
-        cheapestRoute.setVertices(cheapestVertices);
-        routesObject.add(cheapestRoute);
-
-        //Fastets route getting into Dto
-
-        ArrayList<LatLngName> fastestMarkers = new ArrayList<>();
-        for (int i = 0; i < routes.getFastestMarkers().size(); i++) {
-
-            LatLngName fastestMarker = new LatLngName(routes.getFastestMarkers().get(i).getLat(),
-                    routes.getFastestMarkers().get(i).getLng());
-            fastestMarker.setNameLocation(routes.getFastestMarkers().get(i).getLabel());
-            cheapestMarkers.add(fastestMarker);
-        }
-
-        CreateRouteModel fastestRoute = new CreateRouteModel(routes.getFastestPolyline(),fastestMarkers,
-                routes.getTotalFastestTime(),routes.getTotalFastestCost());
-
-        List<LatLng> fastestVertices = decodePolyline(routes.getFastestPolyline());
-        fastestRoute.setVertices(fastestVertices);
-        routesObject.add(fastestRoute);
-
-
-
-
-        routesObject.get(0).setChainNameList(uniqueCheapestChainList);
-        routesObject.get(0).setChainIdList(uniqueCheapestIdChainList);
-
-        routesObject.get(1).setChainNameList(uniqueFastestChainNameList);
-        routesObject.get(1).setChainIdList(uniqueFastestChainIdList);
-
-
-
-
-
-
 
         return routesObject;
 
@@ -596,28 +598,34 @@ public class GoogleApiServiceImpl implements GoogleApiService {
     public boolean checkShoppingList(){
         User user = userService.getAuthenticatedUser();
         ShoppingList shoppingList = user.getCurrentShoppingList();
+        Route currentRoute = user.getCurrentRoute();
 
-        List<String> cheapestChainsIdList = shoppingList.getCheapestProductQuantities().stream()
-                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());
+        if (shoppingList!=null && currentRoute!=null){
+            List<String> chainNameList = new ArrayList<>();
+            for (int i = 0; i < user.getCurrentRoute().getCheapestMarkers().size(); i++) {
+                chainNameList.add(user.getCurrentRoute().getCheapestMarkers().get(i).getLabel());
+            }
+
+            chainNameList.add("partida");
+            chainNameList.add("");
+
+            Route route = user.getCurrentRoute();
+
+            List<String> markerLabelList = new ArrayList<>();
+
+            for (int i = 0; i < route.getCheapestMarkers().size(); i++) {
+                markerLabelList.add(route.getCheapestMarkers().get(i).getLabel());
+            }
+
+
+            return markerLabelList.containsAll(chainNameList);
+        }
+        return false;
+
+        /*List<String> cheapestChainsIdList = shoppingList.getCheapestProductQuantities().stream()
+                .map(c -> c.getProduct().getChain().getName()).collect(Collectors.toList());*/
         
-        List<String> chainNameList = new ArrayList<>();
-        for (int i = 0; i < user.getCurrentRoute().getCheapestMarkers().size(); i++) {
-            chainNameList.add(user.getCurrentRoute().getCheapestMarkers().get(i).getLabel());
-        }
 
-        chainNameList.add("partida");
-        chainNameList.add("");
-
-        Route route = user.getCurrentRoute();
-
-        List<String> markerLabelList = new ArrayList<>();
-
-        for (int i = 0; i < route.getCheapestMarkers().size(); i++) {
-            markerLabelList.add(route.getCheapestMarkers().get(i).getLabel());
-        }
-
-
-        return markerLabelList.containsAll(chainNameList);
 
 
 
