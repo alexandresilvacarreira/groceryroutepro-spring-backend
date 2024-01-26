@@ -125,13 +125,14 @@ public class ScraperController {
     @PostMapping("/all-chains")
     public ResponseEntity<String> scrapeAllChains() {
         try {
+            this.scraperService.scrapeAuchanAll();
+            this.scraperService.scrapeContinenteAll();
             this.scraperService.scrapeIntermarcheAll();
             this.scraperService.scrapePingoDoceAll();
             this.scraperService.scrapeMiniprecoAll();
-            this.scraperService.scrapeContinenteAll();
-            this.scraperService.scrapeAuchanAll();
             return ResponseEntity.ok("Produtos guardados com sucesso");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar produtos: " + e.getMessage());
         }
     }

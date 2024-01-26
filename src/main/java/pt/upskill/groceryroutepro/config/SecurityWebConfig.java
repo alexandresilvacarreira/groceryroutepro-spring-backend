@@ -85,7 +85,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
 
-        User user = userRepository.getByEmail(authentication.getName()); //TODO usar model/DTO para não expor tanta coisa
+        User user = userRepository.getByEmail(authentication.getName());
 
         Map<String, Object> serverMessage = new HashMap<>();
         serverMessage.put("success", true);

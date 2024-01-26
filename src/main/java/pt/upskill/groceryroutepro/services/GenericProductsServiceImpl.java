@@ -319,35 +319,6 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                                 genericProductCategories.add(category);
                             }
                         }
-
-                        // Verificar e atualizar preços
-//                        List<Product> productsInGenericProduct = new ArrayList<>(genericProductToSave.getProducts());
-//                        for (Product productInGenericProduct : productsInGenericProduct) {
-//
-//                            List<Price> productPrices = productInGenericProduct.getPrices();
-//                            Price currentProductPrice = productPrices.get(productPrices.size() - 1); // O último da lista é sempre o mais recente
-//
-//                            Price currentGenericProductPrice = genericProductToSave.getCurrentLowestPrice();
-//                            Product currentCheapestProduct = genericProductToSave.getCurrentCheapestProduct();
-//
-//                            if (currentGenericProductPrice == null || currentProductPrice.getPrimaryValue() < currentGenericProductPrice.getPrimaryValue()) {
-//
-//                                // Elminar o preço e produtos antigos, caso contrário será enviada uma exceção porque a relação é one-to-one
-//                                if (currentGenericProductPrice != null && currentCheapestProduct != null) {
-//                                    currentGenericProductPrice.setGenericProduct(null);
-//                                    currentCheapestProduct.setCheapestForGenericProduct(null);
-////                                productRepository.save(currentCheapestProduct);
-////                                priceRepository.save(currentGenericProductPrice);
-//                                }
-//
-//                                // Atualizar GenericProduct
-//                                genericProductToSave.setCurrentLowestPrice(currentProductPrice);
-//                                genericProductToSave.setCurrentLowestPricePrimaryValue(currentProductPrice.getPrimaryValue());
-//                                genericProductToSave.setCurrentCheapestProduct(productInGenericProduct);
-//                                currentProductPrice.setGenericProduct(genericProductToSave);
-//                                productInGenericProduct.setCheapestForGenericProduct(genericProductToSave);
-//                            }
-//                        }
                         genericProductsList.add(genericProductToSave);
                         genericProductsToSave.add(genericProductToSave);
                         break;
