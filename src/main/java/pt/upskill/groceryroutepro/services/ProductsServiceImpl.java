@@ -6,6 +6,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.entities.Price;
 import pt.upskill.groceryroutepro.entities.Product;
+import pt.upskill.groceryroutepro.entities.User;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
 import pt.upskill.groceryroutepro.models.ProductData;
 import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
@@ -29,9 +30,18 @@ public class ProductsServiceImpl implements ProductsService {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    UserService userService;
+
     @Override
     public Product getProductById(Long productId) {
-        return productRepository.findById(productId).isPresent() ? productRepository.findById(productId).get() : null;
+        User user = userService.getAuthenticatedUser();
+        if (user == null) throw new BadRequestException("Utilizador não encontrado");
+        Product product = productRepository.findById(productId).get();
+        if (!user.getChain().getId().equals(product.getChain().getId())) {
+            throw new BadRequestException("O utilizador não tem permissão para aceder a este produto");
+        }
+        return product;
     }
 
     @Override

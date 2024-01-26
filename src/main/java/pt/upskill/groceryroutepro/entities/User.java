@@ -63,11 +63,9 @@ public class User {
     @JoinColumn(name = "current_route_id")
     private Route currentRoute;
 
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "chain_id")
     private Chain chain;
-
-
 
     public User() {
     }

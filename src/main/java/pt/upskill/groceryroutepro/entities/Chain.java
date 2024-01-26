@@ -21,19 +21,19 @@ public class Chain {
     @JsonIgnore
     private List<Store> stores = new ArrayList<>();
 
-    @OneToOne
+    @OneToMany(mappedBy = "chain")
     @JsonIgnore
-    private User user;
+    private List<User> users = new ArrayList<>();;
 
     public Chain() {
     }
 
-    public User getUser() {
-        return user;
+    public List<User> getUsers() {
+        return users;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     public Long getId() {
