@@ -151,8 +151,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         Route routes = user.getCurrentRoute();
         List<CreateRouteModel> routesObject = new ArrayList<>();
         if (routes != null) {
-
-
             // getting chain ids
             ShoppingList shoppingList = user.getCurrentShoppingList();
 
@@ -174,6 +172,10 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                 }
             }
 
+
+            /**-----------------------------------------------*/
+
+
             List<Long> fastestChainsIdList = shoppingList.getFastestProductQuantities().stream()
                     .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
             List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
@@ -192,14 +194,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                     uniqueFastestChainNameList.add(fastestChain);
                 }
             }
-            //cheapest
-
-
-
-
-
-
-
 
             //Cheapest route getting into dto
             ArrayList<LatLngName> cheapestMarkers = new ArrayList<>();
@@ -226,7 +220,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
                 LatLngName fastestMarker = new LatLngName(routes.getFastestMarkers().get(i).getLat(),
                         routes.getFastestMarkers().get(i).getLng());
                 fastestMarker.setNameLocation(routes.getFastestMarkers().get(i).getLabel());
-                cheapestMarkers.add(fastestMarker);
+                fastestMarkers.add(fastestMarker);
             }
 
             CreateRouteModel fastestRoute = new CreateRouteModel(routes.getFastestPolyline(),fastestMarkers,
