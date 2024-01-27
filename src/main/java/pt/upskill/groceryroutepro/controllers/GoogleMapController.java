@@ -53,11 +53,9 @@ public class GoogleMapController {
             LatLngName destino = coordinates.get("destino");
             destino.setNameLocation("Destino");
             List<CreateRouteModel> rotas = googleApiService.generateRoutes(partida,destino);
-
             response.put("success", true);
             response.put("message", "Rotas criadas com sucesso");
             //response.put("rotas",rotas);
-
             return ResponseEntity.ok(response);
         } catch (ValidationException e){
             response.put("success", false);
@@ -70,7 +68,6 @@ public class GoogleMapController {
     public ResponseEntity getRoute(){
         Map<String, Object> response = new HashMap<>();
         try{
-
             List<CreateRouteModel> routes = googleApiService.getRoutes();
             Map<String, Object> data = new HashMap<>();
             data.put("routes", routes);
@@ -78,10 +75,8 @@ public class GoogleMapController {
                 response.put("success", true);
             } else {
                 response.put("sucess", false);
-                response.put("message", "Existem alteraçãoes na lista de compras, poderá ser necessário gerar nova rota");
+                response.put("message", "Existem alterações na lista de compras, poderá ser necessário gerar nova rota");
             }
-
-
             response.put("data", data);
             return ResponseEntity.ok(response);
         } catch (ValidationException e){

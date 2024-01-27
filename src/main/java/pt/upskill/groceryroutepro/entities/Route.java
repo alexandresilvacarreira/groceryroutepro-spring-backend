@@ -17,6 +17,7 @@ public class Route {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
+    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime creationDate;
     @ManyToOne
     @JsonIgnore
@@ -32,9 +33,11 @@ public class Route {
     @OneToMany(mappedBy = "route")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<FastestMarker> fastestMarkers;
-    @Column(length = 5000)
+
+    @Column(columnDefinition = "TEXT")
     private String cheapestPolyline;
-    @Column(length = 5000)
+
+    @Column(columnDefinition = "TEXT")
     private String fastestPolyline;
     private int totalCheapestTime;
     private int totalFastestTime;
