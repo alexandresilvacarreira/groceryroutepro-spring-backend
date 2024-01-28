@@ -1,6 +1,5 @@
 package pt.upskill.groceryroutepro.services;
 
-import okhttp3.*;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -138,9 +137,6 @@ public class GoogleApiServiceImpl implements GoogleApiService {
         userRepository.save(user);
 
 
-        //TODO current user???? que isto?
-
-
         return rotas;
 
 
@@ -158,6 +154,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
             // getting chain ids
             ShoppingList shoppingList = user.getCurrentShoppingList();
 
+            //CHEAPEST
             List<Long> cheapestChainsIdList = shoppingList.getCheapestProductQuantities().stream()
                     .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
             List<String> cheapestChainsList = shoppingList.getCheapestProductQuantities().stream()
@@ -179,7 +176,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
             /**-----------------------------------------------*/
 
-
+            //FASTEST
             List<Long> fastestChainsIdList = shoppingList.getFastestProductQuantities().stream()
                     .map(c -> c.getProduct().getChain().getId()).collect(Collectors.toList());
             List<String> fastestChainsList = shoppingList.getFastestProductQuantities().stream()
@@ -290,14 +287,11 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
 
     public CreateRouteModel createRoute(LatLngName partida, LatLngName destino, List<String> chains, double totalCost) {
-        //TODO MUDAR QUANDO RECEBER A SHOPPING LIST
 
         //create route between partida and destino and return polyline
         String polyline = this.createAToBRoute(partida, destino);
 
-        //User get chain from shopping list
-        // create new list of chains
-        //TODO PASSAR PARA VARIAVEL NO METODO
+
 
 
         List<LatLng> routeCoordinates = decodePolyline(polyline);
@@ -347,7 +341,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
 
                     if (newCoordinate != null) {
-                        //calcular distancias das coordenadas à partida e ao destino
+                        //calculate distance of coordinates to start and finish
                         placeFound[j] = true;
                         newCoordinate.setNameLocation(closestChainArray[j].getChain());
                         double distPartida = calculateHaversineDistance(newCoordinate.getLat(), newCoordinate.getLng(), partida.getLat(), partida.getLng());
@@ -380,9 +374,8 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
 
         } while (!allPlacesFound && radius <= 7000);
-        if (radius > 7000) throw new BadRequestException("Não foi possível criar encontrar lojas na sua localização");
+        if (radius > 7000) throw new BadRequestException("Não foi possível criar encontrar lojas na tua localização");
         // no places found in the 7 km range
-
 
         return closestChainArray;
 
@@ -463,7 +456,7 @@ public class GoogleApiServiceImpl implements GoogleApiService {
 
             String polyline = (String) ((Map<String, Object>) ((Map<String, Object>) ((List<Map<String, Object>>) responseMap.get("routes")).get(0)).get("overview_polyline")).get("points");
 
-            String replacedPolyline = polyline;//.replace("\\\\+", "\\\\");
+
 
 
             // calculate total time
