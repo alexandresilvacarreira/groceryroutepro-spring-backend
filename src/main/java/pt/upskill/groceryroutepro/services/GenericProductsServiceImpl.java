@@ -1,28 +1,24 @@
 package pt.upskill.groceryroutepro.services;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import pt.upskill.groceryroutepro.entities.*;
 import pt.upskill.groceryroutepro.exceptions.types.BadRequestException;
-import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.repositories.ChainRepository;
 import pt.upskill.groceryroutepro.repositories.GenericProductRepository;
 import pt.upskill.groceryroutepro.repositories.PriceRepository;
 import pt.upskill.groceryroutepro.repositories.ProductRepository;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 
 @Service
 public class GenericProductsServiceImpl implements GenericProductsService {
@@ -128,8 +124,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
             String processedName = productName.replace(productBrand, "").replaceAll("\\s", "");
 
             String genericProductName = StringUtils.capitalize(productName.replace(productBrand, ""));
-            String genericProductBrand = productBrand;
-            String genericProductQuantity = productQuantity;
+
 
             GenericProduct genericProduct = new GenericProduct();
             genericProduct.setName(genericProductName);
@@ -148,9 +143,9 @@ public class GenericProductsServiceImpl implements GenericProductsService {
     @Override
     public void mergeToGenericTable(String chainName) {
 
-//        List<Product> products = productRepository.findByChain(chainRepository.findByName(chainName));
+
         List<Product> products = productRepository.findByChainAndNotNullGenericProduct(chainRepository.findByName(chainName));
-//        List<Product> products = productRepository.findByChainAndNullGenericProduct(chainRepository.findByName(chainName));
+
         List<GenericProduct> genericProductsList = new ArrayList<>(genericProductRepository.findAll());
 
         int batchSize = 10000;
@@ -215,7 +210,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                 processedName = productName.replaceAll("\\s", "");
                 genericProductName = StringUtils.capitalize(productName);
 
-//            List<GenericProduct> genericProductsList = new ArrayList<>(genericProductRepository.findAll());
+
 
                 for (int j = 0; j < genericProductsList.size(); j++) {
 
@@ -265,10 +260,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                             canBeSaved = true;
                         } else if (nameDistance <= 2 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
                             canBeSaved = true;
-//                    } else if (nameDistance <= 5 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
-//                        canBeSaved = true;
-//                    } else if (nameDistance <= 7 && containsBrandInName && quantityDistance <= 1 && hasSameCategory) {
-//                        canBeSaved = true;
+
                         } else if (j == genericProductsList.size() - 1) {
                             // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
                             genericProductToSave = new GenericProduct();
@@ -287,8 +279,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                             canBeSaved = true;
                         } else if (nameDistance <= 2 && brandDistance <= 2 && quantityDistance == 0 && hasSameCategory) {
                             canBeSaved = true;
-//                    } else if (nameDistance <= 5 && brandDistance == 0 && quantityDistance == 0 && hasSameCategory) {
-//                        canBeSaved = true;
+
                         } else if (j == genericProductsList.size() - 1) {
                             // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
                             genericProductToSave = new GenericProduct();
@@ -336,14 +327,13 @@ public class GenericProductsServiceImpl implements GenericProductsService {
 
         List<GenericProduct> genericProducts = genericProductRepository.findAllByCurrentCheapestProductIsNull();
 
-//        List<GenericProduct> genericProducts = genericProductRepository.findAll();
 
         for (int i = 0; i < genericProducts.size(); i += batchSize) {
 
             int endIndex = Math.min(i + batchSize, genericProducts.size());
             List<GenericProduct> batch = genericProducts.subList(i, endIndex);
 
-//            List<Product> products = new ArrayList<>(productRepository.findByGenericProductIn(batch));
+
 
             for (GenericProduct genericProduct : batch) {
 
@@ -363,8 +353,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                         if (currentGenericProductPrice != null && currentCheapestProduct != null) {
                             currentGenericProductPrice.setGenericProduct(null);
                             currentCheapestProduct.setCheapestForGenericProduct(null);
-//                            productRepository.save(currentCheapestProduct);
-//                            priceRepository.save(currentGenericProductPrice);
+
                         }
 
                         // Atualizar GenericProduct
@@ -529,10 +518,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                     canBeSaved = true;
                 } else if (nameDistance <= 2 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
                     canBeSaved = true;
-//                    } else if (nameDistance <= 5 && containsBrandInName && quantityDistance == 0 && hasSameCategory) {
-//                        canBeSaved = true;
-//                    } else if (nameDistance <= 7 && containsBrandInName && quantityDistance <= 1 && hasSameCategory) {
-//                        canBeSaved = true;
+
                 } else if (i == genericProductsList.size() - 1) {
                     // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
                     genericProductToSave = new GenericProduct();
@@ -551,8 +537,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                     canBeSaved = true;
                 } else if (nameDistance <= 2 && brandDistance <= 2 && quantityDistance == 0 && hasSameCategory) {
                     canBeSaved = true;
-//                    } else if (nameDistance <= 5 && brandDistance == 0 && quantityDistance == 0 && hasSameCategory) {
-//                        canBeSaved = true;
+
                 } else if (i == genericProductsList.size() - 1) {
                     // Não foi apanhado por nenhum dos critérios, por isso é um produto novo
                     genericProductToSave = new GenericProduct();
