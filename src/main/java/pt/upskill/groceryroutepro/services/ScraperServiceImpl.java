@@ -628,7 +628,7 @@ public class ScraperServiceImpl implements ScraperService {
                 genericProductsService.updateGenericProducts(product);
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -799,7 +799,7 @@ public class ScraperServiceImpl implements ScraperService {
                         }
                         priceWithoutDiscount = ((double) Math.round(priceWoDiscount * 100) / 100) + " €";
                     } catch (ClassCastException e) {
-                        System.out.println("priceWithoutDiscount failed for: \n" + name + "\n url: " + url);
+                        e.printStackTrace();
                     }
                 }
 
@@ -1095,7 +1095,7 @@ public class ScraperServiceImpl implements ScraperService {
 
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
     }

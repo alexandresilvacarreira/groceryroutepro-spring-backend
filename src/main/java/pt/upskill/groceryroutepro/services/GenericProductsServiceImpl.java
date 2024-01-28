@@ -364,7 +364,7 @@ public class GenericProductsServiceImpl implements GenericProductsService {
                         product.setCheapestForGenericProduct(genericProduct);
                     }
                 }
-//                productRepository.saveAll(products); //TODO experimentar sem isto
+
             }
             genericProductRepository.saveAll(batch);
         }
