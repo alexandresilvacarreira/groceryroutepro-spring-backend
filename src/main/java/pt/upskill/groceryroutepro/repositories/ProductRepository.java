@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import pt.upskill.groceryroutepro.entities.Price;
 import pt.upskill.groceryroutepro.entities.Chain;
 import pt.upskill.groceryroutepro.entities.GenericProduct;
 import pt.upskill.groceryroutepro.entities.Product;

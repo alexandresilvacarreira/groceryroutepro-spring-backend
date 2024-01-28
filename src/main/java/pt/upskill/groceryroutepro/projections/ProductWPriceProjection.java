@@ -1,7 +1,6 @@
 package pt.upskill.groceryroutepro.projections;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 public interface ProductWPriceProjection {
 
