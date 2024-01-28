@@ -151,10 +151,7 @@ public class ScraperServiceImpl implements ScraperService {
                         try {
                             discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
                         } catch (NumberFormatException e) {
-                            System.out.println("Product ID: " + product.getId());
-                            System.out.println("Product name: " + name);
-                            System.out.println("Product brand: " + brand);
-                            System.out.println(e.getMessage());
+                           e.printStackTrace();
                         }
                     }
                 }
@@ -176,9 +173,6 @@ public class ScraperServiceImpl implements ScraperService {
                 // Primário
                 Element primaryPriceElement = productElement.select(".pwc-tile--price-primary").first();
                 if (primaryPriceElement == null) {
-                    System.out.println("Product name: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println("primaryPriceElement null: " + url);
                     continue;
                 }
 
@@ -190,10 +184,7 @@ public class ScraperServiceImpl implements ScraperService {
                 try {
                     primaryValue = Double.parseDouble(modifiedPrimaryValueStr);
                 } catch (NumberFormatException e) {
-                    System.out.println("Product ID: " + product.getId());
-                    System.out.println("Product name: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println(e.getMessage());
+                    e.printStackTrace();
                 }
 
                 String primaryUnit = primaryPriceElement.select(".pwc-m-unit").text().replace("/", "");
@@ -203,9 +194,6 @@ public class ScraperServiceImpl implements ScraperService {
                 double secondaryValue = 0.0;
                 String secondaryUnit = "";
                 if (secondaryPriceElement == null) {
-                    System.out.println("Product name: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println("secondaryPriceElement null: " + url);
                 } else {
                     String secondaryValueStr = secondaryPriceElement.select(".ct-price-value").text();
                     int lastCommaIndexSecondary = secondaryValueStr.lastIndexOf(",");
@@ -214,10 +202,7 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         secondaryValue = Double.parseDouble(modifiedSecondaryValueStr);
                     } catch (NumberFormatException e) {
-                        System.out.println("Product ID: " + product.getId());
-                        System.out.println("Product name: " + name);
-                        System.out.println("Product brand: " + brand);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                     secondaryUnit = secondaryPriceElement.select(".pwc-m-unit").text().replace("/", "");
                 }
@@ -246,7 +231,7 @@ public class ScraperServiceImpl implements ScraperService {
 
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -346,9 +331,7 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
                     } catch (NumberFormatException e) {
-                        System.out.println("Product name: " + name);
-                        System.out.println("Product brand: " + brand);
-                        System.out.println(e.getMessage());
+                       e.printStackTrace();
                     }
                 }
                 Element priceWithoutDiscountElement = productElement.select(".auc-price__stricked").first();
@@ -377,7 +360,6 @@ public class ScraperServiceImpl implements ScraperService {
                 // Primário
                 Element primaryPriceElement = productElement.select(".auc-product-tile__prices .sales").first();
                 if (primaryPriceElement == null) {
-                    System.out.println("primaryPriceElement null for name: " + name + " url: " + url);
                     continue;
                 }
                 String primaryValueStr = primaryPriceElement.select(".value").attr("content");
@@ -385,9 +367,7 @@ public class ScraperServiceImpl implements ScraperService {
                 try {
                     primaryValue = Double.parseDouble(primaryValueStr);
                 } catch (NumberFormatException e) {
-                    System.out.println("Product name: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println(e.getMessage());
+                    e.printStackTrace();
                 }
 
                 Element primaryUnitElement = primaryPriceElement.selectFirst(".auc-avgWeight");
@@ -406,9 +386,7 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         secondaryValue = Double.parseDouble(secondaryValueStr);
                     } catch (NumberFormatException e) {
-                        System.out.println("Product name: " + name);
-                        System.out.println("Product brand: " + brand);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -435,7 +413,7 @@ public class ScraperServiceImpl implements ScraperService {
                 genericProductsService.updateGenericProducts(product);
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -541,8 +519,7 @@ public class ScraperServiceImpl implements ScraperService {
                             brand = brand.substring(0, brand.length() - 1);
                         } catch (IndexOutOfBoundsException e) {
                             brand = "";
-                            System.out.println(name);
-                            System.out.println(e.getMessage());
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -553,18 +530,14 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         quantity = name.substring(name.lastIndexOf("(") + 1, name.lastIndexOf(")"));
                     } catch (IndexOutOfBoundsException e) {
-                        System.out.println("Could not get quantity for: " + url);
-                        System.out.println("Product name: " + name);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 } else {
                     String[] nameWords = name.split(" ");
                     try {
                         quantity = nameWords[nameWords.length - 2] + nameWords[nameWords.length - 1];
                     } catch (IndexOutOfBoundsException e) {
-                        System.out.println("Could not get quantity for: " + url);
-                        System.out.println("Product name: " + name);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -577,10 +550,7 @@ public class ScraperServiceImpl implements ScraperService {
                     try {
                         discountPercentage = Integer.parseInt(discountPercentageElement.text().replaceAll("[^0-9]", ""));
                     } catch (NumberFormatException e) {
-                        System.out.println("Product name: " + name);
-                        System.out.println("Product brand: " + brand);
-                        System.out.println("url: " + url);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -605,9 +575,6 @@ public class ScraperServiceImpl implements ScraperService {
                 // Primário
                 Element primaryPriceElement = productElement.select("p.price").first();
                 if (primaryPriceElement == null) {
-                    System.out.println("primaryPriceElement is null for: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println("url: " + url);
                     continue;
                 }
 
@@ -616,10 +583,7 @@ public class ScraperServiceImpl implements ScraperService {
                 try {
                     primaryValue = Double.parseDouble(primaryValueStr);
                 } catch (NumberFormatException e) {
-                    System.out.println("Product name: " + name);
-                    System.out.println("Product brand: " + brand);
-                    System.out.println("url: " + url);
-                    System.out.println(e.getMessage());
+                    e.printStackTrace();
                 }
 
                 String primaryUnit = "";
@@ -635,13 +599,9 @@ public class ScraperServiceImpl implements ScraperService {
                         secondaryValue = Double.parseDouble(secondaryValueStr);
                         secondaryUnit = secondaryPriceString.substring(secondaryPriceString.lastIndexOf("/") + 1, secondaryPriceString.length() - 2);
                     } catch (NumberFormatException e) {
-                        System.out.println("Product name: " + name);
-                        System.out.println("url: " + url);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     } catch (IndexOutOfBoundsException e) {
-                        System.out.println("Product name: " + name);
-                        System.out.println("url: " + url);
-                        System.out.println(e.getMessage());
+                        e.printStackTrace();
                     }
                 }
 
@@ -785,7 +745,7 @@ public class ScraperServiceImpl implements ScraperService {
                         primaryValue = (double) Math.round((double) productData.get("buyingPrice") * 100) / 100;
                     }
                 } catch (ClassCastException e) {
-                    System.out.println("primaryValue failed for: \n" + name + "\n url: " + url);
+                    e.printStackTrace();
                     continue;
                 }
 
@@ -808,7 +768,7 @@ public class ScraperServiceImpl implements ScraperService {
                         }
                         secondaryValue = (double) Math.round((primaryValue / netContent) * 100) / 100;
                     } catch (ClassCastException e) {
-                        System.out.println("secondaryValue failed for: \n" + name + "\n url: " + url);
+                        e.printStackTrace();
                     }
 
                 }
@@ -827,7 +787,7 @@ public class ScraperServiceImpl implements ScraperService {
                         }
                         discountPercentage = (int) Math.round(promotionAmount);
                     } catch (ClassCastException e) {
-                        System.out.println("discountPercentage failed for: \n" + name + "\n url: " + url);
+                        e.printStackTrace();
                     }
                     try {
                         Object priceWoDiscountObject = productData.get("regularPrice");
@@ -879,7 +839,7 @@ public class ScraperServiceImpl implements ScraperService {
 
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -1029,7 +989,6 @@ public class ScraperServiceImpl implements ScraperService {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
