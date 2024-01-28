@@ -13,36 +13,27 @@ import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.repositories.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Double.doubleToLongBits;
 import static java.lang.Double.parseDouble;
 
 @Service
 public class ProductsServiceImpl implements ProductsService {
 
     @Autowired
-    CategoryRepository categoryRepository;
+    ProductRepository productRepository;
 
     @Autowired
-    ProductRepository productRepository;
+    CategoryRepository categoryRepository;
+
 
     @Autowired
     UserService userService;
 
-    @Override
-    public Product getProductById(Long productId) {
-        User user = userService.getAuthenticatedUser();
-        if (user == null) throw new BadRequestException("Utilizador não encontrado");
-        Product product = productRepository.findById(productId).get();
-        if (!user.getChain().getId().equals(product.getChain().getId())) {
-            throw new BadRequestException("O utilizador não tem permissão para aceder a este produto");
-        }
-        return product;
-    }
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public Slice<ProductWPriceProjection> getProductsByParams(String search, List<Long> categoryIds, List<Long> chainIds, Pageable pageable) {
@@ -52,6 +43,8 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public void createProduct(ProductData productData) {
 
+        User user = userService.getAuthenticatedUser();
+        if(user== null) throw new BadRequestException("Utilizado não encontrado");
 
         Product product = new Product();
 
@@ -74,8 +67,6 @@ public class ProductsServiceImpl implements ProductsService {
         price.setPriceWoDiscount(productData.getPrice().getPriceWoDiscount());
         price.setCollectionDate(LocalDateTime.now());
 
-        double a = parseDouble(productData.getPrice().getPriceWoDiscount());
-        double b = productData.getPrice().getPrimaryValue();
 
         if (productData.getPrice().getPriceWoDiscount().isEmpty()) {
             price.setProduct(product);
@@ -86,7 +77,9 @@ public class ProductsServiceImpl implements ProductsService {
 
             productRepository.save(product);
 
-        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty() && a > b) {
+        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty()) {
+            double a = parseDouble(productData.getPrice().getPriceWoDiscount());
+            double b = productData.getPrice().getPrimaryValue();
 
             price.setDiscountPercentage((int) Math.round((a - b) * 100 / a));
 
@@ -105,6 +98,9 @@ public class ProductsServiceImpl implements ProductsService {
 
     public void editProduct(ProductData productData) {
 
+        User user = userService.getAuthenticatedUser();
+        if(user== null) throw new BadRequestException("Utilizado não encontrado");
+
         Product product = productData.getProduct();
 
         product.setId(productData.getProduct().getId());
@@ -113,8 +109,7 @@ public class ProductsServiceImpl implements ProductsService {
         product.setBrand(productData.getProduct().getBrand());
         product.setImageUrl(productData.getProduct().getImageUrl());
         product.setChain(productData.getProduct().getChain());
-        product.setGenericProduct(null);
-        product.setCheapestForGenericProduct(null);
+
 
         Set<Long> productCategories = productData.getProduct().getCategories().stream().map(c -> c.getId()).collect(Collectors.toSet());
 
@@ -129,9 +124,6 @@ public class ProductsServiceImpl implements ProductsService {
         price.setPriceWoDiscount(productData.getPrice().getPriceWoDiscount());
         price.setCollectionDate(LocalDateTime.now());
 
-        double a = parseDouble(productData.getPrice().getPriceWoDiscount());
-        double b = productData.getPrice().getPrimaryValue();
-
         if (productData.getPrice().getPriceWoDiscount().isEmpty()) {
             price.setProduct(product);
 
@@ -141,8 +133,9 @@ public class ProductsServiceImpl implements ProductsService {
 
             productRepository.save(product);
 
-        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty() && a > b) {
-
+        } else if (!productData.getPrice().getPriceWoDiscount().isEmpty()) {
+            double a = parseDouble(productData.getPrice().getPriceWoDiscount());
+            double b = productData.getPrice().getPrimaryValue();
             price.setDiscountPercentage((int) Math.round((a - b) * 100 / a));
 
             price.setProduct(product);
@@ -156,5 +149,15 @@ public class ProductsServiceImpl implements ProductsService {
         } else {
             throw new BadRequestException("Produto com dados incorrectos");
         }
+    }
+    @Override
+    public Product getProductById(Long productId) {
+        Product product = productRepository.findById(productId).get();
+        User user = this.userService.getAuthenticatedUser();
+        if (user == null) throw new BadRequestException("Utilizador não encontrado");
+        if (!user.getChain().getId().equals(product.getChain().getId())) {
+            throw new BadRequestException("O utilizador não tem permissão para aceder a este produto");
+        }
+        return product;
     }
 }

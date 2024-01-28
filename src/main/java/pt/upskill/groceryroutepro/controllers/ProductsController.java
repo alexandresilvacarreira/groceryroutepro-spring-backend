@@ -21,6 +21,7 @@ import pt.upskill.groceryroutepro.projections.ProductWPriceProjection;
 import pt.upskill.groceryroutepro.repositories.CategoryRepository;
 import pt.upskill.groceryroutepro.services.GenericProductsService;
 import pt.upskill.groceryroutepro.services.ProductsService;
+import pt.upskill.groceryroutepro.services.UserService;
 
 import java.util.HashMap;
 import java.util.Arrays;
@@ -41,6 +42,9 @@ public class ProductsController {
 
     @Autowired
     GenericProductsService genericProductsService;
+
+    @Autowired
+    UserService userService;
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetails> getProduct(@PathVariable Long productId) {
@@ -100,6 +104,7 @@ public class ProductsController {
     public ResponseEntity createProduct(@RequestBody ProductData productData) {
         Map<String, Object> response = new HashMap<>();
         try {
+
             productsService.createProduct(productData);
             response.put("success", true);
             response.put("message", "Produto criado com sucesso");
