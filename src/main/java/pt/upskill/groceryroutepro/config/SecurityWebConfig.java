@@ -39,7 +39,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        //TODO confirmar email, alterar antMatchers,
         httpSecurity
                 .cors()
                 .and()
@@ -66,11 +65,12 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user", "/users/forgot-password","/users/change-password/").permitAll() //TODO mudar o get-authenticated-user para o .authenticated()
-                .antMatchers("/","/shopping-list/**").authenticated()
-//                .antMatchers("/shopping-list/**").hasAnyRole("USER_FREE", "USER_PREMIUM")
+                .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user",
+                        "/users/forgot-password","/users/change-password/").permitAll()
+                .antMatchers("/","/shopping-list/**", "/products/**", "/google-maps-api/**").authenticated()
+                .antMatchers("/products/create", "/products/edit", "/products/categories").hasAnyRole("STORE")
                 .antMatchers("/user-management/**").hasRole("ADMIN")
-                .antMatchers("/scraper/**", "/products/**", "/google-maps-api/**").permitAll() //TODO proteger isto!
+                .antMatchers("/scraper/**").permitAll()
                 .antMatchers("**").denyAll();
     }
 
@@ -81,7 +81,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
 
 
     private void handleSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        // Podemos personalizar esta lógica
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
 
@@ -98,7 +97,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     }
 
     private void handleFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        // Podemos personalizar esta lógica
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType("application/json");
 
@@ -126,7 +124,6 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
     }
 
     private void handleLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        // Podemos personalizar esta lógica
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
 

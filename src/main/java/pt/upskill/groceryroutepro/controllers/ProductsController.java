@@ -25,7 +25,6 @@ import pt.upskill.groceryroutepro.services.UserService;
 
 import java.util.HashMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -237,16 +236,3 @@ public class ProductsController {
 
 }
 
-//public ResponseEntity<Map<String, Object>> signUp(@RequestBody SignUp signUp) {
-//        Map<String, Object> response = new HashMap<>();
-//        try {
-//            userService.createAccount(signUp);
-//            response.put("success", true);
-//            response.put("message", "Conta criada com sucesso");
-//            return ResponseEntity.ok(response);
-//        } catch (ValidationException e) {
-//            response.put("success", false);
-//            response.put("message", e.getMessage());
-//            return ResponseEntity.status(e.getStatusCode()).body(response);
-//        }
-//    }
