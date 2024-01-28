@@ -93,10 +93,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             user.getShoppingLists().add(shoppingList);
 
             shoppingListRepository.save(shoppingList);
-//            productQuantityGenericRepository.save(productQuantityGeneric);
-//            productQuantityCheapestRepository.save(productQuantityCheapest);
-//            productQuantityFastestRepository.save(productQuantityFastest);
-//            userRepository.save(user);
+
 
         } else {
 
@@ -158,12 +155,11 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             List<ProductQuantityGeneric> updatedGenericList = new ArrayList<>(genericProductQuantities);
             shoppingList.setGenericProductQuantities(updatedGenericList);
             productQuantityGenericRepository.delete(productQuantityGenericToUpdate);
-//            shoppingListRepository.save(shoppingList);
+
             this.generateLists(shoppingList);
         }
 
-//        shoppingListRepository.save(shoppingList);
-//        return user.getCurrentShoppingList();
+
         return shoppingList;
     }
 
@@ -251,7 +247,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 break;
         }
         shoppingListRepository.save(shoppingList);
-//        return shoppingList;
+
     }
 
     private void generateLists(ShoppingList shoppingList) {
@@ -264,7 +260,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         productQuantityFastestRepository.deleteInBatch(shoppingList.getFastestProductQuantities());
         shoppingList.setFastestProductQuantities(new ArrayList<>());
         shoppingList.setCheapestProductQuantities(new ArrayList<>());
-//        shoppingListRepository.save(shoppingList);
+
 
         // Se só houver um produto na lista, a lista mais rápida e mais barata são iguais
         if (genericProductQuantities.size() == 1) {
@@ -290,7 +286,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             shoppingList.getCheapestProductQuantities().add(productQuantityCheapest);
             shoppingList.setCheapestListCost(listCost);
 
-//            shoppingListRepository.save(shoppingList);
+
 
         } else {
 
@@ -383,12 +379,12 @@ public class ShoppingListServiceImpl implements ShoppingListService {
             }
 
             shoppingList.setCheapestListCost(cheapestListCost);
-//            shoppingList.setCheapestProductQuantities(productQuantityCheapestList);
+
             productQuantityCheapestRepository.saveAll(productQuantityCheapestList);
         }
 
         shoppingListRepository.save(shoppingList);
-//        return shoppingList;
+
     }
 
 
