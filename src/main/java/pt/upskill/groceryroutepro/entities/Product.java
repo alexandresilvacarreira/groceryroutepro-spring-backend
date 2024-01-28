@@ -138,7 +138,6 @@ public class Product {
         this.categories = categories;
     }
 
-    // TODO omitir o getter para não repetir info na resposta
     public GenericProduct getGenericProduct() {
         return genericProduct;
     }
@@ -147,10 +146,6 @@ public class Product {
         this.genericProduct = genericProduct;
     }
 
-    // TODO omitir o getter para não repetir info na resposta
-//    public GenericProduct getCheapestForGenericProduct() {
-//        return cheapestForGenericProduct;
-//    }
 
     public void setCheapestForGenericProduct(GenericProduct cheapestForGenericProduct) {
         this.cheapestForGenericProduct = cheapestForGenericProduct;

@@ -25,10 +25,8 @@ public class GenericProduct {
     private String processedQuantity;
     private double currentLowestPricePrimaryValue;
     @OneToOne(mappedBy = "genericProduct", cascade = CascadeType.ALL)
-//    @JsonIgnore
     private Price currentLowestPrice;
     @OneToOne(mappedBy = "cheapestForGenericProduct", cascade = CascadeType.ALL)
-//    @JsonIgnore
     private Product currentCheapestProduct;
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
@@ -47,7 +45,6 @@ public class GenericProduct {
     private Set<Chain> chains = new HashSet<>();
 
     @OneToMany(mappedBy = "genericProduct", cascade = CascadeType.ALL)
-//    @JsonIgnore
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Product> products = new ArrayList<>();
 
