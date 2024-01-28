@@ -33,7 +33,6 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         Login login = new Login(email, password);
         User user = authService.validateLogin(login);
         if(user != null) {
-            /// logica verificar se já tem email registado???
             if (user.isVerifiedEmail()){
                 List<GrantedAuthority> roleList = new ArrayList<>();
                 roleList.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));

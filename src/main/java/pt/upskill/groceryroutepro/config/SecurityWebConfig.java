@@ -69,7 +69,7 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                         "/users/forgot-password","/users/change-password/").permitAll()
                 .antMatchers("/","/shopping-list/**", "/products/**", "/google-maps-api/**").authenticated()
                 .antMatchers("/products/create", "/products/edit", "/products/categories").hasAnyRole("STORE")
-                .antMatchers("/user-management/**").hasRole("ADMIN")
+  //              .antMatchers("/user-management/**").hasRole("ADMIN")
                 .antMatchers("/scraper/**").permitAll()
                 .antMatchers("**").denyAll();
     }
