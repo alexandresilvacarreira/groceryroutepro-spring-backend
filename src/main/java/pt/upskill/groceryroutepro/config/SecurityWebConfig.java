@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -64,16 +63,13 @@ public class SecurityWebConfig extends WebSecurityConfigurerAdapter {
                     handleFailure(request, response, exception);
                 })
                 .and()
-                .csrf(Customizer.withDefaults())
-//                .csrf().disable()
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/signup", "/login", "/logout", "/verify-account/", "/users/get-authenticated-user",
                         "/users/forgot-password","/users/change-password/").permitAll()
                 .antMatchers("/","/shopping-list/**", "/products/**", "/google-maps-api/**").authenticated()
                 .antMatchers("/products/create", "/products/edit", "/products/categories").hasAnyRole("STORE")
-  //              .antMatchers("/user-management/**").hasRole("ADMIN")
-                .antMatchers("/scraper/**").permitAll()
-                .antMatchers("**").denyAll();
+                .antMatchers("**", "/scraper/**","/products/merge/**").denyAll();
     }
 
     @Override

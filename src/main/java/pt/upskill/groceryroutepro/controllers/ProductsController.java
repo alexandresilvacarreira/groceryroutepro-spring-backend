@@ -178,7 +178,7 @@ public class ProductsController {
 
     }
 
-    @PostMapping("/create-merged-table")
+    @PostMapping("merge/create-merged-table")
     public ResponseEntity createMergedTable() {
         try {
             genericProductsService.createMergedTable();
@@ -189,7 +189,7 @@ public class ProductsController {
         }
     }
 
-    @PostMapping("/merge-to-generic-table/{chainName}")
+    @PostMapping("merge/merge-to-generic-table/{chainName}")
     public ResponseEntity mergeToGenericTable(@PathVariable String chainName) {
         try {
             genericProductsService.mergeToGenericTable(chainName);
@@ -200,7 +200,7 @@ public class ProductsController {
         }
     }
 
-    @PostMapping("/merge-all-to-generic-table")
+    @PostMapping("merge/merge-all-to-generic-table")
     public ResponseEntity mergeAllToGenericTable() {
         try {
             List<String> chainNames = Arrays.asList("continente", "intermarché", "minipreço", "auchan");
@@ -214,7 +214,7 @@ public class ProductsController {
         }
     }
 
-    @PostMapping("/update-generic-products-prices")
+    @PostMapping("merge/update-generic-products-prices")
     public ResponseEntity updateGenericProductPrices() {
         try {
             genericProductsService.updateGenericProductPrices();
@@ -224,7 +224,6 @@ public class ProductsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
 
 
     @GetMapping("/categories")
