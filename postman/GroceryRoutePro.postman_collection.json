@@ -1,0 +1,2137 @@
+{
+	"info": {
+		"_postman_id": "d2611349-d4eb-4d54-8dd4-a4e8c1b29823",
+		"name": "GroceryRoutePro",
+		"description": "API da GroceryRoutePro.\n\nA GroceryRoutePro é uma aplicação que agrega preços de artigos e gera rotas optimizadas pelas várias superfícies comerciais, fornecendo aos utilizadores um agregador de preços que maximiza as poupanças de tempo e/ou dinheiro.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4911199",
+		"_collection_link": "https://blue-crater-92913.postman.co/workspace/GroceryRoutePro~aec4006d-2b4a-4e6b-843e-c80658ef36d9/collection/4911199-d2611349-d4eb-4d54-8dd4-a4e8c1b29823?action=share&source=collection_link&creator=4911199"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "register",
+					"item": [
+						{
+							"name": "1. signup",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\":\"Rui Pereira\",\r\n    \"email\":\"sdfdsflklk@asdfsd.com\",\r\n    \"password\":\"aa12345\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/signup",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"signup"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Regista um novo utilizador (role: \"user_free\").\n\nDeverá retornar mensagem de erro caso já exista um utilizador com mesmo email.\n\nAo submeter a informação, é enviado um email para o utilizador com um link para ativar a conta. A verificação do utilizador requer que seja gerado um token ao submeter a informação de registo.\n\nInicialmente, o utilizador é marcado como inactivo. Só após confirmação via email será marcado como ativo (\"enabled\")."
+							},
+							"response": []
+						},
+						{
+							"name": "2. confirm-registration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/confirm-registration?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"confirm-registration"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+										}
+									]
+								},
+								"description": "Enpoint correspondente ao link enviado para o email do utilizador após submeter informação do registo. Quando o utilizador acede ao link, o UserController deverá extrair o token passado em parâmetro para ativar o utilizador (o token contém informação do utilizador, data de validade, etc., necessárias para confirmar o registo).\n\nCaso o registo tenha sido confirmado com sucesso, reencaminha o utilizador para a página de login."
+							},
+							"response": []
+						},
+						{
+							"name": "3. resend-registration-token",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/resend-registration-token?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"resend-registration-token"
+									],
+									"query": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+										}
+									]
+								},
+								"description": "Envia um email com um novo link para confirmação do registo do utilizador, caso o token anterior tenha expirado. Necessita do token anterior para extrair a informação do utilizador."
+							},
+							"response": []
+						},
+						{
+							"name": "4. verify-account",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" :\"sdfsdf@gmail.com\",\r\n    \"token\" : \"5b1c15e9-2a5d-42df-ba5f-6220bd4041da\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/verify-account/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"verify-account",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Endpoints para os fluxos de registo do utilizador."
+				},
+				{
+					"name": "password",
+					"item": [
+						{
+							"name": "forgot password",
+							"item": [
+								{
+									"name": "1. forgot-password",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"email\":\"koyax71450@tanlanav.com\"}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/forgot-password",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"forgot-password"
+											]
+										},
+										"description": "Endpoint para a reposição da password a partir da página de login (\"Esqueci-me da password\"). Cria token de reposição da password e envia para o email do utilizador."
+									},
+									"response": []
+								},
+								{
+									"name": "Delete? 2. change-password",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/users/change-password?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"users",
+												"change-password"
+											],
+											"query": [
+												{
+													"key": "token",
+													"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+												}
+											]
+										},
+										"description": "Endpoint correspondente ao link enviado para o email do utilizador após clicar em \"Esqueci-me da password\". Ao aceder a este endpoint, o UserController verifica se o token passado é válido e, em caso afirmativo, reencaminha o utilizador para a página com o formulário de alteração de password."
+									},
+									"response": []
+								},
+								{
+									"name": "3. save-new-password",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{   \r\n    \"email\" : \"ole@tumba.com\",\r\n    \"password\" :\"1Abc?\",\r\n    \"token\" : \"583f8c6f331b45579cdcbdc012368e99\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/change-password/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"change-password",
+												""
+											],
+											"query": [
+												{
+													"key": "token",
+													"value": "fccde92369fc4d9aa817f9590e8a0286",
+													"disabled": true
+												}
+											]
+										},
+										"description": "Guarda a nova password. A informação do utilizador é passada no token."
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "change password",
+							"item": [
+								{
+									"name": "change-password",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"old-password\":\"aa12345\",\r\n    \"new-password\":\"ac33456\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id/change-password",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id",
+												"change-password"
+											],
+											"variable": [
+												{
+													"key": "user_id",
+													"value": "1"
+												}
+											]
+										},
+										"description": "Altera a password do utilizador. Deverá verificar se a password antiga está correta."
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "process-login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "sarev73413@grassdev.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Abc12?",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/process-login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"process-login"
+							]
+						},
+						"description": "Efetua o login do utilizador.\n\nVerifica se as credenciais estão corretas. Em caso afirmativo, gera o token de sessão e redirecciona o utilizador para o dashboard. Caso contrário, devolve mensagem de erro."
+					},
+					"response": []
+				},
+				{
+					"name": "get-authenticated-user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=895B19E5F0056CE0EF10F34ACFAFF2A6",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/get-authenticated-user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"get-authenticated-user"
+							]
+						},
+						"description": "Efetua o login do utilizador.\n\nVerifica se as credenciais estão corretas. Em caso afirmativo, gera o token de sessão e redirecciona o utilizador para o dashboard. Caso contrário, devolve mensagem de erro."
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "Efetua o login do utilizador.\n\nVerifica se as credenciais estão corretas. Em caso afirmativo, gera o token de sessão e redirecciona o utilizador para o dashboard. Caso contrário, devolve mensagem de erro."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para os fluxos dos utilizadores."
+		},
+		{
+			"name": "shopping-list",
+			"item": [
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/shopping-list/get",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shopping-list",
+								"get"
+							],
+							"query": [
+								{
+									"key": null,
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Devolve os detalhes de uma lista de compras."
+					},
+					"response": []
+				},
+				{
+					"name": "add-product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"genericProductId\" : 9183\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shopping-list/add-product",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shopping-list",
+								"add-product"
+							]
+						},
+						"description": "Atualiza um produto à lista de compras."
+					},
+					"response": []
+				},
+				{
+					"name": "remove-product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"genericProductId\" : 9183\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shopping-list/remove-product",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shopping-list",
+								"remove-product"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Remove produto da lista de compras. Opcionalmente, podem ser removidas todas as ocorrências do produto na lista."
+					},
+					"response": []
+				},
+				{
+					"name": "remove-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"genericProductId\" : 9183\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shopping-list/remove-all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shopping-list",
+								"remove-all"
+							]
+						},
+						"description": "Remove produto da lista de compras. Opcionalmente, podem ser removidas todas as ocorrências do produto na lista."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para as listas de compras."
+		},
+		{
+			"name": "routes",
+			"item": [
+				{
+					"name": "Google Api",
+					"item": [
+						{
+							"name": "NearbySearch",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=auchan&inputtype=textquery&locationbias=circle%3A5000%38.74786873195817%2C-9.153436211686&fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry&key=AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0",
+									"protocol": "https",
+									"host": [
+										"maps",
+										"googleapis",
+										"com"
+									],
+									"path": [
+										"maps",
+										"api",
+										"place",
+										"findplacefromtext",
+										"json"
+									],
+									"query": [
+										{
+											"key": "input",
+											"value": "auchan"
+										},
+										{
+											"key": "inputtype",
+											"value": "textquery"
+										},
+										{
+											"key": "locationbias",
+											"value": "circle%3A5000%38.74786873195817%2C-9.153436211686"
+										},
+										{
+											"key": "fields",
+											"value": "formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry"
+										},
+										{
+											"key": "key",
+											"value": "AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "1. FindPlace",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=mongolian&inputtype=textquery&locationbias=circle%3A2000%4047.6918452%2C-122.2226413&fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry&key=AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0",
+									"protocol": "https",
+									"host": [
+										"maps",
+										"googleapis",
+										"com"
+									],
+									"path": [
+										"maps",
+										"api",
+										"place",
+										"findplacefromtext",
+										"json"
+									],
+									"query": [
+										{
+											"key": "input",
+											"value": "mongolian"
+										},
+										{
+											"key": "inputtype",
+											"value": "textquery"
+										},
+										{
+											"key": "locationbias",
+											"value": "circle%3A2000%4047.6918452%2C-122.2226413"
+										},
+										{
+											"key": "fields",
+											"value": "formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry"
+										},
+										{
+											"key": "key",
+											"value": "AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "1.1 FindPlace_Params",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=auchan&inputtype=textquery&locationbias=circle%3A5000%38.74792139317427,-9.153486545555609&fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry&key=AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0&fields=photos",
+									"protocol": "https",
+									"host": [
+										"maps",
+										"googleapis",
+										"com"
+									],
+									"path": [
+										"maps",
+										"api",
+										"place",
+										"findplacefromtext",
+										"json"
+									],
+									"query": [
+										{
+											"key": "input",
+											"value": "auchan"
+										},
+										{
+											"key": "inputtype",
+											"value": "textquery"
+										},
+										{
+											"key": "locationbias",
+											"value": "circle%3A5000%38.74792139317427,-9.153486545555609"
+										},
+										{
+											"key": "fields",
+											"value": "formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry"
+										},
+										{
+											"key": "key",
+											"value": "AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0"
+										},
+										{
+											"key": "fields",
+											"value": "photos"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2. Directions API",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://maps.googleapis.com/maps/api/directions/json?origin=38.747986072606935,-9.153416372105795&destination=38.7424211,-9.1569523&waypoints=optimize:true|38.7424211,-9.1569523&key=AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0",
+									"protocol": "https",
+									"host": [
+										"maps",
+										"googleapis",
+										"com"
+									],
+									"path": [
+										"maps",
+										"api",
+										"directions",
+										"json"
+									],
+									"query": [
+										{
+											"key": "origin",
+											"value": "38.747986072606935,-9.153416372105795"
+										},
+										{
+											"key": "destination",
+											"value": "38.7424211,-9.1569523"
+										},
+										{
+											"key": "waypoints",
+											"value": "optimize:true|38.7424211,-9.1569523"
+										},
+										{
+											"key": "key",
+											"value": "AIzaSyD4kHh09CiWj9r1GCFfZTUBx1Tl4_XKHI0"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "3.create-route",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"partida\" :{\r\n        \"lat\": 38.747986072606935,\r\n        \"lng\": -9.153416372105795\r\n    },\r\n    \"destino\" : {\r\n        \"lat\": 38.79748571103334,\r\n        \"lng\": -9.341323733399381\r\n    }\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/google-maps-api/create-route",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"google-maps-api",
+								"create-route"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "3.create-route",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"partida\" :{\r\n        \"lat\": 38.747986072606935,\r\n        \"lng\": -9.153416372105795\r\n    },\r\n    \"destino\" : {\r\n        \"lat\": 38.79748571103334,\r\n        \"lng\": -9.341323733399381\r\n    }\r\n\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/google-maps-api/create-route",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"google-maps-api",
+										"create-route"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Method"
+								},
+								{
+									"key": "Vary",
+									"value": "Access-Control-Request-Headers"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Jan 2024 11:06:40 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"rotas\": {\n        \"polyline\": \"}}nkFnwzv@fAOTdCPvBp@nH^vDx@zEzArFrBrHzAdFX`Af@rA\\\\|A\\\\fANhACx@K\\\\m@j@}A\\\\uA^wBz@cBfAa@b@}B|A}GtE{RzMcDvBkDzBmB`AeEvAsBf@iBRaEVo@Fq@DUQKKKMKYCm@F]Ze@^KZD`@h@D|ABJJTE`BIhDKrKBvCZbG`ArJlA~GjAlE`C~GbBnDhB~CtB~C`EjE`DpCtAbAbDlBjChAnLrDtBv@jAp@`BpAjAxBdArCf@~B~B~LFf@b@nC^|GEnD[~LQb@ULWFiFUiFUw@@w@d@e@t@e@Q[HCdAw@lFu@`ESF[DEHOp@Lm@VHLBJ@XCf@i@~AcKVgBd@u@v@e@v@AhFThFTb@NLZHd@EtAItDIlDUfCAbE?b@P?nCj@p@TzBbBPZQb@kBtAc@JACCAGAMH@`@DB@@ZXT\\\\Od@Sn@Q`AVDLN^j@JbAFxBEpBWrAm@`B@z@?NZCj@Ad@@lARjAp@h@p@Lj@|AlD~@bC`A|At@j@XLRBNLJD\\\\PVZRp@n@bDPhCCt@ALF`@]xCKz@It@gAzJsBxQmBtPq@lEcA`EsEvMqJfXqBvG}ArI}BzMoDdVqErZSxDCdENpIVzLAvCD~CEfAg@xBwAvCCBEJGHORm@j@KJkCnBm@b@e@DmAOm@c@@MA]Ku@]a@aDiDa@c@{BkByEuBmGmC]OEa@SsDHeBKgN@qEBABG@IAI?A@g@Zg@t@u@^AxAZXQRi@@ABCBGd@e@lASv@H`FlAtAPlAGn@O`Bw@nEyBNC^N\\\\j@j@hBv@pARr@b@lEPhGL\\\\`@dOVrBrAbGhC~KZhCDrEEzQCxGGdPSdv@KfLQ`Dy@tG}FrXwAfEaEnGwE`HwC`EoBrBwA|@}@Z_Cb@}ARyCh@iAd@_BjAiDpEiDbEgNnLeMjKcCfBsDpDyB`Dg@pAe@pB_@bEE|L@bK@hOMlG_@bH[fDg@rC_BpFeCfFeB~BoBzBiEtDsV~PoGfEgGxEoCdD_BxCuAjDaAxDw@pFWlDI|FDhFp@`LA`B?vB]pAa@n@oB`B}@x@YV}AfBm@b@mCrBsDrCyB~@GAa@@}@BqCZA?A?CAcDi@uDo@qDH}BRkBXy@RiAZWXKJC@eAXwB?}F\\\\YBa@?gAGeAWoBkAeAsA_@s@KW{AkE@YQKMT@Fi@f@{AfAGDONSRe@r@e@~@OZa@|@QJIl@JPDh@It@Kt@?BADOj@s@pAA@A@[HwDvA}DzEEZTxAFR\",\n        \"coordenadasMarcadores\": [\n            {\n                \"lat\": 38.747986072606935,\n                \"lng\": -9.153416372105795,\n                \"nameLocation\": \"Partida\"\n            },\n            {\n                \"lat\": 38.7562931,\n                \"lng\": -9.2528138,\n                \"nameLocation\": \"Auchan\"\n            },\n            {\n                \"lat\": 38.7495793,\n                \"lng\": -9.2037354,\n                \"nameLocation\": \"Pingo Doce\"\n            },\n            {\n                \"lat\": 38.79748571103334,\n                \"lng\": -9.341323733399381,\n                \"nameLocation\": \"Destino\"\n            }\n        ],\n        \"totalTime\": 2293,\n        \"shoppingListCost\": 1000.99\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "4. get-routes",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para rotas."
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/list?search=batata&categories=1,10&chains=3&sort=pricePrimaryValue,asc&page=0&size=3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"list"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "batata",
+									"description": "Default value por omissão: \"\""
+								},
+								{
+									"key": "categories",
+									"value": "1,10",
+									"description": "Default value por omissão: todas as categorias"
+								},
+								{
+									"key": "chains",
+									"value": "3",
+									"description": "Default value por omissão: todas as cadeias"
+								},
+								{
+									"key": "sort",
+									"value": "pricePrimaryValue,asc",
+									"description": "Template: \"{critério},{ordem}\" Ex: name,desc ; pricePrimaryValue,asc\nDefault value por omissão: pricePrimaryValue,asc"
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Default value por omissão: 0"
+								},
+								{
+									"key": "size",
+									"value": "3",
+									"description": "Default value por omissão: 10"
+								}
+							]
+						},
+						"description": "Devolve os produtos. Opção de filtrar por categoria e supermercado."
+					},
+					"response": []
+				},
+				{
+					"name": "list-promos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/list?chains=3&sort=priceDiscountPercentage,desc&size=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"list"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "pão de forma",
+									"description": "Default value por omissão: \"\"",
+									"disabled": true
+								},
+								{
+									"key": "categories",
+									"value": "1",
+									"description": "Default value por omissão: todas as categorias",
+									"disabled": true
+								},
+								{
+									"key": "chains",
+									"value": "3",
+									"description": "Default value por omissão: todas as cadeias"
+								},
+								{
+									"key": "sort",
+									"value": "priceDiscountPercentage,desc",
+									"description": "Template: \"{critério},{ordem}\" Ex: name,desc ; pricePrimaryValue,asc\nDefault value por omissão: pricePrimaryValue,asc"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Default value por omissão: 0",
+									"disabled": true
+								},
+								{
+									"key": "size",
+									"value": "5",
+									"description": "Default value por omissão: 10"
+								}
+							]
+						},
+						"description": "Devolve os produtos. Opção de filtrar por categoria e supermercado."
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"date\":\"09-12-2023\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"create"
+							]
+						},
+						"description": "Criação manual de um novo produto, via preenchimento de formulário por um utilizador com o role \"store\"."
+					},
+					"response": []
+				},
+				{
+					"name": "create-product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"product\": {\r\n        \"id\": 1,\r\n        \"name\": \"teste\",\r\n        \"brand\": \"teste\",\r\n        \"quantity\": \"2kg\",\r\n        \"imageUrl\": \"https://google.pt\",\r\n        \"chain\": {\r\n            \"id\": 2,\r\n            \"name\": \"auchan\"\r\n        },\r\n        \"categories\": [\r\n            {\r\n                \"id\": 1,\r\n                \"name\": \"mercearia\"\r\n            }\r\n        ]\r\n    },\r\n    \"price\": {\r\n        \"id\": 1,\r\n        \"primaryValue\": 2.3,\r\n        \"primaryUnit\": \"\",\r\n        \"secondaryValue\": 10.2,\r\n        \"secondaryUnit\": \"kg\",\r\n        \"discountPercentage\": 0,\r\n        \"priceWoDiscount\": \"\",\r\n        \"collectionDate\": \"2024-01-24T09:48:33\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"create"
+							]
+						},
+						"description": "Criação manual de um novo produto, via preenchimento de formulário por um utilizador com o role \"store\"."
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/:product_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								":product_id"
+							],
+							"variable": [
+								{
+									"key": "product_id",
+									"value": "18"
+								}
+							]
+						},
+						"description": "Devolve os detalhes de um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "get-categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/:product_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								":product_id"
+							],
+							"variable": [
+								{
+									"key": "product_id",
+									"value": "18"
+								}
+							]
+						},
+						"description": "Devolve os detalhes de um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/edit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"edit"
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "merge-products",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/merge-products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"merge-products"
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "create-merged-table",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/create-merged-table",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"create-merged-table"
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "merge-to-generic-table",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/merge-to-generic-table/:chain_name",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"merge-to-generic-table",
+								":chain_name"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "chain_name",
+									"value": "auchan"
+								}
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "merge-all-to-generic-table",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/merge-products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"merge-products"
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "update-generic-products-prices",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Massa Esparguete\",\r\n    \"quantity\":\"emb. 500g\",\r\n    \"price_primary\":0.83,\r\n    \"price_secondary\":1.66,\r\n    \"category\":\"mercearia\",\r\n    \"brand\":\"Milaneza\",\r\n    \"store\":\"continente\",\r\n    \"date\":\"09-12-2023\",\r\n    \"image_url\":\"https://www.continente.pt/dw/image/v2/BDVS_PRD/on/demandware.static/-/Sites-col-master-catalog/default/dw9fab760a/images/col/200/2003312-frente.jpg?sw=2000&sh=2000\",\r\n    \"edited_by\":897\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/update-generic-products-prices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"update-generic-products-prices"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						},
+						"description": "Edita um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "get-generic-product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/generic-products/:product_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"generic-products",
+								":product_id"
+							],
+							"variable": [
+								{
+									"key": "product_id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Devolve os detalhes de um produto."
+					},
+					"response": []
+				},
+				{
+					"name": "list-generic-products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/generic-products/list?search=batata&categories=1,10&chains=3&sort=pricePrimaryValue,asc&page=0&size=3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"generic-products",
+								"list"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "batata",
+									"description": "Default value por omissão: \"\""
+								},
+								{
+									"key": "categories",
+									"value": "1,10",
+									"description": "Default value por omissão: todas as categorias"
+								},
+								{
+									"key": "chains",
+									"value": "3",
+									"description": "Default value por omissão: todas as cadeias"
+								},
+								{
+									"key": "sort",
+									"value": "pricePrimaryValue,asc",
+									"description": "Template: \"{critério},{ordem}\" Ex: name,desc ; pricePrimaryValue,asc\nDefault value por omissão: pricePrimaryValue,asc"
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Default value por omissão: 0"
+								},
+								{
+									"key": "size",
+									"value": "3",
+									"description": "Default value por omissão: 10"
+								}
+							]
+						},
+						"description": "Devolve os produtos. Opção de filtrar por categoria e supermercado."
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/:product_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								":product_id"
+							],
+							"variable": [
+								{
+									"key": "product_id",
+									"value": ""
+								}
+							]
+						},
+						"description": "Elimina o produto."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para produtos."
+		},
+		{
+			"name": "scraping",
+			"item": [
+				{
+					"name": "continente-api",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3"
+							},
+							{
+								"key": "Accept-Encoding",
+								"value": "gzip, deflate, br"
+							},
+							{
+								"key": "X-Requested-With",
+								"value": "XMLHttpRequest"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Referer",
+								"value": "https://www.continente.pt/bio-e-escolhas-alimentares/nutricao-desportiva/?start=0&srule=FOOD-BIO&pmin=0.01"
+							},
+							{
+								"key": "Cookie",
+								"value": "dwanonymous_921d4ae6710e4b2198d48293cc3ce075=bcLm7WaroMbGsJwMM35hZGRq0j; CookieConsent={stamp:%27xUtsbhe0/T3EahGWGMJwfJRHu5jb+htk9naYsHTGk6cDeKEWXzs88Q==%27%2Cnecessary:true%2Cpreferences:true%2Cstatistics:true%2Cmarketing:true%2Cmethod:%27explicit%27%2Cver:3%2Cutc:1701347001836%2Cregion:%27pt%27}; cqcid=bcLm7WaroMbGsJwMM35hZGRq0j; cquid=||; GCLB=CPPxmKGk7OLUYA; __cqact=%5B%7B%22activityType%22%3A%22addToCart%22%2C%22parameters%22%3A%7B%22cookieId%22%3A%22bcLm7WaroMbGsJwMM35hZGRq0j%22%2C%22userId%22%3A%22%22%2C%22product%22%3A%7B%22id%22%3A%227127340%22%2C%22quantity%22%3A1%2C%22changeQty%22%3A1%7D%2C%22realm%22%3A%22BDVS%22%2C%22siteId%22%3A%22continente%22%2C%22instanceType%22%3A%22prd%22%2C%22locale%22%3A%22default%22%7D%7D%5D; __anact=%5B%7B%22activityType%22%3A%22viewSearch%22%2C%22parameters%22%3A%7B%22cookieId%22%3A%22bcLm7WaroMbGsJwMM35hZGRq0j%22%2C%22userId%22%3A%22%22%2C%22searchText%22%3A%2229%2C99%22%2C%22suggestedSearchText%22%3A%22__UNDEFINED__%22%2C%22products%22%3A%5B%5D%2C%22showProducts%22%3Afalse%2C%22personalized%22%3Afalse%2C%22refinements%22%3A%22%5B%7B%5C%22name%5C%22%3A%5C%22priceMin%5C%22%2C%5C%22value%5C%22%3A%5C%220.01%5C%22%7D%2C%7B%5C%22name%5C%22%3A%5C%22priceMax%5C%22%2C%5C%22value%5C%22%3A%5C%22null%5C%22%7D%2C%7B%5C%22name%5C%22%3A%5C%22curr%5C%22%2C%5C%22value%5C%22%3A%5C%22EUR%5C%22%7D%5D%22%2C%22searchID%22%3A%22c57d5c20-05f0-4a15-8623-8aa17a97f34e%22%2C%22locale%22%3A%22default%22%2C%22queryLocale%22%3A%22default%22%2C%22realm%22%3A%22BDVS%22%2C%22siteId%22%3A%22continente%22%2C%22instanceType%22%3A%22prd%22%7D%7D%5D; dwac_99f34b6e35d78e56f04854e02c=wWfu86D70TLjakbxZKAOqd9sF_6K8hujaDo%3D|dw-only|||EUR|false|Europe%2FLisbon|true; sid=wWfu86D70TLjakbxZKAOqd9sF_6K8hujaDo; __cq_dnt=0; dw_dnt=0; dwsid=O_EWs1bGRa0h44mA6jK-ZiX67758z488qrMYk5cX-BcSGE7OJBEz8r_KOFSidWqdFx3FT6WuErk4aiR0QH6Baw==; inAppsRecurrenceData={\"peixaria-e-talho-col-in-app-modal-category\":1,\"col-in-app-modal-category\":1,\"col-in-app-modal-homepage\":1,\"mercearias-col-in-app-modal-category\":1}|Fri, 22 Dec 2023 17:32:34 GMT"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "TE",
+								"value": "trailers"
+							}
+						],
+						"url": {
+							"raw": "https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=mercearias&pmin=0%2e01&start=3500&sz=100",
+							"protocol": "https",
+							"host": [
+								"www",
+								"continente",
+								"pt"
+							],
+							"path": [
+								"on",
+								"demandware.store",
+								"Sites-continente-Site",
+								"default",
+								"Search-UpdateGrid"
+							],
+							"query": [
+								{
+									"key": "cgid",
+									"value": "mercearias"
+								},
+								{
+									"key": "pmin",
+									"value": "0%2e01"
+								},
+								{
+									"key": "start",
+									"value": "3500"
+								},
+								{
+									"key": "sz",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-continente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://www.continente.pt/on/demandware.store/Sites-continente-Site/default/Search-UpdateGrid?cgid=mercearias&pmin=0%2e01&start=700&sz=500\",\r\n    \"category\":\"mercearia\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/continente",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"continente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-continente-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/continente/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"continente",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auchan-api",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3"
+							},
+							{
+								"key": "Accept-Encoding",
+								"value": "gzip, deflate, br"
+							},
+							{
+								"key": "X-Requested-With",
+								"value": "XMLHttpRequest"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Cookie",
+								"value": "dwanonymous_eba3212b382ead3d8bd1f9008941ba80=abZaJI6tZpkBPEU3ymAfq2ClhR; OptanonConsent=isGpcEnabled=0&datestamp=Fri+Dec+22+2023+11%3A06%3A22+GMT%2B0000+(Hora+padr%C3%A3o+da+Europa+Ocidental)&version=6.22.0&isIABGlobal=false&hosts=&consentId=e60679ef-765d-49b6-b6c5-4fefe8eb6fbb&interactionCount=2&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&AwaitingReconsent=false&geolocation=%3B; OptanonAlertBoxClosed=2023-12-02T15:31:29.124Z; sfcc_consenttracking=true; historic_search_term=YmF0YXRhIGRvY2U=; sid=seCmJRn-EQCcTxgMgdFjJjThm2BwuisfMIE; __cq_dnt=0; dw_dnt=0; dwsid=tfyph96Txg3nuH72COKDODD9lMK31_wSS3b1iJTB2ibreEW-0gusIkvQ2EKgW2ORyhr2KAgRkwRfm5IYVXjymw==; dwac_efd05fc17f21d31cf1551801fb=seCmJRn-EQCcTxgMgdFjJjThm2BwuisfMIE%3D|dw-only|||EUR|false|Europe%2FLisbon|true; cqcid=abZaJI6tZpkBPEU3ymAfq2ClhR; cquid=||"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "TE",
+								"value": "trailers"
+							}
+						],
+						"url": {
+							"raw": "https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=pastelaria&prefn1=soldInStores&prefv1=000&start=24&sz=24",
+							"protocol": "https",
+							"host": [
+								"www",
+								"auchan",
+								"pt"
+							],
+							"path": [
+								"on",
+								"demandware.store",
+								"Sites-AuchanPT-Site",
+								"pt_PT",
+								"Search-UpdateGrid"
+							],
+							"query": [
+								{
+									"key": "cgid",
+									"value": "pastelaria"
+								},
+								{
+									"key": "prefn1",
+									"value": "soldInStores"
+								},
+								{
+									"key": "prefv1",
+									"value": "000"
+								},
+								{
+									"key": "start",
+									"value": "24"
+								},
+								{
+									"key": "sz",
+									"value": "24"
+								},
+								{
+									"key": "next",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "selectedUrl",
+									"value": "https%3A%2F%2Fwww.auchan.pt%2Fon%2Fdemandware.store%2FSites-AuchanPT-Site%2Fpt_PT%2FSearch-UpdateGrid%3Fcgid%3Dpastelaria%26prefn1%3DsoldInStores%26prefv1%3D000%26start%3D24%26sz%3D24%26next%3Dtrue",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-auchan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://www.auchan.pt/on/demandware.store/Sites-AuchanPT-Site/pt_PT/Search-UpdateGrid?cgid=especialidades-1-1&prefn1=soldInStores&prefv1=000&start=0&sz=24&next=true&selectedUrl=https%3A%2F%2Fwww.auchan.pt%2Fon%2Fdemandware.store%2FSites-AuchanPT-Site%2Fpt_PT%2FSearch-UpdateGrid%3Fcgid%3Despecialidades-1-1%26prefn1%3DsoldInStores%26prefv1%3D000%26start%3D48%26sz%3D24%26next%3Dtrue\",\r\n    \"category\":\"mercearia\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/auchan",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"auchan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-auchan-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/scraper/auchan/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"auchan",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "minipreço-api",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0"
+							},
+							{
+								"key": "Accept",
+								"value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3"
+							},
+							{
+								"key": "Accept-Encoding",
+								"value": "gzip, deflate, br"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Referer",
+								"value": "https://www.minipreco.pt/produtos/frutas-e-vegetais/c/WEB.001.000.00000"
+							},
+							{
+								"key": "Cookie",
+								"value": "__dia_lng__=pt; __utma=true; AWSALB=e0o52o0KGXIYQnFyY5K6d+QPDHBOsCrb47DZkgfeCXFV2FkTdhNyx6XXpDXBvlbEcsykKkj++9L5OBesByN7ueDKl9R2Be5xEpYUZ4gMBcdXLwBNlwnWDyl6eihB; AWSALBCORS=e0o52o0KGXIYQnFyY5K6d+QPDHBOsCrb47DZkgfeCXFV2FkTdhNyx6XXpDXBvlbEcsykKkj++9L5OBesByN7ueDKl9R2Be5xEpYUZ4gMBcdXLwBNlwnWDyl6eihB; JSESSIONID=0ACDD92AF10EADA631D11568791FBF8D.app11; AKA_A2=A"
+							},
+							{
+								"key": "Upgrade-Insecure-Requests",
+								"value": "1"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "document"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "navigate"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Sec-Fetch-User",
+								"value": "?1"
+							},
+							{
+								"key": "TE",
+								"value": "trailers"
+							}
+						],
+						"url": {
+							"raw": "https://www.minipreco.pt/produtos/frutas-e-vegetais/c/WEB.001.000.00000?q=%3Arelevance&page=0&disp=",
+							"protocol": "https",
+							"host": [
+								"www",
+								"minipreco",
+								"pt"
+							],
+							"path": [
+								"produtos",
+								"frutas-e-vegetais",
+								"c",
+								"WEB.001.000.00000"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "%3Arelevance"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "disp",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-minpreço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://www.minipreco.pt/produtos/charcutaria-e-queijos/charcutaria/presunto/c/WEB.021.001.00001\",\r\n    \"category\":\"talho\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/minipreco",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"minipreco"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-minpreço-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/minipreco/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"minipreco",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "pingo-doce-api",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json, text/plain, */*"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3"
+							},
+							{
+								"key": "Accept-Encoding",
+								"value": "gzip, deflate, br"
+							},
+							{
+								"key": "Referer",
+								"value": "https://mercadao.pt/store/pingo-doce/category/frigorifico-20/manteigas-e-cremes-vegetais-2018"
+							},
+							{
+								"key": "X-Version",
+								"value": "3.16.0"
+							},
+							{
+								"key": "X-Name",
+								"value": "webapp"
+							},
+							{
+								"key": "ngsw-bypass",
+								"value": "true"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Cookie",
+								"value": "OptanonConsent=isGpcEnabled=0&datestamp=Sat+Dec+23+2023+21%3A11%3A51+GMT%2B0000+(Hora+padr%C3%A3o+da+Europa+Ocidental)&version=202301.2.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0002%3A1%2CC0001%3A1%2CC0005%3A1%2CC0004%3A1&geolocation=PT%3B11&AwaitingReconsent=false; OptanonAlertBoxClosed=2023-12-05T18:33:49.947Z"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "TE",
+								"value": "trailers"
+							}
+						],
+						"url": {
+							"raw": "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde7fd2bff003f50812d%22%5D&esPreference=0.20779248609075285&from=1000&size=100",
+							"protocol": "https",
+							"host": [
+								"mercadao",
+								"pt"
+							],
+							"path": [
+								"api",
+								"catalogues",
+								"6107d28d72939a003ff6bf51",
+								"products",
+								"search"
+							],
+							"query": [
+								{
+									"key": "mainCategoriesIds",
+									"value": "%5B%2261eedde7fd2bff003f50812d%22%5D"
+								},
+								{
+									"key": "esPreference",
+									"value": "0.20779248609075285"
+								},
+								{
+									"key": "from",
+									"value": "1000"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-pingo-doce",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eede01fd2bff003f508304%22%5D&from=0&size=100&esPreference=0.9580062688292429\",\r\n    \"category\":\"congelados\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/pingo-doce",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"pingo-doce"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-pingo-doce-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f50815a%22%5D&from=100&size=100&esPreference=0.540993692727629\",\r\n    \"category\":\"congelados\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/pingo-doce/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"pingo-doce",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "intermarche-api",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json, text/plain, */*"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "pt-PT,pt;q=0.8,en;q=0.5,en-US;q=0.3"
+							},
+							{
+								"key": "Accept-Encoding",
+								"value": "gzip, deflate, br"
+							},
+							{
+								"key": "x-red-device",
+								"value": "red_fo_desktop"
+							},
+							{
+								"key": "x-red-version",
+								"value": "3"
+							},
+							{
+								"key": "x-service-name",
+								"value": "arborescence-produit"
+							},
+							{
+								"key": "x-itm-device-fp",
+								"value": "ead3ce12-5cec-43d6-abf0-62d10b4e0bcd"
+							},
+							{
+								"key": "x-itm-session-id",
+								"value": "7ea3cd74-a97c-4ca5-87ca-d634800964fa"
+							},
+							{
+								"key": "x-pdv",
+								"value": "{\"ref\":\"03622\",\"isEcommerce\":true}"
+							},
+							{
+								"key": "Alt-Used",
+								"value": "www.loja-online.intermarche.pt"
+							},
+							{
+								"key": "Connection",
+								"value": "keep-alive"
+							},
+							{
+								"key": "Referer",
+								"value": "https://www.loja-online.intermarche.pt/shelves/mercearia/arroz-massa-e-farinha/massa/10179"
+							},
+							{
+								"key": "Cookie",
+								"value": "datadome=iKf01CU1s5nRvY3m~fENy3jqHsqcXqwMbAP3HGXYjWZT2f~41muWa_uA4KRyVAuKUqmgV2fAMseXZAHNj93TicXl5xYhtiZKmHSbgsfquFTutzutaWMMTIx7KqbnAgSF; itm_device_id=ead3ce12-5cec-43d6-abf0-62d10b4e0bcd; itm_usid=7ea3cd74-a97c-4ca5-87ca-d634800964fa; didomi_token=eyJ1c2VyX2lkIjoiMThjM2I1ZWMtMjQ1Zi02YjRiLWI1MmYtNzhhZjBjNjVjZGU5IiwiY3JlYXRlZCI6IjIwMjMtMTItMDVUMTk6MDU6MTUuNzcwWiIsInVwZGF0ZWQiOiIyMDIzLTEyLTA1VDE5OjA1OjE3LjEyOVoiLCJ2ZW5kb3JzIjp7ImVuYWJsZWQiOlsiZ29vZ2xlIiwiYzpuZXN0bGUtUUxyVEx5OXQiLCJjOnNhbGVjeWNsZSIsImM6bHVja3ljYXJ0LUxKYlBGclNqIiwiYzpiaW5nLWFkcyIsImM6bWVkaWFub2UtOEtzcFQ1UVoiLCJjOnBpbnRlcmVzdCIsImM6YWItdGFzdHkiLCJjOnF1YW50dW0tYWR2ZXJ0aXNpbmciLCJjOmNvbnRlbnRzcXVhcmUiLCJjOnVzYWJpbGxhIiwiYzpwcm9jdGVyYW4tUTNWRUpOaVkiLCJjOmdvb2dsZWFuYS1ySnh6Y2M2MyIsImM6c25hcGNoYXQtZnpOVUVpemoiLCJjOmRhdGFkb21lLWU2RGpnbXI3IiwiYzpkaWRvbWktVGZ4enRBejkiLCJjOmR5bmF0cmFjZS1RWUZtaVRNQyIsImM6cXVldWVpdC1XWVpmTFJ4TCIsImM6YWRvdG1vYiIsImM6bWF0Y2hhLWF5ejNCTEw5Il19LCJwdXJwb3NlcyI6eyJlbmFibGVkIjpbImdlb2xvY2F0aW9uX2RhdGEiLCJkZXZpY2VfY2hhcmFjdGVyaXN0aWNzIl19LCJ2ZXJzaW9uIjoyLCJhYyI6IkM4R0FHQUZrQW93THdRQUEuQUFBQSJ9; euconsent-v2=CP2UBAAP2UBAAAHABBENDgCsAP_AAAAAAB6YF5wDAAKgAZAA3AB8AIAAeACEAFIAMYAcQBEwCOALzAAAAOKgAwABEGopABgACINRKADAAEQah0AGAAIg1EIAMAARBqCQAYAAiDUMgAwABEGo.f_gAAAAAAAAA; itm_pdv={%22ref%22:%2203622%22%2C%22isEcommerce%22:true}; novaParams={%22pdvRef%22:%2203622%22}"
+							},
+							{
+								"key": "Sec-Fetch-Dest",
+								"value": "empty"
+							},
+							{
+								"key": "Sec-Fetch-Mode",
+								"value": "cors"
+							},
+							{
+								"key": "Sec-Fetch-Site",
+								"value": "same-origin"
+							},
+							{
+								"key": "Pragma",
+								"value": "no-cache"
+							},
+							{
+								"key": "Cache-Control",
+								"value": "no-cache"
+							},
+							{
+								"key": "TE",
+								"value": "trailers"
+							}
+						],
+						"url": {
+							"raw": "https://www.loja-online.intermarche.pt/api/service/arborescence-produit/v1/pdvs/03622/categories",
+							"protocol": "https",
+							"host": [
+								"www",
+								"loja-online",
+								"intermarche",
+								"pt"
+							],
+							"path": [
+								"api",
+								"service",
+								"arborescence-produit",
+								"v1",
+								"pdvs",
+								"03622",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-intermarche",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://www.loja-online.intermarche.pt/api/service/produits/v2/pdvs/03622/products/byKeywordAndCategory\",\r\n    \"category\":\"laticínios e ovos\",\r\n    \"requestBody\":\"{\\\"category\\\":\\\"10682\\\",\\\"page\\\":1,\\\"size\\\":8,\\\"filtres\\\":[],\\\"tri\\\":\\\"pertinence\\\",\\\"ordreTri\\\":null,\\\"catalog\\\":[\\\"PDV\\\"]}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/intermarche",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"intermarche"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-intermarche-all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\":\"https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=%5B%2261eedde9fd2bff003f50815a%22%5D&from=100&size=100&esPreference=0.540993692727629\",\r\n    \"category\":\"congelados\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/scraper/intermarche/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"intermarche",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "scrape-intermarche-subcategories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/scraper/intermarche/subcategories?url=https://www.loja-online.intermarche.pt/api/service/arborescence-produit/v1/pdvs/03622/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"intermarche",
+								"subcategories"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://www.loja-online.intermarche.pt/api/service/arborescence-produit/v1/pdvs/03622/categories"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "all-chains",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/scraper/all-chains",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"scraper",
+								"all-chains"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
